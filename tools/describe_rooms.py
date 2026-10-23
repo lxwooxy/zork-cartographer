@@ -14,6 +14,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -35,6 +36,7 @@ know of the game, but don't invent puzzles, treasures or items. Don't mention it
 - indoor: true if enclosed (inside a building or underground with a ceiling).
 - lighting: bright (daylight or lit), dim, or dark (needs a lamp).
 - features: up to 6 fixed scenery things worth modelling, short and lowercase ("trophy case", "rickety staircase").
+  Not exits, passages, doorways or directions: those are drawn already.
 - palette: hex colors (#rrggbb) for floor, wall and accent that suit the place.
 - visual: one vivid sentence (max 30 words) describing the scene, written for a player who has just arrived."""
 
@@ -56,6 +58,14 @@ SCHEMA = {
     "required": ["environment", "indoor", "lighting", "features", "palette", "visual"],
     "additionalProperties": False,
 }
+
+
+EXIT_WORDS = re.compile(r"\b(passages?|openings?|exits?|doorways?|corridors?)\b", re.I)
+
+
+def clean_features(features: list[str]) -> list[str]:
+    """Scenery only: exits are drawn as paths already, so drop passage-like entries."""
+    return [f for f in features if f and not EXIT_WORDS.search(f)][:6]
 
 
 def load(name: str) -> dict:
@@ -140,7 +150,7 @@ async def describe(client, prompt: str) -> dict | None:
             d = json.loads(text)
         except json.JSONDecodeError:
             continue
-        d["features"] = [f for f in d["features"] if f][:6]
+        d["features"] = clean_features(d["features"])
         return d
     return None
 

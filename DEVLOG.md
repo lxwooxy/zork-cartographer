@@ -123,6 +123,9 @@ Bugs found and fixed:
 - Impossible exits (`FALSE-FLAG`, e.g. Santa's chimney) are given to Claude as messages, not exits.
 - UI: the description appears in italics in the room panel (web and Unity), and the header badge reads "Room details ✓".
 - Tested with a temporary two-room file: details appear on discovery and nowhere else.
+- **Ran it:** all 110 rooms in about 90 seconds (`claude-opus-5-5`, medium effort). A two-room trial first showed exits ("west passage") creeping into features; the prompt now excludes them and the tool filters passage-like entries (502 → 488 features). Spot-checks are faithful to the game (Dam: bolted control panel and green bubble; Temple: ancient inscription; Aragain Falls: solid rainbow).
+- **Bug:** the game-start path still called Claude once when a key was present (the per-turn check didn't cover it). Fixed, and verified: 10 commands, zero API calls.
+- A headless-browser hang during testing turned out to be a stuck screenshot process (macOS has no `timeout`, so a time limit silently didn't apply), not the page.
 
 ### Open items
 

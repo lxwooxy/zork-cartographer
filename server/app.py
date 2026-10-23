@@ -118,7 +118,7 @@ async def start_game(replay: list[dict]):
         S.world.apply_turn(intro)
         await S.game.send("verbose")  # always print full room descriptions
         S.world.save()
-        if S.enricher.enabled:
+        if should_enrich("", intro.text, {"room_id": S.world.current, "has_heading": True}):
             asyncio.create_task(enrich("", intro.text, S.world.current, {"room_id": S.world.current, "has_heading": True}))
     else:
         # Restore the game by replaying the saved commands (fixed seed = same outcome).

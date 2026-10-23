@@ -1,0 +1,1923 @@
+{
+ "model": "claude-opus-5-5",
+ "rooms": {
+  "ARAGAIN-FALLS": {
+   "environment": "river",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "enormous waterfall",
+    "solid rainbow bridge",
+    "churning mist",
+    "rocky cliff edge",
+    "river rapids above the drop"
+   ],
+   "palette": {
+    "floor": "#7a6a55",
+    "wall": "#4f6f7f",
+    "accent": "#e8c84a"
+   },
+   "visual": "At the brink of Aragain Falls, the river thunders 450 feet into misty depths while a shimmering, solid rainbow arches westward across the roaring water."
+  },
+  "ATLANTIS-ROOM": {
+   "environment": "temple",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "crumbling stone columns",
+    "silt-covered floor",
+    "barnacle-crusted walls",
+    "worn stone staircase",
+    "algae-stained arches",
+    "puddles of standing water"
+   ],
+   "palette": {
+    "floor": "#4a5a52",
+    "wall": "#3b4f55",
+    "accent": "#7fa89a"
+   },
+   "visual": "Your lamp reveals an ancient chamber once drowned beneath the reservoir, its silt-caked columns and slimy, barnacled walls still dripping as a worn staircase climbs into darkness."
+  },
+  "ATTIC": {
+   "environment": "house",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "sloped rafters",
+    "dusty floorboards",
+    "narrow stairway",
+    "cobwebs",
+    "bare beams"
+   ],
+   "palette": {
+    "floor": "#5a4632",
+    "wall": "#3e3226",
+    "accent": "#8a7a66"
+   },
+   "visual": "A cramped, pitch-black attic under steep rafters, its dusty floorboards creaking, cobwebs hanging from bare beams, and a narrow stairway dropping back down to the kitchen."
+  },
+  "BAT-ROOM": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "vampire bat hanging from ceiling",
+    "guano-streaked rock floor",
+    "low rough-hewn ceiling",
+    "stalactites"
+   ],
+   "palette": {
+    "floor": "#3a3530",
+    "wall": "#4a4038",
+    "accent": "#6b5a7a"
+   },
+   "visual": "A cramped, dank chamber reeking of guano, where leathery wings rustle overhead and a vampire bat stirs among the low, dripping stalactites."
+  },
+  "CANYON-BOTTOM": {
+   "environment": "canyon",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "towering canyon walls",
+    "climbable rock face",
+    "runoff stream",
+    "scattered boulders",
+    "narrow path"
+   ],
+   "palette": {
+    "floor": "#8a7356",
+    "wall": "#a5683f",
+    "accent": "#5f9fb8"
+   },
+   "visual": "Sheer reddish canyon walls tower overhead, their rough face looking just climbable, while a modest stream of Aragain Falls runoff murmurs past below in the daylight."
+  },
+  "CANYON-VIEW": {
+   "environment": "canyon",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "sheer canyon rim",
+    "distant aragain falls with rainbow",
+    "white cliffs across the gorge",
+    "frigid river far below",
+    "storm-tossed fallen trees",
+    "flathead mountain ramparts"
+   ],
+   "palette": {
+    "floor": "#8a7a5c",
+    "wall": "#b59a74",
+    "accent": "#5fa8d3"
+   },
+   "visual": "From the windswept west rim, the Great Canyon plunges away below you, the Frigid River glinting far down and Aragain Falls shimmering under a rainbow to the north."
+  },
+  "CELLAR": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "steep metal ramp",
+    "trap door overhead",
+    "damp stone walls",
+    "dripping water stains"
+   ],
+   "palette": {
+    "floor": "#3a3530",
+    "wall": "#4a443d",
+    "accent": "#7a7f85"
+   },
+   "visual": "A dank, pitch-black cellar of wet stone, a slick metal ramp gleaming faintly to the west as the trap door slams shut overhead and the bar thuds into place."
+  },
+  "CHASM-ROOM": {
+   "environment": "canyon",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "deep chasm",
+    "narrow ledge path",
+    "crack in rock wall",
+    "jagged chasm edge",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#2e2824",
+    "accent": "#0a0808"
+   },
+   "visual": "A narrow path hugs the south lip of a bottomless chasm slashing southwest to northeast, its black depths swallowing your lamplight while a crack splits the rock beside you."
+  },
+  "CLEARING": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "well marked forest path",
+    "ring of tall trees",
+    "grassy clearing",
+    "scattered fallen leaves",
+    "low undergrowth"
+   ],
+   "palette": {
+    "floor": "#6b8e3a",
+    "wall": "#2f4a22",
+    "accent": "#a07a4a"
+   },
+   "visual": "Sunlight pools in a small grassy clearing where a well-worn forest path runs east toward the canyon and west back behind the white house, ringed by tall trees."
+  },
+  "CLIFF-MIDDLE": {
+   "environment": "canyon",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "narrow rock ledge",
+    "sheer canyon wall",
+    "climbable cliff face",
+    "twisting river below",
+    "distant aragain falls spray"
+   ],
+   "palette": {
+    "floor": "#8a6e52",
+    "wall": "#a5836a",
+    "accent": "#4f86a8"
+   },
+   "visual": "You cling to a narrow sunlit ledge halfway up the canyon wall, the river twisting away far below while craggy, climbable cliffs rise overhead toward the open sky."
+  },
+  "COLD-PASSAGE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "damp stone walls",
+    "dripping water",
+    "condensation-slick floor",
+    "rough rock ceiling"
+   ],
+   "palette": {
+    "floor": "#3a4248",
+    "wall": "#4f5a62",
+    "accent": "#8fb3c4"
+   },
+   "visual": "Your lamp reveals a cold, damp corridor of glistening grey stone, water beading on the walls as the long east-west passage bends sharply southward into darkness."
+  },
+  "CYCLOPS-ROOM": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "staircase leading up",
+    "bloodstained walls",
+    "sleeping cyclops",
+    "cyclops-sized hole in east wall",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#4a3b2e",
+    "wall": "#5c4a3d",
+    "accent": "#8b1a1a"
+   },
+   "visual": "A gloomy stone chamber with bloodstained walls, where a hulking one-eyed cyclops looms at the foot of a staircase climbing into darkness, eyeing you hungrily."
+  },
+  "DAM-BASE": {
+   "environment": "dam",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "towering dam face",
+    "river frigid",
+    "white cliffs",
+    "rocky riverbank",
+    "sluice outflow"
+   ],
+   "palette": {
+    "floor": "#6b6a5e",
+    "wall": "#e8e4d8",
+    "accent": "#3a6f8f"
+   },
+   "visual": "The colossal concrete face of Flood Control Dam #3 looms overhead as the Frigid River rushes past, hemmed in by towering White Cliffs stretching away downstream."
+  },
+  "DAM-LOBBY": {
+   "environment": "dam",
+   "indoor": true,
+   "lighting": "bright",
+   "features": [
+    "waiting benches",
+    "\"private\" signs",
+    "tour information placard",
+    "brochure rack",
+    "concrete walls",
+    "overhead lamps"
+   ],
+   "palette": {
+    "floor": "#8a8478",
+    "wall": "#b5afa3",
+    "accent": "#c9a227"
+   },
+   "visual": "A drab concrete waiting room for dam tours, lined with worn benches under humming lamps, its doorways stencilled \"Private\" while the dam's walkway stretches away south."
+  },
+  "DAM-ROOM": {
+   "environment": "dam",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "massive concrete dam crest",
+    "control panel with large metal bolt",
+    "glowing green plastic bubble",
+    "sluice gates",
+    "wide reservoir behind dam",
+    "rushing water spillway"
+   ],
+   "palette": {
+    "floor": "#9a9590",
+    "wall": "#6e6a64",
+    "accent": "#3fd16a"
+   },
+   "visual": "Atop the vast concrete crest of Flood Control Dam #3, a bolted control panel glows with a serene green bubble while the reservoir stretches behind and water roars below."
+  },
+  "DAMP-CAVE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "damp muddy floor",
+    "dripping rock ceiling",
+    "narrow crack in south wall",
+    "puddles",
+    "glistening wet walls"
+   ],
+   "palette": {
+    "floor": "#3b3226",
+    "wall": "#4a4438",
+    "accent": "#6f8a7a"
+   },
+   "visual": "Your lamp glistens on sweating rock walls as mud squelches underfoot; water drips from the low ceiling, and a hairline crack splits the southern wall."
+  },
+  "DEAD-END-1": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisting rock walls",
+    "low uneven ceiling",
+    "rubble-strewn floor"
+   ],
+   "palette": {
+    "floor": "#3a342c",
+    "wall": "#4d463c",
+    "accent": "#7a6a50"
+   },
+   "visual": "The twisty passage simply stops: cold, featureless rock closes in on three sides, your lamp's glow dying against walls identical to every other turn of the maze."
+  },
+  "DEAD-END-2": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisty rock walls",
+    "uneven stone floor",
+    "low craggy ceiling"
+   ],
+   "palette": {
+    "floor": "#3a342c",
+    "wall": "#4b4338",
+    "accent": "#7a6a52"
+   },
+   "visual": "The twisting passage ends abruptly against a blank wall of damp, rough-hewn rock, your lamplight pooling on cold stone with nowhere left to go but back."
+  },
+  "DEAD-END-3": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisty rock walls",
+    "uneven stone floor",
+    "low rough ceiling"
+   ],
+   "palette": {
+    "floor": "#3a3530",
+    "wall": "#4a4540",
+    "accent": "#6b5d4f"
+   },
+   "visual": "The twisting passage ends abruptly against a blank wall of damp, featureless rock; your lamp reveals nothing but the narrow way you came in."
+  },
+  "DEAD-END-4": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisting rock walls",
+    "low uneven ceiling",
+    "rubble-strewn floor",
+    "blank stone wall"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5e554b",
+    "accent": "#8a7a5c"
+   },
+   "visual": "The twisting passage ends abruptly in a blank wall of damp, featureless rock, your lamplight pooling on rubble in a cramped pocket of the maze."
+  },
+  "DEAD-END-5": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "timber shoring",
+    "rough rock face",
+    "coal dust",
+    "fallen rubble"
+   ],
+   "palette": {
+    "floor": "#2a2622",
+    "wall": "#3b342c",
+    "accent": "#6b5a3e"
+   },
+   "visual": "The tunnel stops abruptly against a blank wall of black rock, old timbers sagging overhead and coal dust thick underfoot, with nowhere to go but back north."
+  },
+  "DEEP-CANYON": {
+   "environment": "canyon",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "canyon edge",
+    "stone stairway",
+    "rocky ledge",
+    "sheer chasm"
+   ],
+   "palette": {
+    "floor": "#5a4a3c",
+    "wall": "#3b322b",
+    "accent": "#6f8fa3"
+   },
+   "visual": "You stand on the south lip of a deep underground canyon, a stone stairway plunging into darkness while a loud roar of rushing water echoes up from below."
+  },
+  "DOME-ROOM": {
+   "environment": "temple",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "wooden railing",
+    "circular dome walkway",
+    "precipitous drop",
+    "dome ceiling",
+    "stone balustrade posts"
+   ],
+   "palette": {
+    "floor": "#5a4632",
+    "wall": "#6e6a62",
+    "accent": "#a07840"
+   },
+   "visual": "A narrow ledge rings the rim of a vast stone dome, a weathered wooden railing guarding a dizzying plunge into blackness, while an eerie draught tugs you toward the edge."
+  },
+  "EAST-OF-CHASM": {
+   "environment": "canyon",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "bottomless chasm",
+    "crumbling chasm edge",
+    "rough rock ledge path",
+    "jagged stone outcrops"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#2b2622",
+    "accent": "#0a0808"
+   },
+   "visual": "Your lamp catches a crumbling ledge on the east lip of a vast chasm whose depths swallow the light entirely, while a cold draft rises from the endless black below."
+  },
+  "EAST-OF-HOUSE": {
+   "environment": "house",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "white house wall",
+    "small kitchen window",
+    "forest path",
+    "tree line",
+    "grass yard"
+   ],
+   "palette": {
+    "floor": "#6b8f3a",
+    "wall": "#f2f0e6",
+    "accent": "#3e5c2a"
+   },
+   "visual": "Behind the gleaming white house, a small window in one corner hangs slightly ajar, while a worn path slips eastward into the dense, sun-dappled forest."
+  },
+  "EGYPT-ROOM": {
+   "environment": "crypt",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "hieroglyph-carved walls",
+    "sandstone pillars",
+    "painted frescoes of pharaohs",
+    "stone sarcophagus plinth",
+    "ascending stone staircase"
+   ],
+   "palette": {
+    "floor": "#b89a63",
+    "wall": "#c9a86a",
+    "accent": "#2f6f8f"
+   },
+   "visual": "Your lamp reveals a cramped Egyptian tomb, sandstone walls crowded with faded hieroglyphs and painted pharaohs, a stone staircase climbing west into darkness."
+  },
+  "END-OF-RAINBOW": {
+   "environment": "river",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "rocky beach",
+    "white cliffs",
+    "frigid river",
+    "rainbow over the falls",
+    "aragain falls mist"
+   ],
+   "palette": {
+    "floor": "#8a8478",
+    "wall": "#e8e4da",
+    "accent": "#7fb8e0"
+   },
+   "visual": "Sunlight pours into the opened canyon onto a narrow pebbly beach hemmed by towering White Cliffs, while a shimmering rainbow arcs over the thundering falls to the east."
+  },
+  "ENGRAVINGS-CAVE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "ancient wall engravings",
+    "low rock ceiling",
+    "incised symbolic carvings",
+    "uneven stone floor"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5e5348",
+    "accent": "#a8895a"
+   },
+   "visual": "Your lamp sweeps a low, cramped cave where old engravings, incised into the living rock by an unknown hand, depict the beliefs of the ancient Zorkers."
+  },
+  "ENTRANCE-TO-HADES": {
+   "environment": "crypt",
+   "indoor": true,
+   "lighting": "dim",
+   "features": [
+    "large stone gateway",
+    "inscription over gate",
+    "jeering evil spirits",
+    "pile of mangled bodies",
+    "desolate wasteland beyond gate"
+   ],
+   "palette": {
+    "floor": "#3a2f2a",
+    "wall": "#2b2326",
+    "accent": "#b8452a"
+   },
+   "visual": "A vast gateway looms, carved 'Abandon every hope all ye who enter here!', while ashen wraiths jeer from the open gate and lamenting voices echo from the desolation beyond."
+  },
+  "EW-PASSAGE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "narrow stone stairway",
+    "rough-hewn rock walls",
+    "low uneven ceiling",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5e5248",
+    "accent": "#8a7a66"
+   },
+   "visual": "A cramped passage of rough brown rock stretches east to west, while at its north end a narrow stairway drops steeply into the dark."
+  },
+  "FOREST-1": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "dim",
+   "features": [
+    "dense tall trees",
+    "tangled undergrowth",
+    "fallen leaves",
+    "thick impassable brush",
+    "shafts of sunlight"
+   ],
+   "palette": {
+    "floor": "#4a3b24",
+    "wall": "#2f4a26",
+    "accent": "#e8d27a"
+   },
+   "visual": "Tall trees crowd in on every side, their canopy swallowing the light, while a faint glow of sunlight filters through the trunks to the east."
+  },
+  "FOREST-2": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "dim",
+   "features": [
+    "large oak trees",
+    "dense undergrowth",
+    "thick canopy",
+    "fallen leaves",
+    "mossy roots",
+    "impenetrable thicket"
+   ],
+   "palette": {
+    "floor": "#3b4a2a",
+    "wall": "#2a3a1f",
+    "accent": "#6b4f2e"
+   },
+   "visual": "Massive trees crowd close on every side, their tangled canopy swallowing the daylight, leaving only a dim green gloom over moss, roots and drifts of fallen leaves."
+  },
+  "FOREST-3": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "dim",
+   "features": [
+    "large trees",
+    "rank undergrowth",
+    "storm-tossed fallen trees",
+    "thick canopy",
+    "mossy roots"
+   ],
+   "palette": {
+    "floor": "#3b4a2a",
+    "wall": "#1f3320",
+    "accent": "#6b4f2e"
+   },
+   "visual": "Huge dark trunks crowd around you beneath a heavy canopy, tangled undergrowth choking the east and storm-felled timber heaped to the south in murky green light."
+  },
+  "GALLERY": {
+   "environment": "other",
+   "indoor": true,
+   "lighting": "bright",
+   "features": [
+    "empty picture frames",
+    "bare hanging hooks",
+    "pale outlines on walls",
+    "gallery benches",
+    "wall-mounted lamps"
+   ],
+   "palette": {
+    "floor": "#7a5c3e",
+    "wall": "#d8cfc0",
+    "accent": "#b8860b"
+   },
+   "visual": "A lamplit underground art gallery, its cream walls marked by pale rectangles and empty gilt frames where vandals with exceptional taste stripped away nearly every painting."
+  },
+  "GAS-ROOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "short stone stairs",
+    "rough-hewn rock walls",
+    "sooty coal seams",
+    "greenish gas haze",
+    "timber support beams"
+   ],
+   "palette": {
+    "floor": "#2b2620",
+    "wall": "#3a352c",
+    "accent": "#8fa85a"
+   },
+   "visual": "A cramped, sooty chamber reeking of coal gas, a faint sickly haze hanging over rough rock, with worn stairs climbing up and a narrow tunnel slipping east."
+  },
+  "GRATING-CLEARING": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "iron grating in ground",
+    "pile of leaves",
+    "surrounding tall trees",
+    "dense undergrowth"
+   ],
+   "palette": {
+    "floor": "#6b7a3a",
+    "wall": "#2f4a22",
+    "accent": "#5a5a5e"
+   },
+   "visual": "A sunlit clearing ringed by dense forest, where a pile of fallen leaves sits beside a sturdy iron grating set into the earth, hinting at darkness below."
+  },
+  "GRATING-ROOM": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "iron grating overhead",
+    "skull-and-crossbones lock",
+    "rough stone walls",
+    "leaf litter on floor"
+   ],
+   "palette": {
+    "floor": "#4a3f33",
+    "wall": "#5c544a",
+    "accent": "#9a9a8e"
+   },
+   "visual": "A cramped stone chamber at the maze's edge, where an iron grating set in the ceiling, clasped by a skull-and-crossbones lock, hints at the forest world above."
+  },
+  "IN-STREAM": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "gently flowing stream",
+    "narrow beach",
+    "twisting rock walls",
+    "narrow upstream channel"
+   ],
+   "palette": {
+    "floor": "#1f3a44",
+    "wall": "#4a4038",
+    "accent": "#c9b98a"
+   },
+   "visual": "Your boat drifts on a gently flowing underground stream, lamplight catching twisting rock walls that hide the way downstream, while a narrow sandy beach offers a place to land."
+  },
+  "KITCHEN": {
+   "environment": "house",
+   "indoor": true,
+   "lighting": "bright",
+   "features": [
+    "wooden kitchen table",
+    "dark staircase",
+    "dark chimney",
+    "small window",
+    "hearth"
+   ],
+   "palette": {
+    "floor": "#8a6a45",
+    "wall": "#e8e2d0",
+    "accent": "#3a2a1c"
+   },
+   "visual": "A homely farmhouse kitchen lit by daylight through a small east window, a worn table recently used for cooking, a sooty chimney and a dark staircase climbing upward."
+  },
+  "LADDER-BOTTOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "narrow wooden ladder",
+    "timber support beams",
+    "rough-hewn rock walls",
+    "coal dust on floor"
+   ],
+   "palette": {
+    "floor": "#2b2622",
+    "wall": "#3d3630",
+    "accent": "#8a6a3f"
+   },
+   "visual": "A wide, black-walled mine chamber swallows your lamplight; on one side a narrow wooden ladder climbs up into darkness, its rungs worn and dusted with coal."
+  },
+  "LADDER-TOP": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rickety wooden ladder",
+    "rough-hewn staircase",
+    "timber support beams",
+    "coal-dusted rock walls"
+   ],
+   "palette": {
+    "floor": "#2a2622",
+    "wall": "#3b342c",
+    "accent": "#8a6a3f"
+   },
+   "visual": "A cramped, coal-blackened chamber where a rickety wooden ladder sags into darkness from one corner, while worn stone steps climb back toward the mine above."
+  },
+  "LAND-OF-LIVING-DEAD": {
+   "environment": "crypt",
+   "indoor": true,
+   "lighting": "dim",
+   "features": [
+    "stacked adventurer remains",
+    "heaps of bones and skulls",
+    "rough cavern walls",
+    "eerie spectral mist"
+   ],
+   "palette": {
+    "floor": "#2b2622",
+    "wall": "#3a3440",
+    "accent": "#8fa8a0"
+   },
+   "visual": "A cold, mist-choked cavern where the weeping of countless lost souls echoes endlessly, and in one corner the bones of less fortunate adventurers lie stacked high."
+  },
+  "LIVING-ROOM": {
+   "environment": "house",
+   "indoor": true,
+   "lighting": "bright",
+   "features": [
+    "trophy case",
+    "large oriental rug",
+    "trap door",
+    "nailed wooden door with gothic lettering",
+    "wooden floorboards"
+   ],
+   "palette": {
+    "floor": "#6b4a2e",
+    "wall": "#c9b48a",
+    "accent": "#8b1e2a"
+   },
+   "visual": "A cozy, lamplit living room: a glass trophy case gleams beside a nailed-shut door bearing strange gothic lettering, while a rich oriental rug sprawls across the worn floorboards."
+  },
+  "LOUD-ROOM": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "stone stairway",
+    "towering cavern walls",
+    "ceiling lost in darkness",
+    "reverberating rock ridges"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a66"
+   },
+   "visual": "A vast cavern whose ceiling vanishes into blackness, a stone stairway climbing upward, and a deafening, rushing roar echoing from every wall until thought itself drowns."
+  },
+  "LOWER-SHAFT": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "long vertical shaft",
+    "heavy iron chain hanging in shaft",
+    "rough rock walls",
+    "drafty air"
+   ],
+   "palette": {
+    "floor": "#3a332b",
+    "wall": "#4a4038",
+    "accent": "#6e6e72"
+   },
+   "visual": "A cramped, drafty chamber of raw rock where a cold wind sighs down a long shaft overhead, a heavy iron chain dangling into the lamplight from the darkness above."
+  },
+  "MACHINE-ROOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "dryer-like machine",
+    "start switch",
+    "large machine lid",
+    "cold stone walls"
+   ],
+   "palette": {
+    "floor": "#3a3633",
+    "wall": "#4b4f55",
+    "accent": "#9aa3ad"
+   },
+   "visual": "A large, cold chamber at the mine's bottom where, in one corner, a squat metal machine like a clothes dryer waits, its tiny START switch glinting in your lamplight."
+  },
+  "MAINTENANCE-ROOM": {
+   "environment": "dam",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "blue button",
+    "yellow button",
+    "brown button",
+    "red button",
+    "empty equipment racks",
+    "ransacked workbench"
+   ],
+   "palette": {
+    "floor": "#5a5a55",
+    "wall": "#7a7f78",
+    "accent": "#c8a02a"
+   },
+   "visual": "Your lamp sweeps a ransacked concrete room of empty racks and scattered debris, halting on a wall panel of four buttons: blue, yellow, brown and red."
+  },
+  "MAZE-1": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough rock walls",
+    "low uneven ceiling",
+    "scattered rubble",
+    "dusty footprints"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5e554b",
+    "accent": "#8a7a5c"
+   },
+   "visual": "Your lamp flickers across cramped, twisting stone passages that bend away identically in every direction, their rough walls indistinguishable, the Troll Room's faint stench lingering eastward."
+  },
+  "MAZE-10": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisty rock walls",
+    "uneven stone floor",
+    "low craggy ceiling",
+    "rubble heap"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5e544a",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp reveals cramped, twisting passages of rough grey-brown rock, each bend identical to the last, curling off into darkness east, west and upward."
+  },
+  "MAZE-11": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "low uneven ceiling",
+    "rough stone walls",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#3a342c",
+    "wall": "#4d463c",
+    "accent": "#7a6a52"
+   },
+   "visual": "Your lamp reveals yet another cramped knot of twisty little passages, rough grey-brown rock curving off in every direction, each one maddeningly like the last."
+  },
+  "MAZE-12": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough-hewn rock walls",
+    "low uneven ceiling",
+    "rubble-strewn floor"
+   ],
+   "palette": {
+    "floor": "#4a4238",
+    "wall": "#5c5348",
+    "accent": "#8a7a5c"
+   },
+   "visual": "Your lamp reveals cramped, twisting stone passages identical to every other, branching up, down and sideways until all sense of direction dissolves into gloom."
+  },
+  "MAZE-13": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "low rough-hewn ceiling",
+    "damp stone walls",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#4a4239",
+    "wall": "#5e564c",
+    "accent": "#8a7d6b"
+   },
+   "visual": "Your lamp reveals cramped, featureless passages of grey-brown rock twisting off in every direction, each one maddeningly identical to the last."
+  },
+  "MAZE-14": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough-hewn rock walls",
+    "low uneven ceiling",
+    "scattered rubble",
+    "dripping stalactites"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a5c"
+   },
+   "visual": "Your lamp reveals yet another cramped junction of twisting stone passages, each identical to the last, branching off into darkness in every direction."
+  },
+  "MAZE-15": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough rock walls",
+    "low uneven ceiling",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp flickers over identical rough stone walls twisting off in every direction, the cramped passages so alike that you can no longer tell where you came from."
+  },
+  "MAZE-2": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisting rock walls",
+    "low uneven ceiling",
+    "rubble-strewn floor"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c544c",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp flickers across identical damp stone walls bending away in every direction, each twisty little passage indistinguishable from the last, swallowing all sense of direction."
+  },
+  "MAZE-3": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough stone walls",
+    "low uneven ceiling",
+    "scattered rubble",
+    "damp patches"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp reveals cramped, featureless stone passages twisting off in every direction, each bend identical to the last, swallowing all sense of where you came from."
+  },
+  "MAZE-4": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough-hewn rock walls",
+    "low uneven ceiling",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#3a342c",
+    "wall": "#5a5045",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp reveals yet another cramped junction of twisty little passages, every rough stone wall identical, the darkness swallowing each turn ahead."
+  },
+  "MAZE-5": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "adventurer skeleton",
+    "twisty rock walls",
+    "low rough ceiling",
+    "scattered stones"
+   ],
+   "palette": {
+    "floor": "#4a4238",
+    "wall": "#5e564b",
+    "accent": "#d8d0b8"
+   },
+   "visual": "Your lamp reveals yet another twisty little passage, all alike, where a luckless adventurer's bleached skeleton lies slumped against the cold stone."
+  },
+  "MAZE-6": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisting rock walls",
+    "low uneven ceiling",
+    "rubble-strewn floor",
+    "identical stone alcoves"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a5c"
+   },
+   "visual": "Your lamp reveals another cramped junction of twisty little passages, rough grey-brown walls curving away up, down, and sideways, utterly indistinguishable from the last."
+  },
+  "MAZE-7": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisty rock walls",
+    "uneven stone floor",
+    "low rough ceiling"
+   ],
+   "palette": {
+    "floor": "#4a4238",
+    "wall": "#5c544a",
+    "accent": "#8a7d6a"
+   },
+   "visual": "Your lamp reveals yet another cramped junction of twisty little passages, all alike, rough grey-brown walls curving away in every direction, one sloping upward, another dropping down."
+  },
+  "MAZE-8": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisting rock walls",
+    "low rough ceiling",
+    "uneven stone floor",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#3a342c",
+    "wall": "#4d463b",
+    "accent": "#7a6a4f"
+   },
+   "visual": "Your lamp reveals yet another cramped bend of twisty little passages, every damp grey-brown wall maddeningly identical to the last, branching off into darkness."
+  },
+  "MAZE-9": {
+   "environment": "maze",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisting rock walls",
+    "low uneven ceiling",
+    "rubble-strewn floor"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp reveals cramped, twisting passages of grey-brown rock, each turning bend indistinguishable from the last, branching off in every direction into darkness."
+  },
+  "MINE-1": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "coal seams",
+    "timber support beams",
+    "rough-hewn rock walls",
+    "scattered coal rubble"
+   ],
+   "palette": {
+    "floor": "#1c1a18",
+    "wall": "#2b2724",
+    "accent": "#6b4a2b"
+   },
+   "visual": "Your lamp picks out black, glittering coal seams and sagging timber props in a cramped, nondescript tunnel that branches confusingly into more identical darkness."
+  },
+  "MINE-2": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "timber support beams",
+    "coal seams in walls",
+    "low rough ceiling",
+    "scattered coal rubble"
+   ],
+   "palette": {
+    "floor": "#2a2622",
+    "wall": "#1a1816",
+    "accent": "#6b5a44"
+   },
+   "visual": "A cramped, featureless tunnel of black coal, its glistening seams catching your lamplight, with sagging timber props and passages branching off identically into darkness."
+  },
+  "MINE-3": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "coal seam walls",
+    "timber support beams",
+    "rubble piles",
+    "low rock ceiling"
+   ],
+   "palette": {
+    "floor": "#2a2622",
+    "wall": "#1a1816",
+    "accent": "#6b5a3e"
+   },
+   "visual": "Your lamp flickers across black, glittering coal walls propped by splintered timbers, the cramped tunnel branching off into identical darkness in every direction."
+  },
+  "MINE-4": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "timber support beams",
+    "coal seam walls",
+    "rubble heaps",
+    "low rough ceiling"
+   ],
+   "palette": {
+    "floor": "#1c1a18",
+    "wall": "#2a2724",
+    "accent": "#6b5a3e"
+   },
+   "visual": "Your lamp picks out black, glinting coal walls propped by sagging timber beams, the twisting tunnels all looking maddeningly alike in the choking, dusty darkness."
+  },
+  "MINE-ENTRANCE": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "timber shaft supports",
+    "coal-streaked rock walls",
+    "scattered coal rubble",
+    "rusted rail fragments"
+   ],
+   "palette": {
+    "floor": "#2b2622",
+    "wall": "#3a332c",
+    "accent": "#8a6a3f"
+   },
+   "visual": "Your lamp picks out soot-black rock and sagging timber beams framing a gaping shaft in the west wall, the air thick with old coal dust and silence."
+  },
+  "MIRROR-ROOM-1": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "enormous wall mirror",
+    "shattered mirror shards",
+    "tall stone ceiling",
+    "square stone floor"
+   ],
+   "palette": {
+    "floor": "#4a4640",
+    "wall": "#5e5a54",
+    "accent": "#b8c8d4"
+   },
+   "visual": "A tall, square stone chamber swallows your lamplight, its entire south wall a colossal mirror now cracked into a jagged web of glinting, broken reflections."
+  },
+  "MIRROR-ROOM-2": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "bright",
+   "features": [
+    "enormous wall mirror",
+    "tall ceiling",
+    "square stone chamber",
+    "smooth flagstone floor"
+   ],
+   "palette": {
+    "floor": "#6b6358",
+    "wall": "#8a8170",
+    "accent": "#c9d6e0"
+   },
+   "visual": "A tall, square stone chamber whose entire south wall is one enormous mirror, reflecting you and the three dark exits back into the room."
+  },
+  "MOUNTAINS": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "thinning trees",
+    "impassable mountains",
+    "rocky foothills",
+    "scattered boulders",
+    "fallen leaves"
+   ],
+   "palette": {
+    "floor": "#5a6b3a",
+    "wall": "#7a7f86",
+    "accent": "#2f4a26"
+   },
+   "visual": "The trees thin to scattered trunks, and beyond them sheer grey mountains rise like a wall, their jagged peaks cutting off any hope of going farther east."
+  },
+  "NARROW-PASSAGE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "pinched rock walls",
+    "low uneven ceiling",
+    "worn stone floor",
+    "jagged rock outcrops"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a66"
+   },
+   "visual": "Rough stone walls press in on both sides as the long north-south corridor squeezes even tighter, your lamplight scraping along damp, jagged rock just inches away."
+  },
+  "NORTH-OF-HOUSE": {
+   "environment": "house",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "white house north wall",
+    "boarded-up windows",
+    "narrow winding path",
+    "forest trees",
+    "grassy clearing"
+   ],
+   "palette": {
+    "floor": "#6b8e3a",
+    "wall": "#f2f0e6",
+    "accent": "#7a5a3a"
+   },
+   "visual": "The doorless north face of a white clapboard house looms before you, its windows nailed shut with weathered boards, while a narrow path snakes north into the trees."
+  },
+  "NORTH-TEMPLE": {
+   "environment": "temple",
+   "indoor": true,
+   "lighting": "dim",
+   "features": [
+    "ancient inscription",
+    "huge marble pillars",
+    "granite west wall",
+    "stone staircase leading down",
+    "vaulted temple ceiling"
+   ],
+   "palette": {
+    "floor": "#8a7f6e",
+    "wall": "#6b6560",
+    "accent": "#d8d2c4"
+   },
+   "visual": "Massive marble pillars frame the north end of a vast, hushed temple, where a faded prayer in a forgotten tongue crowns a staircase descending into darkness."
+  },
+  "NS-PASSAGE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "high vaulted rock ceiling",
+    "rough-hewn stone walls",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5e544a",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp barely reaches the ceiling of this tall, narrow passage, where rough stone walls stretch north and a branch splits off northeast into the darkness."
+  },
+  "ON-RAINBOW": {
+   "environment": "sky",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "solid rainbow arch",
+    "aragain falls in view",
+    "rising mist",
+    "rocky gorge below",
+    "frigid river far below"
+   ],
+   "palette": {
+    "floor": "#e84fd0",
+    "wall": "#7fc8f0",
+    "accent": "#ffd23f"
+   },
+   "visual": "You stand atop a shimmering, solid rainbow arching east to west, the thundering Aragain Falls glittering beside you and mist swirling over the gorge far below."
+  },
+  "PATH": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "dim",
+   "features": [
+    "large tree with low branches",
+    "winding dirt path",
+    "dense tree trunks",
+    "fallen leaves",
+    "underbrush"
+   ],
+   "palette": {
+    "floor": "#5a4a2f",
+    "wall": "#2f4a2a",
+    "accent": "#7a9a4a"
+   },
+   "visual": "A narrow dirt path winds north-south through a dim, hushed forest, where one enormous tree with low, inviting branches leans out over the trail."
+  },
+  "RESERVOIR": {
+   "environment": "lake",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "muddy lakebed",
+    "dark water surface",
+    "narrow rock cleft with stream",
+    "distant dam face",
+    "sandy beaches north and south",
+    "cavern ceiling"
+   ],
+   "palette": {
+    "floor": "#3e3a2c",
+    "wall": "#2b2e33",
+    "accent": "#4a6b7a"
+   },
+   "visual": "Black water stretches across a vast cavern, its surface stirring with current; a thin stream spills from a rocky cleft upstream while the great dam looms downstream."
+  },
+  "RESERVOIR-NORTH": {
+   "environment": "lake",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "slimy stone stairway",
+    "wide lake shore",
+    "muddy bank",
+    "cavern ceiling",
+    "dripping rock walls"
+   ],
+   "palette": {
+    "floor": "#4a4436",
+    "wall": "#2e3138",
+    "accent": "#3a6a7a"
+   },
+   "visual": "A vast dark cavern opens before you, its muddy northern shore lapping against a wide black reservoir, while a slimy stairway climbs away into the gloom behind."
+  },
+  "RESERVOIR-SOUTH": {
+   "environment": "lake",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "south shore of reservoir",
+    "dark lake water",
+    "muddy shoreline",
+    "steep chasm edge",
+    "rocky cavern ceiling"
+   ],
+   "palette": {
+    "floor": "#5a5040",
+    "wall": "#3a3a42",
+    "accent": "#2a4a6a"
+   },
+   "visual": "A long, dark cavern hall ends at the muddy south shore of a vast black reservoir, its still waters stretching beyond your lamplight, far too deep to cross."
+  },
+  "RIVER-1": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dim",
+   "features": [
+    "dark flowing water",
+    "west shore landing",
+    "white cliffs",
+    "looming dam face",
+    "rocky riverbanks"
+   ],
+   "palette": {
+    "floor": "#1f3a4a",
+    "wall": "#5a5f66",
+    "accent": "#d8d4c8"
+   },
+   "visual": "Your boat drifts on the cold, quiet Frigid River beneath the towering grey dam, a small landing on the west shore and pale white cliffs rising sheer to the east."
+  },
+  "RIVER-2": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rushing dark water",
+    "towering white cliffs",
+    "large jagged rocks",
+    "river bend"
+   ],
+   "palette": {
+    "floor": "#1c3a4a",
+    "wall": "#d8d4c8",
+    "accent": "#5a5650"
+   },
+   "visual": "Black, icy water swings around a sharp bend, hiding the Dam behind you; pale White Cliffs rise sheer to the east while jagged boulders guard the western bank."
+  },
+  "RIVER-3": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "dark flowing river",
+    "narrow sandy beach",
+    "white limestone cliffs",
+    "sloping valley walls",
+    "churning current"
+   ],
+   "palette": {
+    "floor": "#1f3a4a",
+    "wall": "#d8d4c8",
+    "accent": "#6fa3b8"
+   },
+   "visual": "Black, icy water hurries downhill into a cavern valley, a thin beach hugging pale cliffs to the west, while a low rumble growls somewhere ahead in the darkness."
+  },
+  "RIVER-4": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "fast-flowing current",
+    "sandy east beach",
+    "white cliffs",
+    "narrow west beach strip",
+    "churning rapids",
+    "cavern ceiling"
+   ],
+   "palette": {
+    "floor": "#1f3a4a",
+    "wall": "#5a5650",
+    "accent": "#d8c690"
+   },
+   "visual": "Your boat races through black, cold water as the roar of rushing water grows ahead; a pale sandy beach glimmers east, a thin strand hugs the white cliffs west."
+  },
+  "RIVER-5": {
+   "environment": "river",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "rushing rapids",
+    "churning white water",
+    "large landing area",
+    "rocky riverbanks",
+    "steep cliff walls"
+   ],
+   "palette": {
+    "floor": "#2f5f7a",
+    "wall": "#6b5a48",
+    "accent": "#e8f2f5"
+   },
+   "visual": "Your boat pitches on the roaring Frigid River, spray flying from churning rapids, while a broad, flat landing area beckons from the east shore beneath towering rock walls."
+  },
+  "ROUND-ROOM": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "circular stone walls",
+    "rubble from cave-ins",
+    "domed rock ceiling"
+   ],
+   "palette": {
+    "floor": "#5a544c",
+    "wall": "#6e675d",
+    "accent": "#8a7a62"
+   },
+   "visual": "Your lamp sweeps a perfectly circular stone chamber ringed with passage mouths, several choked shut by heaps of fallen rock and rubble from old cave-ins."
+  },
+  "SANDY-BEACH": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "large sandy beach",
+    "fast-flowing river",
+    "riverside path",
+    "rocky cavern ceiling"
+   ],
+   "palette": {
+    "floor": "#c2a878",
+    "wall": "#4a4038",
+    "accent": "#2f5f6e"
+   },
+   "visual": "Your lamp glows over a broad underground beach of pale sand, where the dark river rushes past and a half-buried passage gapes in the drifts to the northeast."
+  },
+  "SANDY-CAVE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "drifted sand dunes",
+    "low rock ceiling",
+    "rippled sand floor",
+    "rough stone walls",
+    "scattered pebbles"
+   ],
+   "palette": {
+    "floor": "#d8c08a",
+    "wall": "#6b5a44",
+    "accent": "#a88a5a"
+   },
+   "visual": "Your lamp reveals a cramped cave choked with soft drifted sand, its pale dunes rippling up against rough brown walls beneath a low, crumbling ceiling."
+  },
+  "SHAFT-ROOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "small shaft in floor",
+    "metal framework",
+    "heavy iron chain",
+    "rough rock walls",
+    "timber supports"
+   ],
+   "palette": {
+    "floor": "#3a3128",
+    "wall": "#4a4038",
+    "accent": "#7a6a5a"
+   },
+   "visual": "A large, dark rock chamber where a narrow shaft plunges into blackness, crowned by a rusty metal framework from which a heavy iron chain dangles into the void."
+  },
+  "SHORE": {
+   "environment": "river",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "churning river",
+    "rocky riverbank",
+    "narrow dirt path",
+    "sharp rock corner",
+    "canyon cliff face"
+   ],
+   "palette": {
+    "floor": "#a08a68",
+    "wall": "#6e5a48",
+    "accent": "#3a7a8c"
+   },
+   "visual": "A narrow path hugs the east bank of a swift, treacherous river, its churning water rushing south toward a sharp rocky bend and the distant roar of falls."
+  },
+  "SLIDE-ROOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "steep metal slide",
+    "etched \"granite wall\" letters",
+    "coal-streaked rock walls",
+    "old mine timbers"
+   ],
+   "palette": {
+    "floor": "#2b2622",
+    "wall": "#3d3833",
+    "accent": "#8a8f96"
+   },
+   "visual": "A cramped, coal-dusted chamber where the words \"Granite Wall\" are etched into the south rock, and a steep metal slide twists down into blackness."
+  },
+  "SMALL-CAVE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough stone staircase",
+    "low rocky ceiling",
+    "damp cave walls",
+    "scattered loose rubble"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a62"
+   },
+   "visual": "A cramped, pitch-black pocket of rock closes around your lamplight, its damp walls glistening as worn stone steps spiral down toward a distant, watery chill."
+  },
+  "SMELLY-ROOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "small descending staircase",
+    "rough-hewn rock walls",
+    "wooden support beams",
+    "faint yellowish haze"
+   ],
+   "palette": {
+    "floor": "#4a4236",
+    "wall": "#5c5446",
+    "accent": "#9a9a3c"
+   },
+   "visual": "A cramped, nondescript chamber of rough stone where a small staircase drops into darkness, and a foul, sulphurous stench drifts up to sting your nose."
+  },
+  "SOUTH-OF-HOUSE": {
+   "environment": "house",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "white house wall",
+    "boarded windows",
+    "grassy clearing",
+    "forest edge trees"
+   ],
+   "palette": {
+    "floor": "#6b8e3d",
+    "wall": "#f2f0e6",
+    "accent": "#7a5a3a"
+   },
+   "visual": "The doorless south face of a white colonial house rises before you, its windows nailed shut with weathered boards, while dense forest crowds in behind you to the south."
+  },
+  "SOUTH-TEMPLE": {
+   "environment": "temple",
+   "indoor": true,
+   "lighting": "bright",
+   "features": [
+    "stone altar",
+    "small hole in floor",
+    "carved temple columns",
+    "engraved walls"
+   ],
+   "palette": {
+    "floor": "#8a7d6b",
+    "wall": "#a89878",
+    "accent": "#c9a24a"
+   },
+   "visual": "At the temple's lit south end, a solemn stone altar rises before you, while in one corner a small dark hole drops away into blackness."
+  },
+  "SQUEEKY-ROOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "rough rock walls",
+    "low rocky ceiling",
+    "scattered rubble",
+    "bat droppings"
+   ],
+   "palette": {
+    "floor": "#3a332b",
+    "wall": "#4a4038",
+    "accent": "#6b5d4f"
+   },
+   "visual": "A cramped, lightless chamber of rough stone where faint, unsettling squeaks echo from the dark passage to the north, urging you toward the eastern escape."
+  },
+  "STONE-BARROW": {
+   "environment": "field",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "massive stone barrow",
+    "huge open stone door",
+    "dark tomb entrance",
+    "weathered stone blocks",
+    "grassy mound edges"
+   ],
+   "palette": {
+    "floor": "#6b7f4a",
+    "wall": "#8a8478",
+    "accent": "#1a1a1a"
+   },
+   "visual": "A massive barrow of grey stone looms before you, its huge stone door in the east face standing open onto a darkness your eyes cannot pierce."
+  },
+  "STRANGE-PASSAGE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "old wooden door with cyclops-sized hole",
+    "splintered door fragments",
+    "rough stone walls",
+    "low rocky ceiling"
+   ],
+   "palette": {
+    "floor": "#4a3f35",
+    "wall": "#5c5248",
+    "accent": "#8b5a2b"
+   },
+   "visual": "A long, dark stone passage ends at an old wooden door, a huge ragged hole smashed through it, clearly made by something cyclops-sized forcing its way out."
+  },
+  "STREAM-VIEW": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "gently flowing stream",
+    "narrow stone path",
+    "small hole where stream emerges",
+    "damp cavern rock walls",
+    "wet pebbles along bank"
+   ],
+   "palette": {
+    "floor": "#5a5248",
+    "wall": "#3a3f44",
+    "accent": "#4f8fa8"
+   },
+   "visual": "A narrow stone path hugs a gently murmuring stream that trickles out of a tiny crack in the western rock and flows east into darkness toward the reservoir."
+  },
+  "STUDIO": {
+   "environment": "house",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "paint-splattered walls",
+    "paint-splattered floor",
+    "fireplace",
+    "narrow chimney",
+    "paint-covered open door",
+    "empty picture hooks"
+   ],
+   "palette": {
+    "floor": "#5a4a3a",
+    "wall": "#7a6e62",
+    "accent": "#d94a8c"
+   },
+   "visual": "Your lamp reveals a deserted artist's studio, every surface spattered in dozens of riotous colors, bare walls holding no paintings, and a sooty fireplace whose cramped chimney climbs into darkness."
+  },
+  "TIMBER-ROOM": {
+   "environment": "mine",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "broken timbers",
+    "collapsed support beams",
+    "splintered wooden props",
+    "rough rock walls",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#3a2e24",
+    "wall": "#4a3f36",
+    "accent": "#8a6a42"
+   },
+   "visual": "A long, narrow mine passage choked with splintered, fallen timbers, where a cold draft whistles out of a tight crack at the far western end."
+  },
+  "TINY-CAVE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "dark forbidding staircase",
+    "low rocky ceiling",
+    "rough stone walls",
+    "worn stone steps"
+   ],
+   "palette": {
+    "floor": "#3a332c",
+    "wall": "#4a4038",
+    "accent": "#1a1210"
+   },
+   "visual": "A cramped, tiny cave of rough brown rock closes around you, and in one corner a dark, forbidding staircase plunges downward into an ominous blackness."
+  },
+  "TORCH-ROOM": {
+   "environment": "temple",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "large dome",
+    "wooden railing",
+    "white marble pedestal",
+    "dangling rope",
+    "down staircase"
+   ],
+   "palette": {
+    "floor": "#6b6358",
+    "wall": "#8a8174",
+    "accent": "#e8e4dc"
+   },
+   "visual": "A vast domed chamber swallows your lamplight; a white marble pedestal stands at its heart while a frayed rope dangles from a wooden railing far overhead, just out of reach."
+  },
+  "TREASURE-ROOM": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "solid granite east wall",
+    "crumbling discarded bags",
+    "stone staircase down",
+    "rough-hewn rock walls",
+    "thief's lair alcove"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#6b6560",
+    "accent": "#8a6f3a"
+   },
+   "visual": "A vast, gloomy chamber hemmed by a sheer granite east wall, its floor littered with rotting sacks that crumble to dust; a staircase sinks into darkness below."
+  },
+  "TROLL-ROOM": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "bloodstained walls",
+    "deep axe scratches",
+    "forbidding hole",
+    "rough stone floor",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#3a3330",
+    "wall": "#4a403a",
+    "accent": "#7a1a14"
+   },
+   "visual": "A cramped, lamp-lit stone chamber whose walls are smeared with dried blood and gouged by deep axe scratches, while a black, forbidding hole yawns to the west."
+  },
+  "TWISTING-PASSAGE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "winding rock walls",
+    "uneven stone floor",
+    "low craggy ceiling",
+    "jutting boulders"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5e5348",
+    "accent": "#8a7a66"
+   },
+   "visual": "A narrow, winding passage of rough brown stone curls away into blackness, its crooked walls pressing close as your lamp throws twisting shadows ahead."
+  },
+  "UP-A-TREE": {
+   "environment": "forest",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "large branches",
+    "thick tree trunk",
+    "leafy canopy",
+    "forest path below",
+    "unreachable upper branch"
+   ],
+   "palette": {
+    "floor": "#6b4a2b",
+    "wall": "#3f7a32",
+    "accent": "#a8c96a"
+   },
+   "visual": "Ten feet up, you nestle among thick, sturdy branches of a great tree, sunlight dappling through the leaves while the forest path winds far below your dangling feet."
+  },
+  "WEST-OF-HOUSE": {
+   "environment": "field",
+   "indoor": false,
+   "lighting": "bright",
+   "features": [
+    "white house facade",
+    "boarded front door",
+    "small mailbox",
+    "open grass field",
+    "forest edge trees"
+   ],
+   "palette": {
+    "floor": "#6b8e3a",
+    "wall": "#f2f0e6",
+    "accent": "#7a4b2a"
+   },
+   "visual": "An open grassy field stretches before a stately white house whose front door is nailed shut with weathered boards, a small mailbox standing nearby beneath the forest's edge."
+  },
+  "WHITE-CLIFFS-NORTH": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "towering white cliffs",
+    "narrow sandy beach",
+    "dark river edge",
+    "scattered pebbles",
+    "cavern ceiling"
+   ],
+   "palette": {
+    "floor": "#c9b98f",
+    "wall": "#e8e4d8",
+    "accent": "#2a4a5c"
+   },
+   "visual": "A thin ribbon of pale sand hugs the foot of towering chalk-white cliffs, the dark Frigid River lapping softly beside you as your lamp glints off the stone."
+  },
+  "WHITE-CLIFFS-SOUTH": {
+   "environment": "river",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "towering white cliffs",
+    "rocky narrow beach",
+    "frigid river shoreline",
+    "scattered boulders",
+    "narrow shore path"
+   ],
+   "palette": {
+    "floor": "#6b6458",
+    "wall": "#e8e4d8",
+    "accent": "#2f4f5f"
+   },
+   "visual": "A cramped strip of rocky beach huddles beneath sheer white cliffs that glow faintly in your lamplight, while the dark Frigid River laps against the stones beside you."
+  },
+  "WINDING-PASSAGE": {
+   "environment": "cave",
+   "indoor": true,
+   "lighting": "dark",
+   "features": [
+    "twisting rock walls",
+    "uneven stone floor",
+    "low craggy ceiling",
+    "scattered rubble"
+   ],
+   "palette": {
+    "floor": "#4a4038",
+    "wall": "#5c5248",
+    "accent": "#8a7a66"
+   },
+   "visual": "A narrow passage snakes through cold, damp rock, its walls bending out of sight so your lamplight never reaches far before the stone curves away again."
+  }
+ }
+}
