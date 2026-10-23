@@ -113,10 +113,14 @@ Bugs found and fixed:
 - **Spoilers:** visible-from-outside places send undiscovered parts as bare positions; the server scrubs room names.
 - **Unity gotcha:** built-in `TextMesh` labels draw on top of everything, so the Kitchen label showed through the roof. Labels of rooms inside the house are now hidden while it's solid.
 
+- Deployed to Fly.io. The live game in progress (by then in the Cellar, with the river and reservoir found) picked up the new layout on restart: room positions are refreshed from the layout when a save loads. Still zero anomalies.
+
 ### Open items
 
 - Claude parsing hasn't been run against the live API yet (no key configured during development).
 - Autopilot could explore unknown exits on its own (currently it only uses known ones).
 - Map editor in the browser (drag rooms, change levels) writing `zork1-layout-overrides.json`.
 - Unity: show undiscovered rooms when Reveal is on.
+- More landmarks: the temple, coal mine, maze and dam are still drawn room by room.
+- Unity: yard labels can show through the house roof from some angles (TextMesh ignores depth).
 - Unity: click-to-preview routes (it has double-click travel, glow and the status bar).
