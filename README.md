@@ -34,6 +34,14 @@ Open http://localhost:8765 and play. Every move updates the map.
 2. Press **Play** in any scene. The viewer sets itself up automatically, so you don't need to place any objects.
 3. Keep `./run.sh` running. You can type commands in Unity's HUD or in the browser; both stay in sync.
 
+Smoke test (no clicking needed, with the server running):
+
+```bash
+ZORK_AUTOTEST=/tmp/zorktest "/Applications/Unity/Hub/Editor/6000.0.37f1/Unity.app/Contents/MacOS/Unity" \
+  -projectPath unity/ZorkWorld
+# enters Play mode, saves screenshots + autotest.log to /tmp/zorktest, sends one "nw", quits
+```
+
 Controls: right-drag orbits · scroll zooms · WASD/QE pans · **F** follows the player · **Tab** shows the whole map · **H** hides the HUD.
 
 ## How the map is built
