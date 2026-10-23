@@ -1,0 +1,2322 @@
+{
+ "game": "Zork I (Release 119 / Serial 880429)",
+ "source": "historicalsource/zork1 1dungeon.zil (MIT)",
+ "rooms": {
+  "WEST-OF-HOUSE": {
+   "id": "WEST-OF-HOUSE",
+   "name": "West of House",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "NORTH-OF-HOUSE"
+    },
+    "south": {
+     "to": "SOUTH-OF-HOUSE"
+    },
+    "northeast": {
+     "to": "NORTH-OF-HOUSE"
+    },
+    "southeast": {
+     "to": "SOUTH-OF-HOUSE"
+    },
+    "west": {
+     "to": "FOREST-1"
+    },
+    "east": {
+     "msg": "The door is boarded and you can't remove the boards."
+    },
+    "southwest": {
+     "to": "STONE-BARROW",
+     "if": "WON-FLAG"
+    },
+    "in": {
+     "to": "STONE-BARROW",
+     "if": "WON-FLAG"
+    }
+   }
+  },
+  "STONE-BARROW": {
+   "id": "STONE-BARROW",
+   "name": "Stone Barrow",
+   "ldesc": "You are standing in front of a massive barrow of stone. In the east face is a huge stone door which is open. You cannot see into the dark of the tomb.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "northeast": {
+     "to": "WEST-OF-HOUSE"
+    }
+   }
+  },
+  "NORTH-OF-HOUSE": {
+   "id": "NORTH-OF-HOUSE",
+   "name": "North of House",
+   "ldesc": "You are facing the north side of a white house. There is no door here, and all the windows are boarded up. To the north a narrow path winds through the trees.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "southwest": {
+     "to": "WEST-OF-HOUSE"
+    },
+    "southeast": {
+     "to": "EAST-OF-HOUSE"
+    },
+    "west": {
+     "to": "WEST-OF-HOUSE"
+    },
+    "east": {
+     "to": "EAST-OF-HOUSE"
+    },
+    "north": {
+     "to": "PATH"
+    },
+    "south": {
+     "msg": "The windows are all boarded."
+    }
+   }
+  },
+  "SOUTH-OF-HOUSE": {
+   "id": "SOUTH-OF-HOUSE",
+   "name": "South of House",
+   "ldesc": "You are facing the south side of a white house. There is no door here, and all the windows are boarded.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "WEST-OF-HOUSE"
+    },
+    "east": {
+     "to": "EAST-OF-HOUSE"
+    },
+    "northeast": {
+     "to": "EAST-OF-HOUSE"
+    },
+    "northwest": {
+     "to": "WEST-OF-HOUSE"
+    },
+    "south": {
+     "to": "FOREST-3"
+    },
+    "north": {
+     "msg": "The windows are all boarded."
+    }
+   }
+  },
+  "EAST-OF-HOUSE": {
+   "id": "EAST-OF-HOUSE",
+   "name": "Behind House",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "NORTH-OF-HOUSE"
+    },
+    "south": {
+     "to": "SOUTH-OF-HOUSE"
+    },
+    "southwest": {
+     "to": "SOUTH-OF-HOUSE"
+    },
+    "northwest": {
+     "to": "NORTH-OF-HOUSE"
+    },
+    "east": {
+     "to": "CLEARING"
+    },
+    "west": {
+     "to": "KITCHEN",
+     "if": "KITCHEN-WINDOW IS OPEN"
+    },
+    "in": {
+     "to": "KITCHEN",
+     "if": "KITCHEN-WINDOW IS OPEN"
+    }
+   }
+  },
+  "FOREST-1": {
+   "id": "FOREST-1",
+   "name": "Forest",
+   "ldesc": "This is a forest, with trees in all directions. To the east, there appears to be sunlight.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "There is no tree here suitable for climbing."
+    },
+    "north": {
+     "to": "GRATING-CLEARING"
+    },
+    "east": {
+     "to": "PATH"
+    },
+    "south": {
+     "to": "FOREST-3"
+    },
+    "west": {
+     "msg": "You would need a machete to go further west."
+    }
+   }
+  },
+  "FOREST-2": {
+   "id": "FOREST-2",
+   "name": "Forest",
+   "ldesc": "This is a dimly lit forest, with large trees all around.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "There is no tree here suitable for climbing."
+    },
+    "north": {
+     "msg": "The forest becomes impenetrable to the north."
+    },
+    "east": {
+     "to": "MOUNTAINS"
+    },
+    "south": {
+     "to": "CLEARING"
+    },
+    "west": {
+     "to": "PATH"
+    }
+   }
+  },
+  "MOUNTAINS": {
+   "id": "MOUNTAINS",
+   "name": "Forest",
+   "ldesc": "The forest thins out, revealing impassable mountains.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "The mountains are impassable."
+    },
+    "north": {
+     "to": "FOREST-2"
+    },
+    "east": {
+     "msg": "The mountains are impassable."
+    },
+    "south": {
+     "to": "FOREST-2"
+    },
+    "west": {
+     "to": "FOREST-2"
+    }
+   }
+  },
+  "FOREST-3": {
+   "id": "FOREST-3",
+   "name": "Forest",
+   "ldesc": "This is a dimly lit forest, with large trees all around.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "There is no tree here suitable for climbing."
+    },
+    "north": {
+     "to": "CLEARING"
+    },
+    "east": {
+     "msg": "The rank undergrowth prevents eastward movement."
+    },
+    "south": {
+     "msg": "Storm-tossed trees block your way."
+    },
+    "west": {
+     "to": "FOREST-1"
+    },
+    "northwest": {
+     "to": "SOUTH-OF-HOUSE"
+    }
+   }
+  },
+  "PATH": {
+   "id": "PATH",
+   "name": "Forest Path",
+   "ldesc": "This is a path winding through a dimly lit forest. The path heads north-south here. One particularly large tree with some low branches stands at the edge of the path.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "UP-A-TREE"
+    },
+    "north": {
+     "to": "GRATING-CLEARING"
+    },
+    "east": {
+     "to": "FOREST-2"
+    },
+    "south": {
+     "to": "NORTH-OF-HOUSE"
+    },
+    "west": {
+     "to": "FOREST-1"
+    }
+   }
+  },
+  "UP-A-TREE": {
+   "id": "UP-A-TREE",
+   "name": "Up a Tree",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "down": {
+     "to": "PATH"
+    },
+    "up": {
+     "msg": "You cannot climb any higher."
+    }
+   }
+  },
+  "GRATING-CLEARING": {
+   "id": "GRATING-CLEARING",
+   "name": "Clearing",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "north": {
+     "msg": "The forest becomes impenetrable to the north."
+    },
+    "east": {
+     "to": "FOREST-2"
+    },
+    "west": {
+     "to": "FOREST-1"
+    },
+    "south": {
+     "to": "PATH"
+    },
+    "down": {
+     "per": "GRATING-EXIT",
+     "to": "GRATING-ROOM",
+     "if": "GRATE IS OPEN",
+     "note": "only through the open grating"
+    }
+   }
+  },
+  "CLEARING": {
+   "id": "CLEARING",
+   "name": "Clearing",
+   "ldesc": "You are in a small clearing in a well marked forest path that extends to the east and west.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "There is no tree here suitable for climbing."
+    },
+    "east": {
+     "to": "CANYON-VIEW"
+    },
+    "north": {
+     "to": "FOREST-2"
+    },
+    "south": {
+     "to": "FOREST-3"
+    },
+    "west": {
+     "to": "EAST-OF-HOUSE"
+    }
+   }
+  },
+  "KITCHEN": {
+   "id": "KITCHEN",
+   "name": "Kitchen",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "EAST-OF-HOUSE",
+     "if": "KITCHEN-WINDOW IS OPEN"
+    },
+    "west": {
+     "to": "LIVING-ROOM"
+    },
+    "out": {
+     "to": "EAST-OF-HOUSE",
+     "if": "KITCHEN-WINDOW IS OPEN"
+    },
+    "up": {
+     "to": "ATTIC"
+    },
+    "down": {
+     "to": "STUDIO",
+     "if": "FALSE-FLAG",
+     "msg": "Only Santa Claus climbs down chimneys."
+    }
+   }
+  },
+  "ATTIC": {
+   "id": "ATTIC",
+   "name": "Attic",
+   "ldesc": "This is the attic. The only exit is a stairway leading down.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "down": {
+     "to": "KITCHEN"
+    }
+   }
+  },
+  "LIVING-ROOM": {
+   "id": "LIVING-ROOM",
+   "name": "Living Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "KITCHEN"
+    },
+    "west": {
+     "to": "STRANGE-PASSAGE",
+     "if": "MAGIC-FLAG",
+     "msg": "The door is nailed shut."
+    },
+    "down": {
+     "per": "TRAP-DOOR-EXIT",
+     "to": "CELLAR",
+     "if": "TRAP-DOOR IS OPEN",
+     "note": "the trap door must be open; it shuts behind you"
+    }
+   }
+  },
+  "CELLAR": {
+   "id": "CELLAR",
+   "name": "Cellar",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "TROLL-ROOM"
+    },
+    "south": {
+     "to": "EAST-OF-CHASM"
+    },
+    "up": {
+     "to": "LIVING-ROOM",
+     "if": "TRAP-DOOR IS OPEN"
+    },
+    "west": {
+     "msg": "You try to ascend the ramp, but it is impossible, and you slide back down."
+    }
+   }
+  },
+  "TROLL-ROOM": {
+   "id": "TROLL-ROOM",
+   "name": "The Troll Room",
+   "ldesc": "This is a small room with passages to the east and south and a forbidding hole leading west. Bloodstains and deep scratches (perhaps made by an axe) mar the walls.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "CELLAR"
+    },
+    "east": {
+     "to": "EW-PASSAGE",
+     "if": "TROLL-FLAG",
+     "msg": "The troll fends you off with a menacing gesture."
+    },
+    "west": {
+     "to": "MAZE-1",
+     "if": "TROLL-FLAG",
+     "msg": "The troll fends you off with a menacing gesture."
+    }
+   }
+  },
+  "EAST-OF-CHASM": {
+   "id": "EAST-OF-CHASM",
+   "name": "East of Chasm",
+   "ldesc": "You are on the east edge of a chasm, the bottom of which cannot be seen. A narrow passage goes north, and the path you are on continues to the east.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "CELLAR"
+    },
+    "east": {
+     "to": "GALLERY"
+    },
+    "down": {
+     "msg": "The chasm probably leads straight to the infernal regions."
+    }
+   }
+  },
+  "GALLERY": {
+   "id": "GALLERY",
+   "name": "Gallery",
+   "ldesc": "This is an art gallery. Most of the paintings have been stolen by vandals with exceptional taste. The vandals left through either the north or west exits.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "EAST-OF-CHASM"
+    },
+    "north": {
+     "to": "STUDIO"
+    }
+   }
+  },
+  "STUDIO": {
+   "id": "STUDIO",
+   "name": "Studio",
+   "ldesc": "This appears to have been an artist's studio. The walls and floors are splattered with paints of 69 different colors. Strangely enough, nothing of value is hanging here. At the south end of the room is an open door (also covered with paint). A dark and narrow chimney leads up from a fireplace; although you might be able to get up it, it seems unlikely you could get back down.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "GALLERY"
+    },
+    "up": {
+     "per": "UP-CHIMNEY-FUNCTION",
+     "to": "KITCHEN",
+     "if": "CARRYING LITTLE",
+     "note": "you can only climb the chimney carrying one or two things"
+    }
+   }
+  },
+  "MAZE-1": {
+   "id": "MAZE-1",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "TROLL-ROOM"
+    },
+    "north": {
+     "to": "MAZE-1"
+    },
+    "south": {
+     "to": "MAZE-2"
+    },
+    "west": {
+     "to": "MAZE-4"
+    }
+   }
+  },
+  "MAZE-2": {
+   "id": "MAZE-2",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "MAZE-1"
+    },
+    "down": {
+     "per": "MAZE-DIODES",
+     "note": "one-way drop",
+     "to": "MAZE-4",
+     "oneway": true
+    },
+    "east": {
+     "to": "MAZE-3"
+    }
+   }
+  },
+  "MAZE-3": {
+   "id": "MAZE-3",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "MAZE-2"
+    },
+    "north": {
+     "to": "MAZE-4"
+    },
+    "up": {
+     "to": "MAZE-5"
+    }
+   }
+  },
+  "MAZE-4": {
+   "id": "MAZE-4",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "MAZE-3"
+    },
+    "north": {
+     "to": "MAZE-1"
+    },
+    "east": {
+     "to": "DEAD-END-1"
+    }
+   }
+  },
+  "DEAD-END-1": {
+   "id": "DEAD-END-1",
+   "name": "Dead End",
+   "ldesc": "You have come to a dead end in the maze.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "MAZE-4"
+    }
+   }
+  },
+  "MAZE-5": {
+   "id": "MAZE-5",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike. A skeleton, probably the remains of a luckless adventurer, lies here.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "DEAD-END-2"
+    },
+    "north": {
+     "to": "MAZE-3"
+    },
+    "southwest": {
+     "to": "MAZE-6"
+    }
+   }
+  },
+  "DEAD-END-2": {
+   "id": "DEAD-END-2",
+   "name": "Dead End",
+   "ldesc": "You have come to a dead end in the maze.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "MAZE-5"
+    }
+   }
+  },
+  "MAZE-6": {
+   "id": "MAZE-6",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "down": {
+     "to": "MAZE-5"
+    },
+    "east": {
+     "to": "MAZE-7"
+    },
+    "west": {
+     "to": "MAZE-6"
+    },
+    "up": {
+     "to": "MAZE-9"
+    }
+   }
+  },
+  "MAZE-7": {
+   "id": "MAZE-7",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "MAZE-14"
+    },
+    "west": {
+     "to": "MAZE-6"
+    },
+    "down": {
+     "per": "MAZE-DIODES",
+     "note": "one-way drop",
+     "to": "DEAD-END-1",
+     "oneway": true
+    },
+    "east": {
+     "to": "MAZE-8"
+    },
+    "south": {
+     "to": "MAZE-15"
+    }
+   }
+  },
+  "MAZE-8": {
+   "id": "MAZE-8",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "northeast": {
+     "to": "MAZE-7"
+    },
+    "west": {
+     "to": "MAZE-8"
+    },
+    "southeast": {
+     "to": "DEAD-END-3"
+    }
+   }
+  },
+  "DEAD-END-3": {
+   "id": "DEAD-END-3",
+   "name": "Dead End",
+   "ldesc": "You have come to a dead end in the maze.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MAZE-8"
+    }
+   }
+  },
+  "MAZE-9": {
+   "id": "MAZE-9",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MAZE-6"
+    },
+    "down": {
+     "per": "MAZE-DIODES",
+     "note": "one-way drop",
+     "to": "MAZE-11",
+     "oneway": true
+    },
+    "east": {
+     "to": "MAZE-10"
+    },
+    "south": {
+     "to": "MAZE-13"
+    },
+    "west": {
+     "to": "MAZE-12"
+    },
+    "northwest": {
+     "to": "MAZE-9"
+    }
+   }
+  },
+  "MAZE-10": {
+   "id": "MAZE-10",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "MAZE-9"
+    },
+    "west": {
+     "to": "MAZE-13"
+    },
+    "up": {
+     "to": "MAZE-11"
+    }
+   }
+  },
+  "MAZE-11": {
+   "id": "MAZE-11",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "northeast": {
+     "to": "GRATING-ROOM"
+    },
+    "down": {
+     "to": "MAZE-10"
+    },
+    "northwest": {
+     "to": "MAZE-13"
+    },
+    "southwest": {
+     "to": "MAZE-12"
+    }
+   }
+  },
+  "GRATING-ROOM": {
+   "id": "GRATING-ROOM",
+   "name": "Grating Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "southwest": {
+     "to": "MAZE-11"
+    },
+    "up": {
+     "to": "GRATING-CLEARING",
+     "if": "GRATE IS OPEN",
+     "msg": "The grating is closed."
+    }
+   }
+  },
+  "MAZE-12": {
+   "id": "MAZE-12",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "down": {
+     "per": "MAZE-DIODES",
+     "note": "one-way drop",
+     "to": "MAZE-5",
+     "oneway": true
+    },
+    "southwest": {
+     "to": "MAZE-11"
+    },
+    "east": {
+     "to": "MAZE-13"
+    },
+    "up": {
+     "to": "MAZE-9"
+    },
+    "north": {
+     "to": "DEAD-END-4"
+    }
+   }
+  },
+  "DEAD-END-4": {
+   "id": "DEAD-END-4",
+   "name": "Dead End",
+   "ldesc": "You have come to a dead end in the maze.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "MAZE-12"
+    }
+   }
+  },
+  "MAZE-13": {
+   "id": "MAZE-13",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "MAZE-9"
+    },
+    "down": {
+     "to": "MAZE-12"
+    },
+    "south": {
+     "to": "MAZE-10"
+    },
+    "west": {
+     "to": "MAZE-11"
+    }
+   }
+  },
+  "MAZE-14": {
+   "id": "MAZE-14",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "MAZE-15"
+    },
+    "northwest": {
+     "to": "MAZE-14"
+    },
+    "northeast": {
+     "to": "MAZE-7"
+    },
+    "south": {
+     "to": "MAZE-7"
+    }
+   }
+  },
+  "MAZE-15": {
+   "id": "MAZE-15",
+   "name": "Maze",
+   "ldesc": "This is part of a maze of twisty little passages, all alike.",
+   "flags": [
+    "RLANDBIT",
+    "MAZEBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "MAZE-14"
+    },
+    "south": {
+     "to": "MAZE-7"
+    },
+    "southeast": {
+     "to": "CYCLOPS-ROOM"
+    }
+   }
+  },
+  "CYCLOPS-ROOM": {
+   "id": "CYCLOPS-ROOM",
+   "name": "Cyclops Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "northwest": {
+     "to": "MAZE-15"
+    },
+    "east": {
+     "to": "STRANGE-PASSAGE",
+     "if": "MAGIC-FLAG",
+     "msg": "The east wall is solid rock."
+    },
+    "up": {
+     "to": "TREASURE-ROOM",
+     "if": "CYCLOPS-FLAG",
+     "msg": "The cyclops doesn't look like he'll let you past."
+    }
+   }
+  },
+  "STRANGE-PASSAGE": {
+   "id": "STRANGE-PASSAGE",
+   "name": "Strange Passage",
+   "ldesc": "This is a long passage. To the west is one entrance. On the east there is an old wooden door, with a large opening in it (about cyclops sized).",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "CYCLOPS-ROOM"
+    },
+    "in": {
+     "to": "CYCLOPS-ROOM"
+    },
+    "east": {
+     "to": "LIVING-ROOM"
+    }
+   }
+  },
+  "TREASURE-ROOM": {
+   "id": "TREASURE-ROOM",
+   "name": "Treasure Room",
+   "ldesc": "This is a large room, whose east wall is solid granite. A number of discarded bags, which crumble at your touch, are scattered about on the floor. There is an exit down a staircase.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "down": {
+     "to": "CYCLOPS-ROOM"
+    }
+   }
+  },
+  "RESERVOIR-SOUTH": {
+   "id": "RESERVOIR-SOUTH",
+   "name": "Reservoir South",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "southeast": {
+     "to": "DEEP-CANYON"
+    },
+    "southwest": {
+     "to": "CHASM-ROOM"
+    },
+    "east": {
+     "to": "DAM-ROOM"
+    },
+    "west": {
+     "to": "STREAM-VIEW"
+    },
+    "north": {
+     "to": "RESERVOIR",
+     "if": "LOW-TIDE",
+     "msg": "You would drown."
+    }
+   }
+  },
+  "RESERVOIR": {
+   "id": "RESERVOIR",
+   "name": "Reservoir",
+   "ldesc": "",
+   "flags": [
+    "NONLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "RESERVOIR-NORTH"
+    },
+    "south": {
+     "to": "RESERVOIR-SOUTH"
+    },
+    "up": {
+     "to": "IN-STREAM"
+    },
+    "west": {
+     "to": "IN-STREAM"
+    },
+    "down": {
+     "msg": "The dam blocks your way."
+    }
+   }
+  },
+  "RESERVOIR-NORTH": {
+   "id": "RESERVOIR-NORTH",
+   "name": "Reservoir North",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "ATLANTIS-ROOM"
+    },
+    "south": {
+     "to": "RESERVOIR",
+     "if": "LOW-TIDE",
+     "msg": "You would drown."
+    }
+   }
+  },
+  "STREAM-VIEW": {
+   "id": "STREAM-VIEW",
+   "name": "Stream View",
+   "ldesc": "You are standing on a path beside a gently flowing stream. The path follows the stream, which flows from west to east.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "RESERVOIR-SOUTH"
+    },
+    "west": {
+     "msg": "The stream emerges from a spot too small for you to enter."
+    }
+   }
+  },
+  "IN-STREAM": {
+   "id": "IN-STREAM",
+   "name": "Stream",
+   "ldesc": "You are on the gently flowing stream. The upstream route is too narrow to navigate, and the downstream route is invisible due to twisting walls. There is a narrow beach to land on.",
+   "flags": [
+    "NONLANDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "The channel is too narrow."
+    },
+    "west": {
+     "msg": "The channel is too narrow."
+    },
+    "land": {
+     "to": "STREAM-VIEW"
+    },
+    "down": {
+     "to": "RESERVOIR"
+    },
+    "east": {
+     "to": "RESERVOIR"
+    }
+   }
+  },
+  "MIRROR-ROOM-1": {
+   "id": "MIRROR-ROOM-1",
+   "name": "Mirror Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "COLD-PASSAGE"
+    },
+    "west": {
+     "to": "TWISTING-PASSAGE"
+    },
+    "east": {
+     "to": "SMALL-CAVE"
+    }
+   }
+  },
+  "MIRROR-ROOM-2": {
+   "id": "MIRROR-ROOM-2",
+   "name": "Mirror Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "WINDING-PASSAGE"
+    },
+    "north": {
+     "to": "NARROW-PASSAGE"
+    },
+    "east": {
+     "to": "TINY-CAVE"
+    }
+   }
+  },
+  "SMALL-CAVE": {
+   "id": "SMALL-CAVE",
+   "name": "Cave",
+   "ldesc": "This is a tiny cave with entrances west and north, and a staircase leading down.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MIRROR-ROOM-1"
+    },
+    "down": {
+     "to": "ATLANTIS-ROOM"
+    },
+    "south": {
+     "to": "ATLANTIS-ROOM"
+    },
+    "west": {
+     "to": "TWISTING-PASSAGE"
+    }
+   }
+  },
+  "TINY-CAVE": {
+   "id": "TINY-CAVE",
+   "name": "Cave",
+   "ldesc": "This is a tiny cave with entrances west and north, and a dark, forbidding staircase leading down.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MIRROR-ROOM-2"
+    },
+    "west": {
+     "to": "WINDING-PASSAGE"
+    },
+    "down": {
+     "to": "ENTRANCE-TO-HADES"
+    }
+   }
+  },
+  "COLD-PASSAGE": {
+   "id": "COLD-PASSAGE",
+   "name": "Cold Passage",
+   "ldesc": "This is a cold and damp corridor where a long east-west passageway turns into a southward path.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "MIRROR-ROOM-1"
+    },
+    "west": {
+     "to": "SLIDE-ROOM"
+    }
+   }
+  },
+  "NARROW-PASSAGE": {
+   "id": "NARROW-PASSAGE",
+   "name": "Narrow Passage",
+   "ldesc": "This is a long and narrow corridor where a long north-south passageway briefly narrows even further.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "ROUND-ROOM"
+    },
+    "south": {
+     "to": "MIRROR-ROOM-2"
+    }
+   }
+  },
+  "WINDING-PASSAGE": {
+   "id": "WINDING-PASSAGE",
+   "name": "Winding Passage",
+   "ldesc": "This is a winding passage. It seems that there are only exits on the east and north.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MIRROR-ROOM-2"
+    },
+    "east": {
+     "to": "TINY-CAVE"
+    }
+   }
+  },
+  "TWISTING-PASSAGE": {
+   "id": "TWISTING-PASSAGE",
+   "name": "Twisting Passage",
+   "ldesc": "This is a winding passage. It seems that there are only exits on the east and north.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MIRROR-ROOM-1"
+    },
+    "east": {
+     "to": "SMALL-CAVE"
+    }
+   }
+  },
+  "ATLANTIS-ROOM": {
+   "id": "ATLANTIS-ROOM",
+   "name": "Atlantis Room",
+   "ldesc": "This is an ancient room, long under water. There is an exit to the south and a staircase leading up.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "SMALL-CAVE"
+    },
+    "south": {
+     "to": "RESERVOIR-NORTH"
+    }
+   }
+  },
+  "EW-PASSAGE": {
+   "id": "EW-PASSAGE",
+   "name": "East-West Passage",
+   "ldesc": "This is a narrow east-west passageway. There is a narrow stairway leading down at the north end of the room.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "ROUND-ROOM"
+    },
+    "west": {
+     "to": "TROLL-ROOM"
+    },
+    "down": {
+     "to": "CHASM-ROOM"
+    },
+    "north": {
+     "to": "CHASM-ROOM"
+    }
+   }
+  },
+  "ROUND-ROOM": {
+   "id": "ROUND-ROOM",
+   "name": "Round Room",
+   "ldesc": "This is a circular stone room with passages in all directions. Several of them have unfortunately been blocked by cave-ins.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "LOUD-ROOM"
+    },
+    "west": {
+     "to": "EW-PASSAGE"
+    },
+    "north": {
+     "to": "NS-PASSAGE"
+    },
+    "south": {
+     "to": "NARROW-PASSAGE"
+    },
+    "southeast": {
+     "to": "ENGRAVINGS-CAVE"
+    }
+   }
+  },
+  "DEEP-CANYON": {
+   "id": "DEEP-CANYON",
+   "name": "Deep Canyon",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "northwest": {
+     "to": "RESERVOIR-SOUTH"
+    },
+    "east": {
+     "to": "DAM-ROOM"
+    },
+    "southwest": {
+     "to": "NS-PASSAGE"
+    },
+    "down": {
+     "to": "LOUD-ROOM"
+    }
+   }
+  },
+  "DAMP-CAVE": {
+   "id": "DAMP-CAVE",
+   "name": "Damp Cave",
+   "ldesc": "This cave has exits to the west and east, and narrows to a crack toward the south. The earth is particularly damp here.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "LOUD-ROOM"
+    },
+    "east": {
+     "to": "WHITE-CLIFFS-NORTH"
+    },
+    "south": {
+     "msg": "It is too narrow for most insects."
+    }
+   }
+  },
+  "LOUD-ROOM": {
+   "id": "LOUD-ROOM",
+   "name": "Loud Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "DAMP-CAVE"
+    },
+    "west": {
+     "to": "ROUND-ROOM"
+    },
+    "up": {
+     "to": "DEEP-CANYON"
+    }
+   }
+  },
+  "NS-PASSAGE": {
+   "id": "NS-PASSAGE",
+   "name": "North-South Passage",
+   "ldesc": "This is a high north-south passage, which forks to the northeast.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "CHASM-ROOM"
+    },
+    "northeast": {
+     "to": "DEEP-CANYON"
+    },
+    "south": {
+     "to": "ROUND-ROOM"
+    }
+   }
+  },
+  "CHASM-ROOM": {
+   "id": "CHASM-ROOM",
+   "name": "Chasm",
+   "ldesc": "A chasm runs southwest to northeast and the path follows it. You are on the south side of the chasm, where a crack opens into a passage.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "northeast": {
+     "to": "RESERVOIR-SOUTH"
+    },
+    "southwest": {
+     "to": "EW-PASSAGE"
+    },
+    "up": {
+     "to": "EW-PASSAGE"
+    },
+    "south": {
+     "to": "NS-PASSAGE"
+    },
+    "down": {
+     "msg": "Are you out of your mind?"
+    }
+   }
+  },
+  "ENTRANCE-TO-HADES": {
+   "id": "ENTRANCE-TO-HADES",
+   "name": "Entrance to Hades",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "TINY-CAVE"
+    },
+    "in": {
+     "to": "LAND-OF-LIVING-DEAD",
+     "if": "LLD-FLAG",
+     "msg": "Some invisible force prevents you from passing through the gate."
+    },
+    "south": {
+     "to": "LAND-OF-LIVING-DEAD",
+     "if": "LLD-FLAG",
+     "msg": "Some invisible force prevents you from passing through the gate."
+    }
+   }
+  },
+  "LAND-OF-LIVING-DEAD": {
+   "id": "LAND-OF-LIVING-DEAD",
+   "name": "Land of the Dead",
+   "ldesc": "You have entered the Land of the Living Dead. Thousands of lost souls can be heard weeping and moaning. In the corner are stacked the remains of dozens of previous adventurers less fortunate than yourself. A passage exits to the north.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "out": {
+     "to": "ENTRANCE-TO-HADES"
+    },
+    "north": {
+     "to": "ENTRANCE-TO-HADES"
+    }
+   }
+  },
+  "ENGRAVINGS-CAVE": {
+   "id": "ENGRAVINGS-CAVE",
+   "name": "Engravings Cave",
+   "ldesc": "You have entered a low cave with passages leading northwest and east.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "northwest": {
+     "to": "ROUND-ROOM"
+    },
+    "east": {
+     "to": "DOME-ROOM"
+    }
+   }
+  },
+  "EGYPT-ROOM": {
+   "id": "EGYPT-ROOM",
+   "name": "Egyptian Room",
+   "ldesc": "This is a room which looks like an Egyptian tomb. There is an ascending staircase to the west.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "NORTH-TEMPLE"
+    },
+    "up": {
+     "to": "NORTH-TEMPLE"
+    }
+   }
+  },
+  "DOME-ROOM": {
+   "id": "DOME-ROOM",
+   "name": "Dome Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "ENGRAVINGS-CAVE"
+    },
+    "down": {
+     "to": "TORCH-ROOM",
+     "if": "DOME-FLAG",
+     "msg": "You cannot go down without fracturing many bones."
+    }
+   }
+  },
+  "TORCH-ROOM": {
+   "id": "TORCH-ROOM",
+   "name": "Torch Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "You cannot reach the rope."
+    },
+    "south": {
+     "to": "NORTH-TEMPLE"
+    },
+    "down": {
+     "to": "NORTH-TEMPLE"
+    }
+   }
+  },
+  "NORTH-TEMPLE": {
+   "id": "NORTH-TEMPLE",
+   "name": "Temple",
+   "ldesc": "This is the north end of a large temple. On the east wall is an ancient inscription, probably a prayer in a long-forgotten language. Below the prayer is a staircase leading down. The west wall is solid granite. The exit to the north end of the room is through huge marble pillars.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "down": {
+     "to": "EGYPT-ROOM"
+    },
+    "east": {
+     "to": "EGYPT-ROOM"
+    },
+    "north": {
+     "to": "TORCH-ROOM"
+    },
+    "out": {
+     "to": "TORCH-ROOM"
+    },
+    "up": {
+     "to": "TORCH-ROOM"
+    },
+    "south": {
+     "to": "SOUTH-TEMPLE"
+    }
+   }
+  },
+  "SOUTH-TEMPLE": {
+   "id": "SOUTH-TEMPLE",
+   "name": "Altar",
+   "ldesc": "This is the south end of a large temple. In front of you is what appears to be an altar. In one corner is a small hole in the floor which leads into darkness. You probably could not get back up it.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "NORTH-TEMPLE"
+    },
+    "down": {
+     "to": "TINY-CAVE",
+     "if": "COFFIN-CURE",
+     "msg": "You haven't a prayer of getting the coffin down there."
+    }
+   }
+  },
+  "DAM-ROOM": {
+   "id": "DAM-ROOM",
+   "name": "Dam",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "DEEP-CANYON"
+    },
+    "down": {
+     "to": "DAM-BASE"
+    },
+    "east": {
+     "to": "DAM-BASE"
+    },
+    "north": {
+     "to": "DAM-LOBBY"
+    },
+    "west": {
+     "to": "RESERVOIR-SOUTH"
+    }
+   }
+  },
+  "DAM-LOBBY": {
+   "id": "DAM-LOBBY",
+   "name": "Dam Lobby",
+   "ldesc": "This room appears to have been the waiting room for groups touring the dam. There are open doorways here to the north and east marked \"Private\", and there is a path leading south over the top of the dam.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "DAM-ROOM"
+    },
+    "north": {
+     "to": "MAINTENANCE-ROOM"
+    },
+    "east": {
+     "to": "MAINTENANCE-ROOM"
+    }
+   }
+  },
+  "MAINTENANCE-ROOM": {
+   "id": "MAINTENANCE-ROOM",
+   "name": "Maintenance Room",
+   "ldesc": "This is what appears to have been the maintenance room for Flood Control Dam #3. Apparently, this room has been ransacked recently, for most of the valuable equipment is gone. On the wall in front of you is a group of buttons colored blue, yellow, brown, and red. There are doorways to the west and south.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "DAM-LOBBY"
+    },
+    "west": {
+     "to": "DAM-LOBBY"
+    }
+   }
+  },
+  "DAM-BASE": {
+   "id": "DAM-BASE",
+   "name": "Dam Base",
+   "ldesc": "You are at the base of Flood Control Dam #3, which looms above you and to the north. The river Frigid is flowing by here. Along the river are the White Cliffs which seem to form giant walls stretching from north to south along the shores of the river as it winds its way downstream.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "DAM-ROOM"
+    },
+    "up": {
+     "to": "DAM-ROOM"
+    }
+   }
+  },
+  "RIVER-1": {
+   "id": "RIVER-1",
+   "name": "Frigid River",
+   "ldesc": "You are on the Frigid River in the vicinity of the Dam. The river flows quietly here. There is a landing on the west shore.",
+   "flags": [
+    "NONLANDBIT",
+    "SACREDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "You cannot go upstream due to strong currents."
+    },
+    "west": {
+     "to": "DAM-BASE"
+    },
+    "land": {
+     "to": "DAM-BASE"
+    },
+    "down": {
+     "to": "RIVER-2"
+    },
+    "east": {
+     "msg": "The White Cliffs prevent your landing here."
+    }
+   }
+  },
+  "RIVER-2": {
+   "id": "RIVER-2",
+   "name": "Frigid River",
+   "ldesc": "The river turns a corner here making it impossible to see the Dam. The White Cliffs loom on the east bank and large rocks prevent landing on the west.",
+   "flags": [
+    "NONLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "You cannot go upstream due to strong currents."
+    },
+    "down": {
+     "to": "RIVER-3"
+    },
+    "land": {
+     "msg": "There is no safe landing spot here."
+    },
+    "east": {
+     "msg": "The White Cliffs prevent your landing here."
+    },
+    "west": {
+     "msg": "Just in time you steer away from the rocks."
+    }
+   }
+  },
+  "RIVER-3": {
+   "id": "RIVER-3",
+   "name": "Frigid River",
+   "ldesc": "The river descends here into a valley. There is a narrow beach on the west shore below the cliffs. In the distance a faint rumbling can be heard.",
+   "flags": [
+    "NONLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "You cannot go upstream due to strong currents."
+    },
+    "down": {
+     "to": "RIVER-4"
+    },
+    "land": {
+     "to": "WHITE-CLIFFS-NORTH"
+    },
+    "west": {
+     "to": "WHITE-CLIFFS-NORTH"
+    }
+   }
+  },
+  "WHITE-CLIFFS-NORTH": {
+   "id": "WHITE-CLIFFS-NORTH",
+   "name": "White Cliffs Beach",
+   "ldesc": "You are on a narrow strip of beach which runs along the base of the White Cliffs. There is a narrow path heading south along the Cliffs and a tight passage leading west into the cliffs themselves.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "WHITE-CLIFFS-SOUTH",
+     "if": "DEFLATE",
+     "msg": "The path is too narrow."
+    },
+    "west": {
+     "to": "DAMP-CAVE",
+     "if": "DEFLATE",
+     "msg": "The path is too narrow."
+    }
+   }
+  },
+  "WHITE-CLIFFS-SOUTH": {
+   "id": "WHITE-CLIFFS-SOUTH",
+   "name": "White Cliffs Beach",
+   "ldesc": "You are on a rocky, narrow strip of beach beside the Cliffs. A narrow path leads north along the shore.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "WHITE-CLIFFS-NORTH",
+     "if": "DEFLATE",
+     "msg": "The path is too narrow."
+    }
+   }
+  },
+  "RIVER-4": {
+   "id": "RIVER-4",
+   "name": "Frigid River",
+   "ldesc": "The river is running faster here and the sound ahead appears to be that of rushing water. On the east shore is a sandy beach. A small area of beach can also be seen below the cliffs on the west shore.",
+   "flags": [
+    "NONLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "You cannot go upstream due to strong currents."
+    },
+    "down": {
+     "to": "RIVER-5"
+    },
+    "land": {
+     "msg": "You can land either to the east or the west."
+    },
+    "west": {
+     "to": "WHITE-CLIFFS-SOUTH"
+    },
+    "east": {
+     "to": "SANDY-BEACH"
+    }
+   }
+  },
+  "RIVER-5": {
+   "id": "RIVER-5",
+   "name": "Frigid River",
+   "ldesc": "The sound of rushing water is nearly unbearable here. On the east shore is a large landing area.",
+   "flags": [
+    "NONLANDBIT",
+    "SACREDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "up": {
+     "msg": "You cannot go upstream due to strong currents."
+    },
+    "east": {
+     "to": "SHORE"
+    },
+    "land": {
+     "to": "SHORE"
+    }
+   }
+  },
+  "SHORE": {
+   "id": "SHORE",
+   "name": "Shore",
+   "ldesc": "You are on the east shore of the river. The water here seems somewhat treacherous. A path travels from north to south here, the south end quickly turning around a sharp corner.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "SANDY-BEACH"
+    },
+    "south": {
+     "to": "ARAGAIN-FALLS"
+    }
+   }
+  },
+  "SANDY-BEACH": {
+   "id": "SANDY-BEACH",
+   "name": "Sandy Beach",
+   "ldesc": "You are on a large sandy beach on the east shore of the river, which is flowing quickly by. A path runs beside the river to the south here, and a passage is partially buried in sand to the northeast.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "northeast": {
+     "to": "SANDY-CAVE"
+    },
+    "south": {
+     "to": "SHORE"
+    }
+   }
+  },
+  "SANDY-CAVE": {
+   "id": "SANDY-CAVE",
+   "name": "Sandy Cave",
+   "ldesc": "This is a sand-filled cave whose exit is to the southwest.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "southwest": {
+     "to": "SANDY-BEACH"
+    }
+   }
+  },
+  "ARAGAIN-FALLS": {
+   "id": "ARAGAIN-FALLS",
+   "name": "Aragain Falls",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "ON-RAINBOW",
+     "if": "RAINBOW-FLAG"
+    },
+    "down": {
+     "msg": "It's a long way..."
+    },
+    "north": {
+     "to": "SHORE"
+    },
+    "up": {
+     "to": "ON-RAINBOW",
+     "if": "RAINBOW-FLAG"
+    }
+   }
+  },
+  "ON-RAINBOW": {
+   "id": "ON-RAINBOW",
+   "name": "On the Rainbow",
+   "ldesc": "You are on top of a rainbow (I bet you never thought you would walk on a rainbow), with a magnificent view of the Falls. The rainbow travels east-west here.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "west": {
+     "to": "END-OF-RAINBOW"
+    },
+    "east": {
+     "to": "ARAGAIN-FALLS"
+    }
+   }
+  },
+  "END-OF-RAINBOW": {
+   "id": "END-OF-RAINBOW",
+   "name": "End of Rainbow",
+   "ldesc": "You are on a small, rocky beach on the continuation of the Frigid River past the Falls. The beach is narrow due to the presence of the White Cliffs. The river canyon opens here and sunlight shines in from above. A rainbow crosses over the falls to the east and a narrow path continues to the southwest.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "ON-RAINBOW",
+     "if": "RAINBOW-FLAG"
+    },
+    "northeast": {
+     "to": "ON-RAINBOW",
+     "if": "RAINBOW-FLAG"
+    },
+    "east": {
+     "to": "ON-RAINBOW",
+     "if": "RAINBOW-FLAG"
+    },
+    "southwest": {
+     "to": "CANYON-BOTTOM"
+    }
+   }
+  },
+  "CANYON-BOTTOM": {
+   "id": "CANYON-BOTTOM",
+   "name": "Canyon Bottom",
+   "ldesc": "You are beneath the walls of the river canyon which may be climbable here. The lesser part of the runoff of Aragain Falls flows by below. To the north is a narrow path.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "CLIFF-MIDDLE"
+    },
+    "north": {
+     "to": "END-OF-RAINBOW"
+    }
+   }
+  },
+  "CLIFF-MIDDLE": {
+   "id": "CLIFF-MIDDLE",
+   "name": "Rocky Ledge",
+   "ldesc": "You are on a ledge about halfway up the wall of the river canyon. You can see from here that the main flow from Aragain Falls twists along a passage which it is impossible for you to enter. Below you is the canyon bottom. Above you is more cliff, which appears climbable.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "CANYON-VIEW"
+    },
+    "down": {
+     "to": "CANYON-BOTTOM"
+    }
+   }
+  },
+  "CANYON-VIEW": {
+   "id": "CANYON-VIEW",
+   "name": "Canyon View",
+   "ldesc": "You are at the top of the Great Canyon on its west wall. From here there is a marvelous view of the canyon and parts of the Frigid River upstream. Across the canyon, the walls of the White Cliffs join the mighty ramparts of the Flathead Mountains to the east. Following the Canyon upstream to the north, Aragain Falls may be seen, complete with rainbow. The mighty Frigid River flows out from a great dark cavern. To the west and south can be seen an immense forest, stretching for miles around. A path leads northwest. It is possible to climb down into the canyon from here.",
+   "flags": [
+    "RLANDBIT",
+    "ONBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "CLIFF-MIDDLE"
+    },
+    "down": {
+     "to": "CLIFF-MIDDLE"
+    },
+    "northwest": {
+     "to": "CLEARING"
+    },
+    "west": {
+     "to": "FOREST-3"
+    },
+    "south": {
+     "msg": "Storm-tossed trees block your way."
+    }
+   }
+  },
+  "MINE-ENTRANCE": {
+   "id": "MINE-ENTRANCE",
+   "name": "Mine Entrance",
+   "ldesc": "You are standing at the entrance of what might have been a coal mine. The shaft enters the west wall, and there is another exit on the south end of the room.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "SLIDE-ROOM"
+    },
+    "in": {
+     "to": "SQUEEKY-ROOM"
+    },
+    "west": {
+     "to": "SQUEEKY-ROOM"
+    }
+   }
+  },
+  "SQUEEKY-ROOM": {
+   "id": "SQUEEKY-ROOM",
+   "name": "Squeaky Room",
+   "ldesc": "You are in a small room. Strange squeaky sounds may be heard coming from the passage at the north end. You may also escape to the east.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "BAT-ROOM"
+    },
+    "east": {
+     "to": "MINE-ENTRANCE"
+    }
+   }
+  },
+  "BAT-ROOM": {
+   "id": "BAT-ROOM",
+   "name": "Bat Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "SQUEEKY-ROOM"
+    },
+    "east": {
+     "to": "SHAFT-ROOM"
+    }
+   }
+  },
+  "SHAFT-ROOM": {
+   "id": "SHAFT-ROOM",
+   "name": "Shaft Room",
+   "ldesc": "This is a large room, in the middle of which is a small shaft descending through the floor into darkness below. To the west and the north are exits from this room. Constructed over the top of the shaft is a metal framework to which a heavy iron chain is attached.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "down": {
+     "msg": "You wouldn't fit and would die if you could."
+    },
+    "west": {
+     "to": "BAT-ROOM"
+    },
+    "north": {
+     "to": "SMELLY-ROOM"
+    }
+   }
+  },
+  "SMELLY-ROOM": {
+   "id": "SMELLY-ROOM",
+   "name": "Smelly Room",
+   "ldesc": "This is a small nondescript room. However, from the direction of a small descending staircase a foul odor can be detected. To the south is a narrow tunnel.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "down": {
+     "to": "GAS-ROOM"
+    },
+    "south": {
+     "to": "SHAFT-ROOM"
+    }
+   }
+  },
+  "GAS-ROOM": {
+   "id": "GAS-ROOM",
+   "name": "Gas Room",
+   "ldesc": "This is a small room which smells strongly of coal gas. There is a short climb up some stairs and a narrow tunnel leading east.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "up": {
+     "to": "SMELLY-ROOM"
+    },
+    "east": {
+     "to": "MINE-1"
+    }
+   }
+  },
+  "LADDER-TOP": {
+   "id": "LADDER-TOP",
+   "name": "Ladder Top",
+   "ldesc": "This is a very small room. In the corner is a rickety wooden ladder, leading downward. It might be safe to descend. There is also a staircase leading upward.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "down": {
+     "to": "LADDER-BOTTOM"
+    },
+    "up": {
+     "to": "MINE-4"
+    }
+   }
+  },
+  "LADDER-BOTTOM": {
+   "id": "LADDER-BOTTOM",
+   "name": "Ladder Bottom",
+   "ldesc": "This is a rather wide room. On one side is the bottom of a narrow wooden ladder. To the west and the south are passages leaving the room.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "DEAD-END-5"
+    },
+    "west": {
+     "to": "TIMBER-ROOM"
+    },
+    "up": {
+     "to": "LADDER-TOP"
+    }
+   }
+  },
+  "DEAD-END-5": {
+   "id": "DEAD-END-5",
+   "name": "Dead End",
+   "ldesc": "You have come to a dead end in the mine.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "LADDER-BOTTOM"
+    }
+   }
+  },
+  "TIMBER-ROOM": {
+   "id": "TIMBER-ROOM",
+   "name": "Timber Room",
+   "ldesc": "This is a long and narrow passage, which is cluttered with broken timbers. A wide passage comes from the east and turns at the west end of the room into a very narrow passageway. From the west comes a strong draft.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "LADDER-BOTTOM"
+    },
+    "west": {
+     "to": "LOWER-SHAFT",
+     "if": "EMPTY-HANDED",
+     "msg": "You cannot fit through this passage with that load."
+    }
+   }
+  },
+  "LOWER-SHAFT": {
+   "id": "LOWER-SHAFT",
+   "name": "Drafty Room",
+   "ldesc": "This is a small drafty room in which is the bottom of a long shaft. To the south is a passageway and to the east a very narrow passage. In the shaft can be seen a heavy iron chain.",
+   "flags": [
+    "RLANDBIT",
+    "SACREDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "MACHINE-ROOM"
+    },
+    "out": {
+     "to": "TIMBER-ROOM",
+     "if": "EMPTY-HANDED",
+     "msg": "You cannot fit through this passage with that load."
+    },
+    "east": {
+     "to": "TIMBER-ROOM",
+     "if": "EMPTY-HANDED",
+     "msg": "You cannot fit through this passage with that load."
+    }
+   }
+  },
+  "MACHINE-ROOM": {
+   "id": "MACHINE-ROOM",
+   "name": "Machine Room",
+   "ldesc": "",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "LOWER-SHAFT"
+    }
+   }
+  },
+  "MINE-1": {
+   "id": "MINE-1",
+   "name": "Coal Mine",
+   "ldesc": "This is a nondescript part of a coal mine.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "GAS-ROOM"
+    },
+    "east": {
+     "to": "MINE-1"
+    },
+    "northeast": {
+     "to": "MINE-2"
+    }
+   }
+  },
+  "MINE-2": {
+   "id": "MINE-2",
+   "name": "Coal Mine",
+   "ldesc": "This is a nondescript part of a coal mine.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MINE-2"
+    },
+    "south": {
+     "to": "MINE-1"
+    },
+    "southeast": {
+     "to": "MINE-3"
+    }
+   }
+  },
+  "MINE-3": {
+   "id": "MINE-3",
+   "name": "Coal Mine",
+   "ldesc": "This is a nondescript part of a coal mine.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "south": {
+     "to": "MINE-3"
+    },
+    "southwest": {
+     "to": "MINE-4"
+    },
+    "east": {
+     "to": "MINE-2"
+    }
+   }
+  },
+  "MINE-4": {
+   "id": "MINE-4",
+   "name": "Coal Mine",
+   "ldesc": "This is a nondescript part of a coal mine.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "north": {
+     "to": "MINE-3"
+    },
+    "west": {
+     "to": "MINE-4"
+    },
+    "down": {
+     "to": "LADDER-TOP"
+    }
+   }
+  },
+  "SLIDE-ROOM": {
+   "id": "SLIDE-ROOM",
+   "name": "Slide Room",
+   "ldesc": "This is a small chamber, which appears to have been part of a coal mine. On the south wall of the chamber the letters \"Granite Wall\" are etched in the rock. To the east is a long passage, and there is a steep metal slide twisting downward. To the north is a small opening.",
+   "flags": [
+    "RLANDBIT"
+   ],
+   "exits": {
+    "east": {
+     "to": "COLD-PASSAGE"
+    },
+    "north": {
+     "to": "MINE-ENTRANCE"
+    },
+    "down": {
+     "to": "CELLAR"
+    }
+   }
+  }
+ }
+}

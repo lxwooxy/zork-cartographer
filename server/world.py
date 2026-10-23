@@ -17,6 +17,8 @@ class Exit:
     inferred: bool = False         # guessed from the reverse direction
     note: str = ""                 # e.g. "narrow path", "trap door"
     via: str = ""                  # the command that actually worked ("climb tree", "enter window")
+    cond: str = ""                 # canonical map: condition from the game source ("KITCHEN-WINDOW IS OPEN")
+    hidden_to: str = ""            # canonical map: where it really goes, even if not discovered yet (never sent to clients unless revealed)
 
 
 @dataclass
@@ -43,8 +45,12 @@ class Room:
 
 
 class World:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, canon=None):
         self.path = path
+        self.canon = canon                  # canonical map (server/canon.py), or None
+        self.mode = "canonical" if canon else "heuristic"
+        self.reveal = False                 # show the whole canonical map (spoilers)
+        self.anomalies: list[dict] = []     # where the game disagreed with the canonical map
         self.rooms: dict[str, Room] = {}
         self.current: str | None = None
         self.inventory: list[str] = []
@@ -64,11 +70,16 @@ class World:
         tmp.replace(self.path)
 
     @classmethod
-    def load(cls, path: Path) -> "World":
-        w = cls(path)
+    def load(cls, path: Path, canon=None) -> "World":
+        w = cls(path, canon)
         if not path.exists():
             return w
         d = json.loads(path.read_text())
+        # Saves made before the canonical map existed keep using the heuristic mapper.
+        if d.get("mode", "heuristic") != "canonical" or not canon:
+            w.canon, w.mode = None, "heuristic"
+        w.reveal = d.get("reveal", False)
+        w.anomalies = d.get("anomalies", [])
         for r in d.get("rooms", []):
             exits = {k: Exit(**v) for k, v in r.pop("exits", {}).items()}
             w.rooms[r["id"]] = Room(**r, exits=exits)
@@ -84,6 +95,10 @@ class World:
     def to_json(self, full: bool = False) -> dict:
         d = {
             "version": self.version,
+            "mode": self.mode,
+            "reveal": self.reveal,
+            "total_rooms": len(self.canon.rooms) if self.canon else None,
+            "anomalies": self.anomalies if full else self.anomalies[-20:],
             "current": self.current,
             "inventory": self.inventory,
             "inventory_stale": self.inventory_stale,
@@ -99,6 +114,23 @@ class World:
             for rd, r in zip(d["rooms"], self.rooms.values()):
                 rd["env3d"] = r.environment or guess_environment(r)
                 rd["indoor3d"] = bool(r.indoor) if r.indoor is not None else guess_indoor(r)
+                for ex in rd["exits"].values():
+                    if not self.reveal:
+                        ex["hidden_to"] = ""      # no spoilers
+                    elif not ex["to"] and ex["hidden_to"]:
+                        ex["to"] = ex["hidden_to"]
+            if self.canon and self.reveal:
+                # Fog of war off: add every room not found yet, marked as undiscovered.
+                for cid in self.canon.rooms:
+                    if cid in self.rooms:
+                        continue
+                    r = self._canon_room(cid)
+                    rd = asdict(r)
+                    rd["undiscovered"] = True
+                    rd["env3d"], rd["indoor3d"] = guess_environment(r), guess_indoor(r)
+                    for ex in rd["exits"].values():
+                        ex["to"] = ex["hidden_to"]
+                    d["rooms"].append(rd)
             d["reachable"] = self.reachable()
             d["confirmed"] = self.reachable(confirmed_only=True)
         d["log"] = self.log if full else self.log[-200:]
@@ -146,7 +178,7 @@ class World:
         self.version += 1
 
     # ---------- routes ----------
-    def route(self, start: str, goal: str) -> list[dict] | None:
+    def route(self, start: str, goal: str, avoid: set | None = None) -> list[dict] | None:
         """Cheapest known path from start to goal. Each step: {dir, command, from, to}.
         Exits we only guessed (the reverse of a move) cost a bit more than ones we walked."""
         import heapq
@@ -162,9 +194,13 @@ class World:
             if d > dist.get(rid, 1e9):
                 continue
             for direction, ex in self.rooms[rid].exits.items():
-                if not ex.to or ex.blocked or ex.to not in self.rooms:
+                if not ex.to or ex.to not in self.rooms or (rid, direction) in (avoid or ()):
                     continue
-                nd = d + (1.5 if ex.inferred else 1.0)
+                if ex.blocked and not ex.cond:
+                    continue
+                # Guessed exits cost a bit more; conditional ones (a window that may be shut)
+                # more again, and a lot more if they failed before (it might work now).
+                nd = d + 1.0 + (0.5 if ex.inferred else 0) + (1.0 if ex.cond else 0) + (6.0 if ex.blocked else 0)
                 if nd < dist.get(ex.to, 1e9):
                     dist[ex.to] = nd
                     prev[ex.to] = (rid, direction)
@@ -177,7 +213,7 @@ class World:
             frm, direction = prev[cur]
             ex = self.rooms[frm].exits[direction]
             steps.append({"dir": direction, "command": ex.via or direction, "from": frm, "to": cur,
-                          "inferred": ex.inferred})
+                          "inferred": ex.inferred, "cond": ex.cond})
             cur = frm
         return list(reversed(steps))
 
@@ -192,7 +228,7 @@ class World:
             rid = queue.pop(0)
             for ex in self.rooms[rid].exits.values():
                 if ex.to and not ex.blocked and ex.to in self.rooms and ex.to not in out:
-                    if confirmed_only and ex.inferred:
+                    if confirmed_only and (ex.inferred or ex.cond):
                         continue
                     out[ex.to] = out[rid] + 1
                     queue.append(ex.to)
@@ -244,9 +280,14 @@ class World:
         if dark and prev is not None and direction is None:
             moved = False
 
+        if self.canon and prev is not None and direction and t.room_name == prev.name and not has_heading:
+            moved = False   # canonical mode: same name and no new description = didn't move
         if moved and not (prev and t.room_name == prev.name and not has_heading):
-            room = self._resolve_room(prev, direction, t.room_name, desc, dark,
-                                      zp.items_mentioned(other) if has_heading else None)
+            if self.canon:
+                room = self._canon_resolve(prev, direction, t.room_name, t.command)
+            else:
+                room = self._resolve_room(prev, direction, t.room_name, desc, dark,
+                                          zp.items_mentioned(other) if has_heading else None)
             changes["new_room"] = room.visits == 0
             room.visits += 1
             if desc and not room.description:
@@ -256,7 +297,7 @@ class World:
                 changes["moved"] = True
                 if direction:
                     self._link(prev, direction, room, t.command)
-            if changes["new_room"] or changes["moved"]:
+            if (changes["new_room"] or changes["moved"]) and not self.canon:
                 self.relax()
             self.current = room.id
         elif prev is not None and direction and zp.is_failed_move(t.text):
@@ -266,8 +307,9 @@ class World:
         if has_heading:
             # A room description lists what's lying around; treat it as the truth.
             room.items = _dedupe(zp.items_mentioned(other))
-            for d in zp.exits_in_description(desc):
-                room.exits.setdefault(d, Exit())
+            if not self.canon:   # the canonical map already knows every exit
+                for d in zp.exits_in_description(desc):
+                    room.exits.setdefault(d, Exit())
         # Inventory
         listing = zp.inventory_listing(t.text)
         if listing is not None:
@@ -291,6 +333,52 @@ class World:
         changes["room_id"] = self.current
         changes["has_heading"] = has_heading
         return changes
+
+    # ---------- canonical map ----------
+    def _canon_room(self, cid: str) -> Room:
+        """A Room for canonical id `cid`, positioned from the fixed layout (not registered)."""
+        c = self.canon.rooms[cid]
+        x, y, z = self.canon.position(cid)
+        room = Room(id=cid, name=c["name"], description="", x=x, y=y, z=z, first_turn=self.turn)
+        for d, ce in c["exits"].items():
+            if not ce.get("to") or ce.get("if") == "FALSE-FLAG":
+                continue   # message-only or impossible "exits" aren't exits
+            note = self.canon.condition_note(ce.get("if", ""))
+            if ce.get("oneway"):
+                note = (note + "; " if note else "") + "one way"
+            room.exits[d] = Exit(to=ce["to"] if ce["to"] in self.rooms else None, note=note,
+                                 cond=ce.get("if", ""), hidden_to=ce["to"])
+        return room
+
+    def _discover(self, cid: str) -> Room:
+        room = self._canon_room(cid)
+        self.rooms[cid] = room
+        # Exits from rooms we already know now lead somewhere visible.
+        for other in self.rooms.values():
+            for ex in other.exits.values():
+                if ex.hidden_to == cid:
+                    ex.to = cid
+        return room
+
+    def _anomaly(self, text: str):
+        self.anomalies.append({"turn": self.turn, "text": text})
+
+    def _canon_resolve(self, prev: Room | None, direction: str | None, name: str, command: str) -> Room:
+        cid = None
+        if prev is not None and direction:
+            predicted = self.canon.target(prev.id, direction)
+            if predicted and self.canon.name(predicted) == name:
+                cid = predicted
+            elif predicted:
+                self._anomaly(f"{prev.name} --{direction}--> map says {self.canon.name(predicted)}, game says {name}")
+        if cid is None:
+            cid, certain = self.canon.find(name, near=prev.id if prev else None)
+            if cid is None:
+                self._anomaly(f"'{name}' isn't in the canonical map (after '{command}')")
+                return self._resolve_room(prev, direction, name, "", False)
+            if not certain:
+                self._anomaly(f"'{name}' after '{command}' could be several rooms; guessed {cid}")
+        return self.rooms.get(cid) or self._discover(cid)
 
     def _resolve_room(self, prev: Room | None, direction: str | None, name: str, desc: str, dark: bool,
                       items: list[str] | None = None) -> Room:
@@ -430,6 +518,8 @@ class World:
         ex.to, ex.blocked, ex.inferred = b.id, False, False
         if command and zp.ALIASES.get(command.lower().strip(), command.lower().strip()) != direction:
             ex.via = command.strip()
+        if self.canon:
+            return   # real exits only; no guessed reverse links
         back = zp.OPPOSITE.get(direction)
         if back and back not in b.exits:
             b.exits[back] = Exit(to=a.id, inferred=True)

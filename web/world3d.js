@@ -101,11 +101,23 @@ function rng(seedStr) {
 
 function signature(r) {
   const ex = Object.entries(r.exits).map(([d, e]) => `${d}:${e.to}:${e.blocked}`).join("|");
-  return [r.env3d, r.indoor3d, r.lighting, JSON.stringify(r.palette), r.items.join(","), (r.features || []).join(","), r.name, ex].join("#");
+  return [r.undiscovered ? "ghost" : "", r.env3d, r.indoor3d, r.lighting, JSON.stringify(r.palette), r.items.join(","), (r.features || []).join(","), r.name, ex].join("#");
 }
 
 // ---------- room building ----------
+// An undiscovered room (Reveal map on): a faint translucent tile and a dim label.
+function buildGhost(r) {
+  const g = new THREE.Group();
+  g.name = r.id;
+  mesh(GEO.box, mat("#3b4a43", 0, { opacity: 0.25 }), g, V(0, -0.2, 0), V(ROOM, 0.2, ROOM));
+  const l = label(r.name, "#7d8c84", 0.8);
+  l.position.set(0, 1.6, 0);
+  g.add(l);
+  return g;
+}
+
 function buildRoom(r, byId) {
+  if (r.undiscovered) return buildGhost(r);
   const g = new THREE.Group();
   g.name = r.id;
   const env = (r.env3d || "").toLowerCase();
@@ -398,7 +410,7 @@ export function createWorld3D(container) {
         const key = [r.id, e.to].sort().join("|");
         if (done.has(key)) continue;
         done.add(key);
-        buildConnection(links, r, byId[e.to], e.inferred);
+        buildConnection(links, r, byId[e.to], e.inferred || r.undiscovered || byId[e.to].undiscovered);
       }
     }
 

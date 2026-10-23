@@ -13,6 +13,7 @@
       <span>Score <b id="score">0</b></span>
       <span>Moves <b id="moves">0</b></span>
       <span>Rooms <b id="roomcount">0</b></span>
+      <span id="mapmode" class="pill" hidden></span>
       <span id="llm" class="pill" title="Claude parsing status">Claude: …</span>
       <button id="newgame" title="Start over (the current map is backed up)">New game</button>
     </div>
@@ -37,6 +38,7 @@
         <label><input type="checkbox" id="follow" checked> Follow</label>
         <button id="center">Center</button>
         <button id="overview" class="only3d" title="Show the whole map">Overview</button>
+        <label id="revealwrap" hidden title="Show every room in the game, including ones you haven't found (spoilers)"><input type="checkbox" id="reveal"> Reveal map</label>
       </div>
       <svg id="map"></svg>
       <div id="view3d" hidden></div>

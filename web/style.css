@@ -118,3 +118,9 @@ button.primary:hover { background: #255571; }
 .list li.cp .muted { grid-column: 1; font-size: 11px; }
 .list li.cp button { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 12px; }
 .list li.cp.auto .cpname { color: var(--muted); }
+
+/* ---- canonical map: undiscovered rooms (Reveal map) ---- */
+#map .room.undiscovered rect { fill: transparent; stroke: #3b4a43; stroke-dasharray: 4 3; }
+#map .room.undiscovered text { fill: #56655d; }
+#map .edge.hidden { stroke: #2c3832; stroke-width: 1.5; stroke-dasharray: 3 4; }
+.pill.warn { color: #e0c97e; border-color: #e0c97e; }

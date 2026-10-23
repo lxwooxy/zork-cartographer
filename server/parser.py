@@ -8,7 +8,7 @@ DIRECTIONS: dict[str, tuple[int, int, int]] = {
     "north": (0, 1, 0), "south": (0, -1, 0), "east": (1, 0, 0), "west": (-1, 0, 0),
     "northeast": (1, 1, 0), "northwest": (-1, 1, 0), "southeast": (1, -1, 0), "southwest": (-1, -1, 0),
     "up": (0, 0, 1), "down": (0, 0, -1),
-    "in": (0, 0, 0), "out": (0, 0, 0),
+    "in": (0, 0, 0), "out": (0, 0, 0), "land": (0, 0, 0),
 }
 OPPOSITE = {
     "north": "south", "south": "north", "east": "west", "west": "east",

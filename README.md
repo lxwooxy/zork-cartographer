@@ -49,13 +49,24 @@ Open <http://localhost:8765> and type `look`.
 
 Progress saves after every command. When the server restarts it replays your commands with a fixed random seed, so you continue exactly where you left off.
 
+## The map: exact, with fog of war
+
+Zork I's source is open, so the full map (110 rooms, 352 exits, with conditions like "the kitchen window must be open") is generated from the game itself (`game/zork1-map.json`) and laid out once (`game/zork1-layout.json`). During play:
+
+- **Fog of war:** rooms appear only once you've been there. Exits you haven't taken show as stubs, without saying where they lead. The header shows progress (`Rooms 17/110`).
+- **Exact tracking:** your position follows the real exits, so identical rooms (the 15 "Maze" rooms, the 4 "Forest" rooms) are never confused, and the autopilot can route through the maze correctly.
+- **Map ✓** in the header means the game has agreed with the map on every move. If it ever disagrees, the badge turns amber and its tooltip lists where. That's how the map gets checked and perfected.
+- **Reveal map** (map toolbar) shows every room, including undiscovered ones as faint outlines. Spoilers, obviously.
+
+To tune the map, see [docs/SETUP.md → Perfecting the map](docs/SETUP.md#7-perfecting-the-map). Saves made before the canonical map existed keep using the older play-built mapper.
+
 ## Autopilot
 
 When you pick a destination, the server plans the shortest route over exits you know about and walks it one move at a time, checking each turn against a rulebook (`server/autopilot.py`):
 
 | Situation | What it does |
 |---|---|
-| A move doesn't work ("The kitchen window is closed.") | Marks that exit blocked and re-plans. |
+| A move doesn't work ("The kitchen window is closed.") | Marks that exit blocked, avoids it for the rest of the trip, and re-plans. Conditional exits can be tried again on a later trip. |
 | You end up somewhere unexpected (Zork's paths aren't always two-way) | Fixes the map and re-plans. |
 | The thief appears, even if he attacks | Keeps moving: leaving is the tactic. |
 | Something gets stolen, or you die | Loads the checkpoint it made before the trip and tries again, after waiting a turn so the dice roll differently (up to 3 attempts). |
@@ -82,6 +93,11 @@ server/parser.py               rule-based parsing: directions, items, inventory,
 server/world.py                rooms, exits, spring layout, persistence
 server/llm.py                  optional Claude API pass (structured JSON per turn)
 server/autopilot.py            click-to-travel rulebook (stop / flee / retry decisions)
+server/canon.py                loads the canonical map and layout
+game/zork1-map.json            every room and exit, generated from the game source
+game/zork1-regions.json        hand-curated level for each room (edit to taste)
+game/zork1-layout.json         room positions (generated)
+tools/                         build_map.py, layout_map.py, render_map.py
 server/app.py                  FastAPI app: API, WebSocket, password login, static files
 web/                           browser UI (app.js = terminal/2D/panels, world3d.js = 3D)
 web/vendor/                    three.js r160 + GLTFLoader (bundled, no CDN needed)
@@ -102,6 +118,7 @@ Set in `.env` locally, or as secrets/env vars when hosted.
 | `ZORK_LLM_MODEL` | `claude-opus-5-5` | Model used for parsing. |
 | `ZORK_LLM_EFFORT` | `low` | `low` / `medium` / `high`. |
 | `ZORK_LLM` | `on` | `off` disables Claude even if a key is set. |
+| `ZORK_MAP` | `on` | `off` ignores the canonical map and builds the map from play only. |
 | `ZORK_SEED` | `42` | Game random seed. Changing it breaks replay of an existing save. |
 | `ZORK_DATA` | `data/world.json` | Where the map and command log are saved. Checkpoint files go in a `saves/` folder next to it. |
 | `PORT` | `8765` | Port used by `run.sh`. |

@@ -109,3 +109,30 @@ Add `ZORK_PASSWORD=…` if the server has a password. The test code is `Assets/Z
 | Autopilot says "No known route" | It only uses exits you've walked or that the map could guess. Walk the missing link by hand once, or use the suggested save. |
 | Autopilot stops in the troll room | On purpose: fights need you. Kill the troll (`kill troll with sword`), then click again. |
 | Saves panel: Load did nothing | Check the server log. Saves live in `saves/` next to `world.json`; deleting that folder breaks loading (replay at startup recreates them). |
+
+## 7. Perfecting the map
+
+The canonical map is generated, then you can tune how it looks. Three files, all in `game/`:
+
+| File | What it is | How it's made |
+|---|---|---|
+| `zork1-map.json` | Every room and exit, with conditions and Zork's descriptions | `tools/build_map.py` from the game source |
+| `zork1-regions.json` | Which level each room is on (surface, underground, deep…) | **Hand-edited** |
+| `zork1-layout.json` | Final position of every room | `tools/layout_map.py` |
+| `zork1-layout-overrides.json` | Your manual position fixes, `{"ROOM-ID": [x, y, level]}` | **Hand-edited** (optional) |
+
+```bash
+# 1. Rebuild the room/exit data (only needed if the parser changes)
+curl -sLO https://raw.githubusercontent.com/historicalsource/zork1/master/1dungeon.zil
+.venv/bin/python tools/build_map.py 1dungeon.zil > game/zork1-map.json
+
+# 2. Re-run the layout after editing regions or overrides
+.venv/bin/python tools/layout_map.py game/zork1-map.json game/zork1-regions.json > game/zork1-layout.json
+
+# 3. Look at it: one panel per level
+.venv/bin/python tools/render_map.py game/zork1-map.json game/zork1-layout.json > map.svg && open map.svg
+```
+
+Restart the server after changing these. Room positions come straight from the layout, so existing games pick up the new layout on the next move.
+
+**Checking the map against the game:** play (or let the autopilot travel). Every move is compared with the map; mismatches appear in the **Map** badge tooltip and in `anomalies` in `/api/world`. A playthrough of the house, cellar, troll, maze and Cyclops Room produced none.

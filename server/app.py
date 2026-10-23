@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
 import autopilot  # noqa: E402
+from canon import Canon  # noqa: E402
 from game import Game  # noqa: E402
 from llm import Enricher  # noqa: E402
 from world import World  # noqa: E402
@@ -38,6 +39,9 @@ SEED = int(os.environ.get("ZORK_SEED", "42"))
 WEB = ROOT / "web"
 SAVES = DATA.parent / "saves"      # Zork save files for checkpoints
 MAX_AUTO_CHECKPOINTS = 8
+# The canonical map (game/zork1-map.json) turns on exact tracking and fog of war.
+# ZORK_MAP=off falls back to the heuristic mapper.
+CANON = None if os.environ.get("ZORK_MAP", "on") == "off" else Canon.for_story(STORY)
 PASSWORD = os.environ.get("ZORK_PASSWORD", "")
 COOKIE = "zork_auth"
 
@@ -126,7 +130,8 @@ async def start_game(replay: list[dict]):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    S.world = World.load(DATA)
+    S.world = World.load(DATA, CANON)
+    log.info("Map mode: %s%s", S.world.mode, f" ({len(CANON.rooms)} rooms in the canonical map)" if S.world.canon else "")
     S.enricher = Enricher()
     if not S.enricher.enabled:
         log.warning("Claude disabled (%s). Map still works with rule-based parsing.", S.enricher.error)
@@ -212,6 +217,21 @@ async def command(cmd: Command):
     turn, changes = await run_command(c)
     return {"text": turn.text, "room": turn.room_name, "score": turn.score, "moves": turn.moves,
             "changes": changes}
+
+
+# ---------- settings ----------
+class Settings(BaseModel):
+    reveal: bool | None = None   # show the whole canonical map (spoilers)
+
+
+@app.post("/api/settings")
+async def settings(req: Settings):
+    if req.reveal is not None:
+        S.world.reveal = req.reveal and S.world.canon is not None
+        S.world.version += 1
+        S.world.save()
+        await broadcast()
+    return {"reveal": S.world.reveal, "mode": S.world.mode}
 
 
 # ---------- checkpoints (save / load) ----------
@@ -330,7 +350,7 @@ async def travel(req: TravelRequest):
     cp = await do_save(f"Before trip to {name}", auto=True)
     S.travel = {"to": req.to, "to_name": name, "status": "moving", "steps": steps, "done": 0,
                 "events": [], "checkpoint": cp["id"] if cp else None, "attempt": 1, "retry": req.retry,
-                "message": f"{len(steps)} moves"}
+                "avoid": [], "message": f"{len(steps)} moves"}
     S.travel_task = asyncio.create_task(_travel_loop(req.to))
     await broadcast()
     return S.travel
@@ -437,13 +457,14 @@ async def _travel_loop(goal: str):
                         ex.blocked = True
                         S.world.version += 1
                         S.world.save()
+                    t["avoid"].append([step["from"], step["dir"]])   # not again this trip
                     said = turn.text.strip().splitlines()[0] if turn.text.strip() else "nothing"
                     why = f"Going {step['dir']} from {S.world.rooms[step['from']].name} didn't work (\"{said}\")"
                 else:
                     # Ended up somewhere else. apply_turn already corrected the map.
                     why = f"Going {step['dir']} led to {S.world.rooms[S.world.current].name}, not where the map expected"
                 replans += 1
-                new = S.world.route(S.world.current, goal)
+                new = S.world.route(S.world.current, goal, avoid={tuple(a) for a in t["avoid"]})
                 if new is None or replans > MAX_REPLANS:
                     return await _finish("stuck", f"{why}, and there's no other known route.", "stop", goal)
                 t["steps"] = new
@@ -483,7 +504,7 @@ async def new_game():
         bak = SAVES.with_name("saves.bak")
         shutil.rmtree(bak, ignore_errors=True)
         SAVES.rename(bak)
-    S.world = World(DATA)
+    S.world = World(DATA, CANON)
     await start_game([])
     await broadcast()
     return {"ok": True}

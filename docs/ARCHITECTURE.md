@@ -31,6 +31,18 @@ Zork's geography isn't Euclidean (east then west doesn't always return you), so 
 
 `z` is the level, an integer changed by `up`/`down`. Positions are floats; both 3D views animate rooms gliding to new spots.
 
+## Two map modes
+
+**Canonical (default for new games, Zork I).** `server/canon.py` loads `game/zork1-map.json` (generated from the game source by `tools/build_map.py`) and `game/zork1-layout.json`.
+
+- **Tracking:** after a direction command, the predicted room is `canon.target(current, dir)`. If its name matches the status line, that's where you are. Otherwise the room is looked up by name (`canon.find`, preferring neighbours of where you were), and the disagreement is recorded in `World.anomalies`.
+- **Discovery:** a room is added to `World.rooms` the first time you enter it (`_discover`), at its fixed layout position, with all its real exits. An exit's `to` is only filled in once its destination has been discovered; until then the destination sits in `hidden_to`, which `/api/world` blanks out unless `reveal` is on. `/api/unity` never sends it.
+- **Conditions:** exits carry `cond` (e.g. `KITCHEN-WINDOW IS OPEN`) and a plain-English `note`. Routes treat conditional exits as possible but pricier. Exits that failed are avoided for the rest of the trip and cost more afterwards (they might work later, once the window is open). Exits with `FALSE-FLAG` (impossible) are dropped.
+- **No guessing:** no reverse-link inference, no direction words from descriptions, no spring relaxation.
+- **Reveal:** `POST /api/settings {"reveal": true}` adds every undiscovered room to `/api/world` with `undiscovered: true`.
+
+**Heuristic (fallback).** For saves made before the canonical map existed, or with `ZORK_MAP=off`: the map is built from play, as described below. `World.mode` is stored in the save, so a game never switches modes halfway.
+
 ## Click-to-travel (autopilot)
 
 - **Planning:** `World.route(start, goal)` is Dijkstra over known, unblocked exits. Exits we've walked cost 1; exits only guessed from the reverse direction cost 1.5, so walked paths are preferred. Each step carries the command that actually worked (`Exit.via`, e.g. `climb tree`, `enter window`), not just the compass direction.

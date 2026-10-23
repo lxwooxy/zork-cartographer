@@ -85,9 +85,24 @@ Bugs found and fixed:
 - **Gotcha:** it rendered as an invisible speck in both engines. The rig's armature is scaled 100× (FBX export), so mesh bounds are ~100× too big and auto-fit shrank it to nothing. Fix: size it by bone positions (Unity) or a fixed scale (web), and disable culling. Bone box is 2.64 × 1.78 × 5.44 in both engines.
 - Added a floating marker above the frog so "you are here" is visible when zoomed out.
 
+### The canonical map and fog of war
+
+- **Idea:** the "correct" map is knowable, so generate it once, perfect it, and reveal it as you play, instead of guessing from text.
+- **Source:** `1dungeon.zil` from Microsoft's MIT release of Zork I. `tools/build_map.py` is a small reader for the ZIL forms used by rooms: `(DIR TO ROOM)`, `(DIR TO ROOM IF FLAG ELSE "msg")`, `(DIR "message")`, `(DIR PER ROUTINE)`. Result: 110 rooms, 352 exits, 16 kinds of condition. The 7 code-driven exits got their targets from the routines and the `;"to MAZE-5"` comments in the source.
+- **Parser slip caught by its own warnings:** `(IN ROOMS)` means "this object is a room", not an IN exit.
+- **Layout, three tries:**
+  1. "+1 for up, −1 for down" from West of House put the maze and the river on the surface, because up/down inside the maze is just more maze.
+  2. Grouping rooms into areas joined by sideways exits merged nearly everything, because the surface canyon connects sideways to the falls, the river, and the dam.
+  3. **Hand-curated levels** in `game/zork1-regions.json` (surface, treetops/attic, main underground, deep areas, mine shaft), then a spring layout per level seeded by walking compass directions. Readable, and editable.
+- **Tracking** now follows real exits. A replay of the earlier test route produced **zero anomalies**, and all 7 maze rooms resolved to their true IDs. The autopilot routed back through the maze in 8 moves; the old mapper couldn't, because it didn't know the maze's one-way passages.
+- **Spoilers:** undiscovered destinations are blanked in `/api/world` unless Reveal is on, and never sent to Unity. Checked by scanning the API output.
+- Old saves keep working in heuristic mode (`mode` is stored in the save).
+
 ### Open items
 
 - Deploy to Fly.io (config is ready; needs `fly auth login`).
 - Claude parsing hasn't been run against the live API yet (no key configured during development).
 - Autopilot could explore unknown exits on its own (currently it only uses known ones).
+- Map editor in the browser (drag rooms, change levels) writing `zork1-layout-overrides.json`.
+- Unity: show undiscovered rooms when Reveal is on.
 - Unity: click-to-preview routes (it has double-click travel, glow and the status bar).

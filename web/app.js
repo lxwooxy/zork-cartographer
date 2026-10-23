@@ -105,7 +105,23 @@ function update(w, llm, tr) {
   const cur = currentRoom();
   $("score").textContent = w.score;
   $("moves").textContent = w.moves;
-  $("roomcount").textContent = w.rooms.length;
+  const found = w.rooms.filter((r) => !r.undiscovered).length;
+  $("roomcount").textContent = w.total_rooms ? `${found}/${w.total_rooms}` : found;
+  // Map mode: canonical (exact, fog of war) or heuristic (built from play).
+  const mm = $("mapmode");
+  if (w.mode === "canonical") {
+    mm.hidden = false;
+    const n = (w.anomalies || []).length;
+    mm.textContent = n ? `Map: ${n} mismatch${n === 1 ? "" : "es"}` : "Map ✓";
+    mm.className = "pill " + (n ? "warn" : "on");
+    mm.title = n ? "The game disagreed with the canonical map here:\n" + w.anomalies.map((a) => `turn ${a.turn}: ${a.text}`).join("\n")
+                 : "Exact map from the game's source. Rooms appear as you discover them.";
+    $("revealwrap").hidden = false;
+    $("reveal").checked = !!w.reveal;
+  } else {
+    mm.hidden = true;
+    $("revealwrap").hidden = true;
+  }
   const pill = $("llm");
   if (llm.enabled) {
     pill.textContent = llm.pending ? `Claude: parsing (${llm.pending})` : "Claude: on";
@@ -201,8 +217,9 @@ function renderMap() {
         if (drawn.has(key)) continue;
         drawn.add(key);
         const [bx, by] = toScreen(b.x, b.y);
-        el("line", { x1: ax, y1: ay, x2: bx, y2: by, class: "edge" + (ex.inferred ? " inferred" : "") }, g);
-      } else if (vec) {
+        const hidden = r.undiscovered || b.undiscovered;
+        el("line", { x1: ax, y1: ay, x2: bx, y2: by, class: "edge" + (ex.inferred || ex.cond ? " inferred" : "") + (hidden ? " hidden" : "") }, g);
+      } else if (vec && !r.undiscovered) {
         // Exit we know about but haven't taken (or that was blocked).
         const len = 0.42 * SCALE * k;
         const n = Math.hypot(vec[0], vec[1]);
@@ -246,6 +263,7 @@ function renderMap() {
       el("circle", { cx: sx, cy: sy, r: ROOM_W * k * 0.62, class: "here-pulse" }, g);
     }
     const cls = ["room"];
+    if (r.undiscovered) cls.push("undiscovered");
     if (r.id === ov.target) cls.push("target");
     if (r.id === selected) cls.push("selected");
     if (r.id === world.current) cls.push("current");
@@ -434,6 +452,9 @@ function setMode(is3d) {
   try { localStorage.setItem("zork-view", is3d ? "3d" : "2d"); } catch {}
   if (!is3d) renderMap();
 }
+$("reveal").onchange = async () => {
+  await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reveal: $("reveal").checked }) });
+};
 $("mode2d").onclick = () => setMode(false);
 $("mode3d").onclick = () => setMode(true);
 $("overview").onclick = () => { if (window.world3d) { window.world3d.overview(); $("follow").checked = false; } };
@@ -485,6 +506,11 @@ function renderPanel() {
 
 function renderRouteBox(r) {
   const box = $("routebox");
+  if (r.undiscovered) {
+    box.hidden = false;
+    box.innerHTML = `<div><b>Not discovered yet</b></div><div class="muted small">You're seeing this because Reveal map is on. Find it in the game to travel here.</div>`;
+    return;
+  }
   if (r.id === world.current || !preview || preview.to !== r.id) { box.hidden = true; return; }
   box.hidden = false;
   if (preview.reachable) {
