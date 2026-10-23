@@ -1,0 +1,7 @@
+.git
+.venv
+.env
+data
+unity
+**/__pycache__
+*.md

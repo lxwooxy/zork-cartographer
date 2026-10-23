@@ -89,6 +89,11 @@ class World:
             "turn": self.turn,
             "rooms": [asdict(r) for r in self.rooms.values()],
         }
+        if not full:
+            # Fallback look for rooms Claude hasn't described (used by the 3D views).
+            for rd, r in zip(d["rooms"], self.rooms.values()):
+                rd["env3d"] = r.environment or guess_environment(r)
+                rd["indoor3d"] = bool(r.indoor) if r.indoor is not None else guess_indoor(r)
         d["log"] = self.log if full else self.log[-200:]
         return d
 

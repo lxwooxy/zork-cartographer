@@ -8,14 +8,16 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
 import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -33,6 +35,8 @@ STORY = Path(os.environ.get("ZORK_STORY", ROOT / "game" / "zork1.z3"))
 DATA = Path(os.environ.get("ZORK_DATA", ROOT / "data" / "world.json"))
 SEED = int(os.environ.get("ZORK_SEED", "42"))
 WEB = ROOT / "web"
+PASSWORD = os.environ.get("ZORK_PASSWORD", "")
+COOKIE = "zork_auth"
 
 
 class State:
@@ -102,9 +106,12 @@ async def start_game(replay: list[str]):
     else:
         # Restore the game by replaying the saved commands (fixed seed = same outcome).
         await S.game.send("verbose")
+        loop = asyncio.get_running_loop()
+        t0 = loop.time()
         for cmd in replay:
-            await S.game.send(cmd)
-        log.info("Replayed %d commands", len(replay))
+            await S.game.send(cmd, fast=True)
+        await S.game.drain()
+        log.info("Replayed %d commands in %.1fs", len(replay), loop.time() - t0)
 
 
 @asynccontextmanager
@@ -120,6 +127,53 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Zork Cartographer", lifespan=lifespan)
+
+
+# ---------- password (set ZORK_PASSWORD to turn it on) ----------
+def _token() -> str:
+    return hmac.new(PASSWORD.encode(), b"zork-cartographer-session", hashlib.sha256).hexdigest()
+
+
+def is_authed(headers, cookies) -> bool:
+    if not PASSWORD:
+        return True
+    if hmac.compare_digest(cookies.get(COOKIE, ""), _token()):
+        return True
+    given = headers.get("x-zork-password", "")  # used by the Unity viewer
+    return bool(given) and hmac.compare_digest(given, PASSWORD)
+
+
+OPEN_PATHS = ("/login", "/healthz", "/style.css")
+
+
+@app.middleware("http")
+async def require_password(request: Request, call_next):
+    if request.url.path in OPEN_PATHS or is_authed(request.headers, request.cookies):
+        return await call_next(request)
+    if request.url.path.startswith("/api/"):
+        return JSONResponse({"error": "password required"}, status_code=401)
+    return RedirectResponse("/login")
+
+
+@app.get("/login")
+async def login_page():
+    return FileResponse(WEB / "login.html")
+
+
+@app.post("/login")
+async def login(request: Request, body: dict):
+    if not PASSWORD or hmac.compare_digest(str(body.get("password", "")), PASSWORD):
+        resp = JSONResponse({"ok": True})
+        https = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+        resp.set_cookie(COOKIE, _token(), max_age=60 * 60 * 24 * 365, httponly=True, samesite="lax", secure=https)
+        return resp
+    await asyncio.sleep(1.0)  # slow down guessing
+    return JSONResponse({"ok": False, "error": "Wrong password"}, status_code=401)
+
+
+@app.get("/healthz")
+async def healthz():
+    return {"ok": True, "turn": S.world.turn if hasattr(S, "world") else None}
 
 
 class Command(BaseModel):
@@ -182,6 +236,9 @@ async def rename_room(room_id: str, body: dict):
 
 @app.websocket("/ws")
 async def ws(websocket: WebSocket):
+    if not is_authed(websocket.headers, websocket.cookies):
+        await websocket.close(code=4401)
+        return
     await websocket.accept()
     S.sockets.add(websocket)
     await websocket.send_json({"type": "world", "world": S.world.to_json(), "llm": llm_status()})

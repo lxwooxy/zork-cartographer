@@ -1,0 +1,32 @@
+# Fly.io config. One always-on machine with a small disk for the save file.
+app = "zork-cartographer-lxwooxy"
+primary_region = "ewr"
+
+[build]
+
+[env]
+  ZORK_DATA = "/data/world.json"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # The game runs as a live process, so keep the machine on.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "30s"
+    interval = "30s"
+    method = "GET"
+    path = "/healthz"
+    timeout = "5s"
+
+[[mounts]]
+  source = "zork_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

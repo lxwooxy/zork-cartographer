@@ -10,7 +10,9 @@ namespace Zork
     public class ZorkClient : MonoBehaviour
     {
         public string serverUrl = "http://127.0.0.1:8765";
+        public string password = "";
         public float pollInterval = 0.5f;
+        public bool Unauthorized { get; private set; }
 
         public WorldData World { get; private set; }
         public bool Connected { get; private set; }
@@ -19,7 +21,30 @@ namespace Zork
 
         int _version = -1;
 
+        void Awake()
+        {
+            // Saved settings win, then environment variables, then the defaults above.
+            serverUrl = PlayerPrefs.GetString("zork.server", Environment.GetEnvironmentVariable("ZORK_SERVER") ?? serverUrl);
+            password = PlayerPrefs.GetString("zork.password", Environment.GetEnvironmentVariable("ZORK_PASSWORD") ?? password);
+        }
+
         void Start() => StartCoroutine(Poll());
+
+        public void Configure(string url, string pw)
+        {
+            serverUrl = url.Trim().TrimEnd('/');
+            password = pw;
+            PlayerPrefs.SetString("zork.server", serverUrl);
+            PlayerPrefs.SetString("zork.password", password);
+            PlayerPrefs.Save();
+            _version = -1;
+            World = null;
+        }
+
+        void Auth(UnityWebRequest req)
+        {
+            if (!string.IsNullOrEmpty(password)) req.SetRequestHeader("X-Zork-Password", password);
+        }
 
         IEnumerator Poll()
         {
@@ -28,7 +53,9 @@ namespace Zork
                 using (var req = UnityWebRequest.Get($"{serverUrl}/api/unity?since={_version}"))
                 {
                     req.timeout = 5;
+                    Auth(req);
                     yield return req.SendWebRequest();
+                    Unauthorized = req.responseCode == 401;
                     if (req.result == UnityWebRequest.Result.Success)
                     {
                         Connected = true;
@@ -44,7 +71,7 @@ namespace Zork
                     else
                     {
                         Connected = false;
-                        LastError = req.error;
+                        LastError = Unauthorized ? "wrong or missing password" : req.error;
                         _version = -1;
                     }
                 }
@@ -66,6 +93,7 @@ namespace Zork
                 req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
                 req.downloadHandler = new DownloadHandlerBuffer();
                 req.SetRequestHeader("Content-Type", "application/json");
+                Auth(req);
                 req.timeout = 15;
                 yield return req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)

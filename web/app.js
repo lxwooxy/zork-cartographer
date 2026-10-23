@@ -118,6 +118,7 @@ function update(w, llm) {
     selected = null;
   }
   renderLog(w.log);
+  if (window.world3d) window.world3d.update(w);
   renderMap();
   renderPanel();
   renderInventory();
@@ -257,8 +258,40 @@ svg.addEventListener("click", () => { selected = null; renderPanel(); });
 
 $("lvlup").onclick = () => { level++; $("follow").checked = false; renderMap(); };
 $("lvldown").onclick = () => { level--; $("follow").checked = false; renderMap(); };
-$("center").onclick = () => { const c = currentRoom(); if (c) { level = c.z; centerOn(c); renderMap(); } };
-$("follow").onchange = () => { if ($("follow").checked) $("center").onclick(); };
+$("center").onclick = () => {
+  if (mode3d) { window.world3d && window.world3d.center(); return; }
+  const c = currentRoom(); if (c) { level = c.z; centerOn(c); renderMap(); }
+};
+$("follow").onchange = () => {
+  if (window.world3d) window.world3d.setFollow($("follow").checked);
+  if ($("follow").checked) $("center").onclick();
+};
+
+// ---------- 2D / 3D toggle ----------
+let mode3d = false;
+function setMode(is3d) {
+  mode3d = is3d;
+  $("mode2d").classList.toggle("on", !is3d);
+  $("mode3d").classList.toggle("on", is3d);
+  $("mapwrap").classList.toggle("is3d", is3d);
+  svg.style.display = is3d ? "none" : "block";
+  $("view3d").hidden = !is3d;
+  if (window.world3d) {
+    window.world3d.setVisible(is3d);
+    if (is3d && world) window.world3d.update(world);
+  }
+  try { localStorage.setItem("zork-view", is3d ? "3d" : "2d"); } catch {}
+  if (!is3d) renderMap();
+}
+$("mode2d").onclick = () => setMode(false);
+$("mode3d").onclick = () => setMode(true);
+$("overview").onclick = () => { if (window.world3d) { window.world3d.overview(); $("follow").checked = false; } };
+window.addEventListener("world3d-ready", () => {
+  if (world) window.world3d.update(world);
+  let saved = null;
+  try { saved = localStorage.getItem("zork-view"); } catch {}
+  if (saved === "3d" || location.hash === "#3d") setMode(true);
+});
 window.addEventListener("resize", () => { const c = currentRoom(); if (c && $("follow").checked) centerOn(c); renderMap(); });
 
 // ---------- side panels ----------

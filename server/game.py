@@ -49,19 +49,25 @@ class Game:
             await self.proc.wait()
         self.proc = None
 
-    async def send(self, command: str) -> Turn:
+    async def send(self, command: str, fast: bool = False) -> Turn:
+        """Send one command. fast=True is for replays: stop as soon as the prompt shows."""
         async with self.lock:
             if not self.proc or self.proc.returncode is not None:
                 raise RuntimeError("Game is not running")
             self.proc.stdin.write((command.strip() + "\n").encode())
             await self.proc.stdin.drain()
-            raw = await self._read_until_prompt()
+            raw = await self._read_until_prompt(idle=0.01 if fast else 0.15, strict=fast)
             self.last = self._parse(command.strip(), raw)
             return self.last
 
-    async def _read_until_prompt(self, idle: float = 0.15, max_wait: float = 5.0) -> str:
+    async def drain(self):
+        """Throw away any output still in the pipe (used after a replay)."""
+        async with self.lock:
+            await self._read_until_prompt(idle=0.3, max_wait=0.6)
+
+    async def _read_until_prompt(self, idle: float = 0.15, max_wait: float = 5.0, strict: bool = False) -> str:
         """Read until the game shows a prompt ('>' or a question ending in ':' / '?')
-        and then goes quiet."""
+        and then goes quiet. strict: only the real '>' prompt counts."""
         buf = ""
         loop = asyncio.get_running_loop()
         deadline = loop.time() + max_wait
@@ -70,7 +76,10 @@ class Game:
                 chunk = await asyncio.wait_for(self.proc.stdout.read(4096), timeout=idle)
             except asyncio.TimeoutError:
                 tail = buf.rstrip(" ")
-                if tail.endswith(">") or tail.endswith(":") or tail.endswith("?") or tail.endswith(")"):
+                if strict:
+                    if tail.endswith("\n>") or tail == ">":
+                        break
+                elif tail.endswith((">", ":", "?", ")")):
                     break
                 continue
             if not chunk:

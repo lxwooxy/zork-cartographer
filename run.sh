@@ -2,6 +2,8 @@
 # Start the Zork Cartographer server, then open http://localhost:8765
 set -e
 cd "$(dirname "$0")"
+# Load settings from .env (PORT, ZORK_PASSWORD, ANTHROPIC_API_KEY, ...)
+if [ -f .env ]; then set -a; . ./.env; set +a; fi
 if ! command -v dfrotz >/dev/null; then
   echo "dfrotz not found. Install it with: brew install frotz"; exit 1
 fi

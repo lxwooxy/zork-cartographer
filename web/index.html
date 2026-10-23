@@ -29,14 +29,18 @@
 
     <section id="mapwrap">
       <div class="maptools">
-        <span>Level</span>
-        <button id="lvldown" title="Go down a level">▼</button>
-        <b id="level">0</b>
-        <button id="lvlup" title="Go up a level">▲</button>
-        <label><input type="checkbox" id="follow" checked> Follow player</label>
+        <span class="seg"><button id="mode2d" class="on">2D</button><button id="mode3d">3D</button></span>
+        <span class="only2d">Level</span>
+        <button id="lvldown" class="only2d" title="Go down a level">▼</button>
+        <b id="level" class="only2d">0</b>
+        <button id="lvlup" class="only2d" title="Go up a level">▲</button>
+        <label><input type="checkbox" id="follow" checked> Follow</label>
         <button id="center">Center</button>
+        <button id="overview" class="only3d" title="Show the whole map">Overview</button>
       </div>
       <svg id="map"></svg>
+      <div id="view3d" hidden></div>
+      <div id="hint3d" class="only3d">Drag to orbit · right-drag to pan · scroll to zoom</div>
     </section>
 
     <aside>
@@ -55,6 +59,12 @@
       </div>
     </aside>
   </main>
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
   <script src="app.js"></script>
+  <script type="module">
+    import { createWorld3D } from "./world3d.js";
+    window.world3d = createWorld3D(document.getElementById("view3d"));
+    window.dispatchEvent(new Event("world3d-ready"));
+  </script>
 </body>
 </html>

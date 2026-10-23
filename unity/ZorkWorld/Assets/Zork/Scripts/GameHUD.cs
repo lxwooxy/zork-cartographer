@@ -12,6 +12,8 @@ namespace Zork
         ZorkClient _client;
         WorldBuilder _builder;
         string _input = "";
+        bool _showSettings, _autoShown;
+        string _urlField, _pwField;
         Vector2 _logScroll;
         int _lastLogCount;
         GUIStyle _log, _box, _title, _small;
@@ -47,8 +49,11 @@ namespace Zork
             var w = _client.World;
             var status = _client.Connected
                 ? (w != null ? $"Score {w.score}   Moves {w.moves}   Rooms {w.rooms.Length}" : "Connected")
-                : $"Not connected to {_client.serverUrl}. Start the server: ./run.sh";
+                : $"Not connected to {_client.serverUrl} ({_client.LastError})";
             GUI.Label(new Rect(12, 8, 900, 22), status, _title);
+            if (GUI.Button(new Rect(Screen.width - 100, 8, 90, 22), "Server…")) ToggleSettings();
+            if (!_client.Connected && _client.LastError != null && !_autoShown && Time.realtimeSinceStartup > 3f) { _autoShown = true; if (!_showSettings) ToggleSettings(); }
+            if (_showSettings) { SettingsWindow(); return; }
             GUI.Label(new Rect(12, 28, 900, 20),
                 "Right-drag orbit · Scroll zoom · WASD/QE pan · F follow · Tab overview · H hide HUD", _small);
 
@@ -118,6 +123,31 @@ namespace Zork
             GUILayout.Label("Inventory", _title);
             if (w == null || w.inventory == null || w.inventory.Length == 0) GUILayout.Label("<i>empty-handed</i>", _small);
             else foreach (var it in w.inventory) GUILayout.Label("• " + it, _small);
+            GUILayout.EndArea();
+        }
+
+        void ToggleSettings()
+        {
+            _showSettings = !_showSettings;
+            _urlField = _client.serverUrl;
+            _pwField = _client.password;
+        }
+
+        void SettingsWindow()
+        {
+            var r = new Rect(Screen.width / 2f - 220, Screen.height / 2f - 110, 440, 200);
+            GUI.Box(r, GUIContent.none, _box);
+            GUILayout.BeginArea(new Rect(r.x + 16, r.y + 12, r.width - 32, r.height - 24));
+            GUILayout.Label("Connect to a Zork Cartographer server", _title);
+            GUILayout.Label("Server URL (local: http://127.0.0.1:8765)", _small);
+            _urlField = GUILayout.TextField(_urlField ?? "");
+            GUILayout.Label("Password (leave empty for a local server)", _small);
+            _pwField = GUILayout.PasswordField(_pwField ?? "", '•');
+            GUILayout.Space(8);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Connect", GUILayout.Height(26))) { _client.Configure(_urlField, _pwField); _showSettings = false; }
+            if (GUILayout.Button("Cancel", GUILayout.Height(26))) _showSettings = false;
+            GUILayout.EndHorizontal();
             GUILayout.EndArea();
         }
 

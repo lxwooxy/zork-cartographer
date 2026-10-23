@@ -1,87 +1,92 @@
 # Zork Cartographer
 
-Play Zork I and watch the world map itself as you go: a 2D map in the browser and a 3D world in Unity.
+Play Zork I in your browser and watch the world map itself as you go: a live 2D map, a 3D view of every room you've visited, and your inventory, all updating as you type. A Unity viewer renders the same world in 3D on the desktop.
 
-```
- you type a command
+```text
+ you type a command (browser or Unity)
         │
         ▼
- ┌──────────────┐   text    ┌────────────────────┐
- │ dfrotz       │ ────────► │ Python server      │
- │ (Zork I)     │           │ • rule-based parser│──► data/world.json
- └──────────────┘           │ • Claude (optional)│
-                            └─────────┬──────────┘
-                     WebSocket        │        HTTP poll
-                 ┌────────────────────┴───────────────────┐
-                 ▼                                        ▼
-     Web UI  localhost:8765                    Unity viewer (unity/ZorkWorld)
-     terminal · 2D map · inventory             3D rooms · paths · stairs · items
+ ┌──────────────┐   text    ┌─────────────────────────┐
+ │ dfrotz       │ ────────► │ Python server (FastAPI) │──► data/world.json
+ │ (Zork I)     │           │ • rule-based parser     │    (map + every command)
+ └──────────────┘           │ • Claude API (optional) │
+                            └───────────┬─────────────┘
+                    WebSocket           │           HTTP polling
+               ┌────────────────────────┴──────────────────┐
+               ▼                                           ▼
+   Web UI (web/)                                Unity viewer (unity/ZorkWorld)
+   terminal · 2D map · 3D view · inventory      3D rooms · paths · stairs · items
 ```
 
-## Quick start
+## Quick start (local)
+
+Requires macOS or Linux, Python 3.10+, and the `dfrotz` interpreter.
 
 ```bash
-brew install frotz              # provides dfrotz, the Z-machine interpreter
-cp .env.example .env            # optional: add ANTHROPIC_API_KEY for richer parsing
-./run.sh                        # starts the server on http://localhost:8765
+git clone https://github.com/lxwooxy/zork-cartographer.git
+cd zork-cartographer
+brew install frotz          # macOS. Linux: see docs/SETUP.md
+cp .env.example .env        # optional settings (API key, password)
+./run.sh                    # creates .venv on first run
 ```
 
-Open http://localhost:8765 and play. Every move updates the map.
+Open <http://localhost:8765> and type `look`.
 
-### 3D view (Unity)
+## Using it
 
-1. Open `unity/ZorkWorld` in Unity Hub (Unity 6000.0.37f1). The first open takes a few minutes while Unity builds the project's `Library/`.
-2. Press **Play** in any scene. The viewer sets itself up automatically, so you don't need to place any objects.
-3. Keep `./run.sh` running. You can type commands in Unity's HUD or in the browser; both stay in sync.
+- **Terminal (left):** type Zork commands. ↑/↓ recalls previous commands.
+- **Map (middle):** switch between **2D** and **3D**.
+  - 2D: drag to pan, scroll to zoom, ▲/▼ to change level (up/down in the game).
+  - 3D: drag to orbit, right-drag to pan, scroll to zoom. **Overview** shows the whole map.
+  - **Follow** keeps the view on the player. **Center** jumps back to them.
+- **Room panel (right):** description, items here (click to take), exits (click to walk).
+- **Inventory:** click an item to examine it. If the game hints something was taken (the thief), a red note asks you to type `i` to refresh.
+- **New game** backs up the current map to `data/world.bak.json` and restarts.
 
-Smoke test (no clicking needed, with the server running):
+Progress saves after every command. When the server restarts it replays your commands with a fixed random seed, so you continue exactly where you left off.
 
-```bash
-ZORK_AUTOTEST=/tmp/zorktest "/Applications/Unity/Hub/Editor/6000.0.37f1/Unity.app/Contents/MacOS/Unity" \
-  -projectPath unity/ZorkWorld
-# enters Play mode, saves screenshots + autotest.log to /tmp/zorktest, sends one "nw", quits
+## Documentation
+
+| Doc | What's in it |
+|---|---|
+| [docs/SETUP.md](docs/SETUP.md) | Local setup on macOS and Linux, configuration, Unity viewer, troubleshooting |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Hosting on Fly.io behind a password |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the map is built, the HTTP API, the save format, where to change things |
+| [DEVLOG.md](DEVLOG.md) | What was built, design decisions, bugs found and fixed |
+
+## Repository layout
+
+```text
+game/zork1.z3                  Zork I story file (MIT, from github.com/historicalsource/zork1)
+server/game.py                 runs dfrotz, splits output into turns
+server/parser.py               rule-based parsing: directions, items, inventory, exits
+server/world.py                rooms, exits, spring layout, persistence
+server/llm.py                  optional Claude API pass (structured JSON per turn)
+server/app.py                  FastAPI app: API, WebSocket, password login, static files
+web/                           browser UI (app.js = terminal/2D/panels, world3d.js = 3D)
+web/vendor/                    three.js r160 (bundled, no CDN needed)
+unity/ZorkWorld/               Unity 6 project; scripts in Assets/Zork/Scripts
+Dockerfile, fly.toml           container build and Fly.io config
+run.sh                         local launcher
 ```
 
-Controls: right-drag orbits · scroll zooms · WASD/QE pans · **F** follows the player · **Tab** shows the whole map · **H** hides the HUD.
+## Configuration
 
-## How the map is built
+Set in `.env` locally, or as secrets/env vars when hosted.
 
-- **Location**: dfrotz prints a status line with the current room name every turn, so the server always knows where you are.
-- **Rooms and exits**: when the room changes after a direction command (`n`, `up`, `enter`, `climb tree`…), the server links the two rooms. Failed moves mark that exit as blocked. Exits mentioned in descriptions show up as unexplored stubs.
-- **Repeated names** (forests, the maze): rooms with the same name are only merged when they sit where the move would put you, so separate "Forest" rooms stay separate.
-- **Layout**: Zork's geography isn't consistent (going east then west doesn't always bring you back), so positions come from a spring layout: each exit pulls rooms toward its compass direction, and rooms push each other apart. Up/down changes the level.
-- **Items and inventory**: parsed from "There is a … here", "Taken.", "Dropped.", and the `inventory` listing.
-- **Claude (optional)**: with an API key, each meaningful turn is also sent to Claude, which returns structured JSON: environment type (forest, cave, river, temple…), indoor/outdoor, lighting, scenery features, exits with notes, items, and a color palette. Unity uses this to theme each room. Runs in the background, so play never waits on it.
-
-## Saving
-
-The map and every command are saved to `data/world.json`. When the server restarts, it replays your commands with a fixed random seed, so the game resumes exactly where you left off. **New game** in the web UI backs up the old map to `data/world.bak.json`.
-
-## Layout
-
-```
-game/zork1.z3            Zork I story file (MIT licensed, from github.com/historicalsource/zork1)
-server/game.py           runs dfrotz, splits output into turns
-server/parser.py         rule-based parsing (directions, items, inventory)
-server/world.py          rooms, exits, layout, persistence
-server/llm.py            optional Claude pass (structured output)
-server/app.py            FastAPI: /api/command, /api/world, /api/unity, /ws
-web/                     browser UI
-unity/ZorkWorld/Assets/Zork/Scripts   Unity viewer (client, builder, camera, HUD)
-```
-
-## Configuration (.env)
-
-| Variable | Default | |
+| Variable | Default | Purpose |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | none | enables Claude parsing |
-| `ZORK_LLM_MODEL` | `claude-opus-5-5` | model used for parsing |
-| `ZORK_LLM_EFFORT` | `low` | `low` / `medium` / `high` |
-| `ZORK_LLM` | `on` | set to `off` to disable Claude |
-| `ZORK_SEED` | `42` | random seed for the game |
+| `ZORK_PASSWORD` | *(empty)* | Require a password to play. Leave empty for local use. |
+| `ANTHROPIC_API_KEY` | *(empty)* | Turns on Claude parsing (richer room types, colors, scenery). |
+| `ZORK_LLM_MODEL` | `claude-opus-5-5` | Model used for parsing. |
+| `ZORK_LLM_EFFORT` | `low` | `low` / `medium` / `high`. |
+| `ZORK_LLM` | `on` | `off` disables Claude even if a key is set. |
+| `ZORK_SEED` | `42` | Game random seed. Changing it breaks replay of an existing save. |
+| `ZORK_DATA` | `data/world.json` | Where the map and command log are saved. |
+| `PORT` | `8765` | Port used by `run.sh`. |
 
-Claude requests use `fallbacks: "default"`, so if a request is ever declined it's retried on a fallback model automatically.
+Everything works without an API key. The rule-based parser handles rooms, exits, items and inventory. With a key, each meaningful turn is also sent to the Claude API, which costs roughly a few dollars over a full game at the default settings.
 
 ## Credits
 
-Zork I © Infocom, released under the MIT license by Microsoft (2025). Interpreter: [Frotz](https://gitlab.com/DavidGriffith/frotz).
+Zork I © Infocom, released under the MIT license by Microsoft (2025); see `game/LICENSE-zork1`. Interpreter: [Frotz](https://gitlab.com/DavidGriffith/frotz). 3D rendering: [three.js](https://threejs.org) (MIT).
