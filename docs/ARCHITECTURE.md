@@ -43,6 +43,10 @@ Zork's geography isn't Euclidean (east then west doesn't always return you), so 
 
 **Heuristic (fallback).** For saves made before the canonical map existed, or with `ZORK_MAP=off`: the map is built from play, as described below. `World.mode` is stored in the save, so a game never switches modes halfway.
 
+## Room details
+
+`tools/describe_rooms.py` asks Claude once per canonical room (structured JSON output) and writes `game/zork1-details.json`. `Canon` loads it, and `World._apply_details` copies it onto a `Room` when the room is discovered (`_canon_room`), and onto already-discovered rooms when a save loads. With details present, `should_enrich` never calls Claude per turn. Fields map onto the existing `Room` fields (`environment`, `indoor`, `lighting`, `features`, `palette`, `visual`), so both 3D views and the panels use them without changes. Undiscovered rooms' details are never sent unless Reveal is on.
+
 ## Landmarks (places drawn as one thing)
 
 `game/zork1-landmarks.json` groups rooms into places: `white-house` (house), `forest`, `frigid-river` (river), `rainbow`, `reservoir` (lake). Each room gets a role (`interior`, `upstairs`, `exterior`, `member`, `path`, `tree-base`, `tree-top`, `from`/`via`/`to`).

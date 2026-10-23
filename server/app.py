@@ -72,7 +72,8 @@ async def broadcast():
 
 
 def llm_status() -> dict:
-    return {"enabled": S.enricher.enabled, "error": S.enricher.error, "pending": S.pending}
+    details = len(S.world.canon.details) if getattr(S, "world", None) and S.world.canon else 0
+    return {"enabled": S.enricher.enabled, "error": S.enricher.error, "pending": S.pending, "details": details}
 
 
 async def enrich(command: str, text: str, room_id: str, changes: dict):
@@ -93,6 +94,9 @@ async def enrich(command: str, text: str, room_id: str, changes: dict):
 
 def should_enrich(command: str, text: str, changes: dict) -> bool:
     if not S.enricher.enabled:
+        return False
+    # With pre-written room details (tools/describe_rooms.py) there's nothing to ask per turn.
+    if S.world.canon and S.world.canon.details:
         return False
     room = S.world.rooms.get(changes["room_id"])
     if changes["has_heading"] and room and not room.enriched:

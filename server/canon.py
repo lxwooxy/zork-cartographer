@@ -51,6 +51,11 @@ class Canon:
         lm_path = Path(str(map_path).replace("-map.json", "-landmarks.json"))
         if lm_path.exists():
             self._load_landmarks(json.loads(lm_path.read_text()).get("landmarks", {}))
+        # Room details written once by Claude (tools/describe_rooms.py), applied on discovery.
+        det_path = Path(str(map_path).replace("-map.json", "-details.json"))
+        self.details: dict[str, dict] = {}
+        if det_path.exists():
+            self.details = {k.lower(): v for k, v in json.loads(det_path.read_text()).get("rooms", {}).items()}
         self.by_name: dict[str, list[str]] = {}
         for rid, r in self.rooms.items():
             self.by_name.setdefault(r["name"], []).append(rid)

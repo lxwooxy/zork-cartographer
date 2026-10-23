@@ -95,6 +95,7 @@ class World:
             for r in w.rooms.values():
                 if r.id in w.canon.rooms:
                     r.x, r.y, r.z = w.canon.position(r.id)
+                    w._apply_details(r)   # details may have been written after this game began
         return w
 
     def to_json(self, full: bool = False) -> dict:
@@ -365,6 +366,7 @@ class World:
         c = self.canon.rooms[cid]
         x, y, z = self.canon.position(cid)
         room = Room(id=cid, name=c["name"], description="", x=x, y=y, z=z, first_turn=self.turn)
+        self._apply_details(room)
         for d, ce in c["exits"].items():
             if not ce.get("to") or ce.get("if") == "FALSE-FLAG":
                 continue   # message-only or impossible "exits" aren't exits
@@ -374,6 +376,19 @@ class World:
             room.exits[d] = Exit(to=ce["to"] if ce["to"] in self.rooms else None, note=note,
                                  cond=ce.get("if", ""), hidden_to=ce["to"])
         return room
+
+    def _apply_details(self, room: Room):
+        """Look, lighting, scenery and colors described once by Claude (game/zork1-details.json)."""
+        d = self.canon.details.get(room.id) if self.canon else None
+        if not d:
+            return
+        room.environment = d.get("environment", room.environment)
+        room.indoor = d.get("indoor", room.indoor)
+        room.lighting = d.get("lighting", room.lighting)
+        room.features = list(d.get("features", room.features))
+        room.palette = {k: v for k, v in (d.get("palette") or {}).items() if isinstance(v, str) and v.startswith("#")}
+        room.visual = d.get("visual", room.visual)
+        room.enriched = True
 
     def _discover(self, cid: str) -> Room:
         room = self._canon_room(cid)

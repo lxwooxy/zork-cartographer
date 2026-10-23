@@ -124,8 +124,7 @@ The canonical map is generated, then you can tune how it looks. Three files, all
 
 ```bash
 # 1. Rebuild the room/exit data (only needed if the parser changes)
-curl -sLO https://raw.githubusercontent.com/historicalsource/zork1/master/1dungeon.zil
-.venv/bin/python tools/build_map.py 1dungeon.zil > game/zork1-map.json
+.venv/bin/python tools/build_map.py game/source/1dungeon.zil > game/zork1-map.json
 
 # 2. Re-run the layout after editing regions or overrides
 .venv/bin/python tools/layout_map.py game/zork1-map.json game/zork1-regions.json > game/zork1-layout.json
@@ -139,3 +138,19 @@ Landmark kinds the 3D views know: `house`, `forest`, `river`, `rainbow`, `lake`.
 Restart the server after changing these. Room positions come straight from the layout, so existing games pick up the new layout on the next move.
 
 **Checking the map against the game:** play (or let the autopilot travel). Every move is compared with the map; mismatches appear in the **Map** badge tooltip and in `anomalies` in `/api/world`. A playthrough of the house, cellar, troll, maze and Cyclops Room produced none.
+
+## 8. Room details (written once by Claude)
+
+`game/zork1-details.json` holds, for every room: environment, indoor/outdoor, lighting, up to 6 scenery features, a floor/wall/accent palette, and a one-sentence description. The server applies a room's details when you discover it, and the 3D views and room panel use them. Nothing is called during play.
+
+```bash
+echo 'ANTHROPIC_API_KEY=sk-ant-...' >> .env          # local only; .env is git-ignored
+.venv/bin/python tools/describe_rooms.py --dry-run   # see exactly what's sent for one room
+.venv/bin/python tools/describe_rooms.py             # describe rooms that don't have details yet
+git add game/zork1-details.json && git commit -m "Room details" && fly deploy --ha=false --remote-only
+```
+
+- Each room's prompt holds its name, Zork's own description (from `LDESC`, or the text in its routine in `game/source/1actions.zil` for the 40 rooms described in code), its level, neighbours and conditions, and the place it belongs to (house, forest…). Claude returns structured JSON.
+- **Cost:** about $2–5 for all 110 rooms with the default model (`claude-opus-5-5`, medium effort), once.
+- **Re-running:** rooms already described are skipped. `--only KITCHEN TROLL-ROOM` redoes specific rooms (with `--force`), and `--force` alone redoes everything. You can also edit the JSON by hand.
+- Existing games pick up new details on the next server start.

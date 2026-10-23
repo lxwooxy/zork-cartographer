@@ -123,7 +123,12 @@ function update(w, llm, tr) {
     $("revealwrap").hidden = true;
   }
   const pill = $("llm");
-  if (llm.enabled) {
+  if (llm.details) {
+    // Room details were written once ahead of time; nothing is called during play.
+    pill.textContent = "Room details ✓";
+    pill.className = "pill on";
+    pill.title = `Looks, lighting, scenery and colors for ${llm.details} rooms, written once by Claude (game/zork1-details.json). Shown as you discover each room.`;
+  } else if (llm.enabled) {
     pill.textContent = llm.pending ? `Claude: parsing (${llm.pending})` : "Claude: on";
     pill.className = "pill on";
   } else {
@@ -475,6 +480,8 @@ function renderPanel() {
   if (!r) return;
   $("roomname").textContent = r.name + (r.id === world.current ? "" : "  (selected)");
   $("roomdesc").textContent = r.description || "";
+  $("roomvisual").textContent = r.visual || "";
+  $("roomvisual").hidden = !r.visual;
   const tags = [];
   if (r.environment) tags.push(r.environment);
   if (r.indoor !== null && r.indoor !== undefined) tags.push(r.indoor ? "indoor" : "outdoor");

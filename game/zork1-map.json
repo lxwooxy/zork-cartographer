@@ -38,7 +38,8 @@
      "to": "STONE-BARROW",
      "if": "WON-FLAG"
     }
-   }
+   },
+   "action": "WEST-HOUSE"
   },
   "STONE-BARROW": {
    "id": "STONE-BARROW",
@@ -53,7 +54,8 @@
     "northeast": {
      "to": "WEST-OF-HOUSE"
     }
-   }
+   },
+   "action": "STONE-BARROW-FCN"
   },
   "NORTH-OF-HOUSE": {
    "id": "NORTH-OF-HOUSE",
@@ -148,7 +150,8 @@
      "to": "KITCHEN",
      "if": "KITCHEN-WINDOW IS OPEN"
     }
-   }
+   },
+   "action": "EAST-HOUSE"
   },
   "FOREST-1": {
    "id": "FOREST-1",
@@ -175,7 +178,8 @@
     "west": {
      "msg": "You would need a machete to go further west."
     }
-   }
+   },
+   "action": "FOREST-ROOM"
   },
   "FOREST-2": {
    "id": "FOREST-2",
@@ -202,7 +206,8 @@
     "west": {
      "to": "PATH"
     }
-   }
+   },
+   "action": "FOREST-ROOM"
   },
   "MOUNTAINS": {
    "id": "MOUNTAINS",
@@ -259,7 +264,8 @@
     "northwest": {
      "to": "SOUTH-OF-HOUSE"
     }
-   }
+   },
+   "action": "FOREST-ROOM"
   },
   "PATH": {
    "id": "PATH",
@@ -286,7 +292,8 @@
     "west": {
      "to": "FOREST-1"
     }
-   }
+   },
+   "action": "FOREST-ROOM"
   },
   "UP-A-TREE": {
    "id": "UP-A-TREE",
@@ -304,7 +311,8 @@
     "up": {
      "msg": "You cannot climb any higher."
     }
-   }
+   },
+   "action": "TREE-ROOM"
   },
   "GRATING-CLEARING": {
    "id": "GRATING-CLEARING",
@@ -334,7 +342,8 @@
      "if": "GRATE IS OPEN",
      "note": "only through the open grating"
     }
-   }
+   },
+   "action": "CLEARING-FCN"
   },
   "CLEARING": {
    "id": "CLEARING",
@@ -361,7 +370,8 @@
     "west": {
      "to": "EAST-OF-HOUSE"
     }
-   }
+   },
+   "action": "FOREST-ROOM"
   },
   "KITCHEN": {
    "id": "KITCHEN",
@@ -392,7 +402,8 @@
      "if": "FALSE-FLAG",
      "msg": "Only Santa Claus climbs down chimneys."
     }
-   }
+   },
+   "action": "KITCHEN-FCN"
   },
   "ATTIC": {
    "id": "ATTIC",
@@ -432,7 +443,8 @@
      "if": "TRAP-DOOR IS OPEN",
      "note": "the trap door must be open; it shuts behind you"
     }
-   }
+   },
+   "action": "LIVING-ROOM-FCN"
   },
   "CELLAR": {
    "id": "CELLAR",
@@ -455,7 +467,8 @@
     "west": {
      "msg": "You try to ascend the ramp, but it is impossible, and you slide back down."
     }
-   }
+   },
+   "action": "CELLAR-FCN"
   },
   "TROLL-ROOM": {
    "id": "TROLL-ROOM",
@@ -478,7 +491,8 @@
      "if": "TROLL-FLAG",
      "msg": "The troll fends you off with a menacing gesture."
     }
-   }
+   },
+   "action": "TROLL-ROOM-F"
   },
   "EAST-OF-CHASM": {
    "id": "EAST-OF-CHASM",
@@ -846,7 +860,8 @@
      "if": "GRATE IS OPEN",
      "msg": "The grating is closed."
     }
-   }
+   },
+   "action": "MAZE-11-FCN"
   },
   "MAZE-12": {
    "id": "MAZE-12",
@@ -978,7 +993,8 @@
      "if": "CYCLOPS-FLAG",
      "msg": "The cyclops doesn't look like he'll let you past."
     }
-   }
+   },
+   "action": "CYCLOPS-ROOM-FCN"
   },
   "STRANGE-PASSAGE": {
    "id": "STRANGE-PASSAGE",
@@ -1010,7 +1026,8 @@
     "down": {
      "to": "CYCLOPS-ROOM"
     }
-   }
+   },
+   "action": "TREASURE-ROOM-FCN"
   },
   "RESERVOIR-SOUTH": {
    "id": "RESERVOIR-SOUTH",
@@ -1037,7 +1054,8 @@
      "if": "LOW-TIDE",
      "msg": "You would drown."
     }
-   }
+   },
+   "action": "RESERVOIR-SOUTH-FCN"
   },
   "RESERVOIR": {
    "id": "RESERVOIR",
@@ -1062,7 +1080,8 @@
     "down": {
      "msg": "The dam blocks your way."
     }
-   }
+   },
+   "action": "RESERVOIR-FCN"
   },
   "RESERVOIR-NORTH": {
    "id": "RESERVOIR-NORTH",
@@ -1080,7 +1099,8 @@
      "if": "LOW-TIDE",
      "msg": "You would drown."
     }
-   }
+   },
+   "action": "RESERVOIR-NORTH-FCN"
   },
   "STREAM-VIEW": {
    "id": "STREAM-VIEW",
@@ -1140,7 +1160,8 @@
     "east": {
      "to": "SMALL-CAVE"
     }
-   }
+   },
+   "action": "MIRROR-ROOM"
   },
   "MIRROR-ROOM-2": {
    "id": "MIRROR-ROOM-2",
@@ -1160,7 +1181,8 @@
     "east": {
      "to": "TINY-CAVE"
     }
-   }
+   },
+   "action": "MIRROR-ROOM"
   },
   "SMALL-CAVE": {
    "id": "SMALL-CAVE",
@@ -1201,7 +1223,8 @@
     "down": {
      "to": "ENTRANCE-TO-HADES"
     }
-   }
+   },
+   "action": "CAVE2-ROOM"
   },
   "COLD-PASSAGE": {
    "id": "COLD-PASSAGE",
@@ -1350,7 +1373,8 @@
     "down": {
      "to": "LOUD-ROOM"
     }
-   }
+   },
+   "action": "DEEP-CANYON-F"
   },
   "DAMP-CAVE": {
    "id": "DAMP-CAVE",
@@ -1388,7 +1412,8 @@
     "up": {
      "to": "DEEP-CANYON"
     }
-   }
+   },
+   "action": "LOUD-ROOM-FCN"
   },
   "NS-PASSAGE": {
    "id": "NS-PASSAGE",
@@ -1456,7 +1481,8 @@
      "if": "LLD-FLAG",
      "msg": "Some invisible force prevents you from passing through the gate."
     }
-   }
+   },
+   "action": "LLD-ROOM"
   },
   "LAND-OF-LIVING-DEAD": {
    "id": "LAND-OF-LIVING-DEAD",
@@ -1523,7 +1549,8 @@
      "if": "DOME-FLAG",
      "msg": "You cannot go down without fracturing many bones."
     }
-   }
+   },
+   "action": "DOME-ROOM-FCN"
   },
   "TORCH-ROOM": {
    "id": "TORCH-ROOM",
@@ -1542,7 +1569,8 @@
     "down": {
      "to": "NORTH-TEMPLE"
     }
-   }
+   },
+   "action": "TORCH-ROOM-FCN"
   },
   "NORTH-TEMPLE": {
    "id": "NORTH-TEMPLE",
@@ -1592,7 +1620,8 @@
      "if": "COFFIN-CURE",
      "msg": "You haven't a prayer of getting the coffin down there."
     }
-   }
+   },
+   "action": "SOUTH-TEMPLE-FCN"
   },
   "DAM-ROOM": {
    "id": "DAM-ROOM",
@@ -1618,7 +1647,8 @@
     "west": {
      "to": "RESERVOIR-SOUTH"
     }
-   }
+   },
+   "action": "DAM-ROOM-FCN"
   },
   "DAM-LOBBY": {
    "id": "DAM-LOBBY",
@@ -1769,7 +1799,8 @@
      "if": "DEFLATE",
      "msg": "The path is too narrow."
     }
-   }
+   },
+   "action": "WHITE-CLIFFS-FUNCTION"
   },
   "WHITE-CLIFFS-SOUTH": {
    "id": "WHITE-CLIFFS-SOUTH",
@@ -1785,7 +1816,8 @@
      "if": "DEFLATE",
      "msg": "The path is too narrow."
     }
-   }
+   },
+   "action": "WHITE-CLIFFS-FUNCTION"
   },
   "RIVER-4": {
    "id": "RIVER-4",
@@ -1811,7 +1843,8 @@
     "east": {
      "to": "SANDY-BEACH"
     }
-   }
+   },
+   "action": "RIVR4-ROOM"
   },
   "RIVER-5": {
    "id": "RIVER-5",
@@ -1906,7 +1939,8 @@
      "to": "ON-RAINBOW",
      "if": "RAINBOW-FLAG"
     }
-   }
+   },
+   "action": "FALLS-ROOM"
   },
   "ON-RAINBOW": {
    "id": "ON-RAINBOW",
@@ -2013,7 +2047,8 @@
     "south": {
      "msg": "Storm-tossed trees block your way."
     }
-   }
+   },
+   "action": "CANYON-VIEW-F"
   },
   "MINE-ENTRANCE": {
    "id": "MINE-ENTRANCE",
@@ -2065,7 +2100,8 @@
     "east": {
      "to": "SHAFT-ROOM"
     }
-   }
+   },
+   "action": "BATS-ROOM"
   },
   "SHAFT-ROOM": {
    "id": "SHAFT-ROOM",
@@ -2117,7 +2153,8 @@
     "east": {
      "to": "MINE-1"
     }
-   }
+   },
+   "action": "BOOM-ROOM"
   },
   "LADDER-TOP": {
    "id": "LADDER-TOP",
@@ -2184,7 +2221,8 @@
      "if": "EMPTY-HANDED",
      "msg": "You cannot fit through this passage with that load."
     }
-   }
+   },
+   "action": "NO-OBJS"
   },
   "LOWER-SHAFT": {
    "id": "LOWER-SHAFT",
@@ -2208,7 +2246,8 @@
      "if": "EMPTY-HANDED",
      "msg": "You cannot fit through this passage with that load."
     }
-   }
+   },
+   "action": "NO-OBJS"
   },
   "MACHINE-ROOM": {
    "id": "MACHINE-ROOM",
@@ -2221,7 +2260,8 @@
     "north": {
      "to": "LOWER-SHAFT"
     }
-   }
+   },
+   "action": "MACHINE-ROOM-FCN"
   },
   "MINE-1": {
    "id": "MINE-1",

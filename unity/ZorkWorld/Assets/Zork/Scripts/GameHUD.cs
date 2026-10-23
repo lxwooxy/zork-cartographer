@@ -121,6 +121,7 @@ namespace Zork
                 if (!string.IsNullOrEmpty(room.environment))
                     GUILayout.Label($"<color=#7d8c84>{room.environment} · {(room.indoor ? "indoor" : "outdoor")} · level {room.z}</color>", _small);
                 if (!string.IsNullOrEmpty(room.description)) GUILayout.Label(room.description, _small);
+                if (!string.IsNullOrEmpty(room.visual)) GUILayout.Label("<i><color=#bfd6c8>" + room.visual + "</color></i>", _small);
                 GUILayout.Space(6);
                 GUILayout.Label("<b>Here</b>", _log);
                 if (room.items == null || room.items.Length == 0) GUILayout.Label("<i>nothing loose</i>", _small);

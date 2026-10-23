@@ -57,6 +57,7 @@ Zork I's source is open, so the full map (110 rooms, 352 exits, with conditions 
 - **Exact tracking:** your position follows the real exits, so identical rooms (the 15 "Maze" rooms, the 4 "Forest" rooms) are never confused, and the autopilot can route through the maze correctly.
 - **Map ✓** in the header means the game has agreed with the map on every move. If it ever disagrees, the badge turns amber and its tooltip lists where. That's how the map gets checked and perfected.
 - **Places, not just rooms:** locations that span several rooms are drawn as one thing in 3D (`game/zork1-landmarks.json`). The white house is a single building with the Kitchen and Living Room inside and the Attic upstairs; the four "… of House" rooms are its yards, and its walls fade with the roof off when you go in (or when it blocks your view). The forest is one woodland with a big climbable tree, the Frigid River is one river, the rainbow arcs from Aragain Falls, and the reservoir is one lake.
+- **Room details:** each room's look (environment, lighting, scenery, colors and a one-line description) was written **once** by Claude for the whole map (`game/zork1-details.json`, made by `tools/describe_rooms.py`). A room's details appear when you discover it. Nothing is sent to Claude while you play, and the server needs no API key.
 - **Reveal map** (map toolbar) shows every room, including undiscovered ones as faint outlines. Spoilers, obviously.
 
 To tune the map, see [docs/SETUP.md → Perfecting the map](docs/SETUP.md#7-perfecting-the-map). Saves made before the canonical map existed keep using the older play-built mapper.
@@ -98,6 +99,8 @@ server/canon.py                loads the canonical map and layout
 game/zork1-map.json            every room and exit, generated from the game source
 game/zork1-regions.json        hand-curated level for each room (edit to taste)
 game/zork1-landmarks.json      places drawn as one thing (house, forest, river, rainbow, reservoir)
+game/zork1-details.json        each room's look, written once by Claude (tools/describe_rooms.py)
+game/source/                   Zork I source files the map is generated from (MIT)
 game/zork1-layout-overrides.json  hand-placed rooms (the house and forest), kept fixed by the layout
 game/zork1-layout.json         room positions (generated)
 tools/                         build_map.py, layout_map.py, render_map.py
@@ -126,7 +129,7 @@ Set in `.env` locally, or as secrets/env vars when hosted.
 | `ZORK_DATA` | `data/world.json` | Where the map and command log are saved. Checkpoint files go in a `saves/` folder next to it. |
 | `PORT` | `8765` | Port used by `run.sh`. |
 
-Everything works without an API key. The rule-based parser handles rooms, exits, items and inventory. With a key, each meaningful turn is also sent to the Claude API, which costs roughly a few dollars over a full game at the default settings.
+Everything works without an API key. The key is only needed to (re)write the room details once: see [docs/SETUP.md → Room details](docs/SETUP.md#8-room-details-written-once-by-claude). For saves made before the canonical map (heuristic mode), a key on the server instead sends each meaningful turn to Claude.
 
 ## Credits
 

@@ -124,3 +124,4 @@ button.primary:hover { background: #255571; }
 #map .room.undiscovered text { fill: #56655d; }
 #map .edge.hidden { stroke: #2c3832; stroke-width: 1.5; stroke-dasharray: 3 4; }
 .pill.warn { color: #e0c97e; border-color: #e0c97e; }
+.visual { margin: 8px 0 0; font-style: italic; color: #bfd6c8; border-left: 2px solid var(--accent); padding-left: 8px; }

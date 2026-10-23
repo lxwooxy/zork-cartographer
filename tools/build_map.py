@@ -1,8 +1,8 @@
 """Build the canonical Zork I map from the game's own source (1dungeon.zil).
 
-    python tools/build_map.py path/to/1dungeon.zil > game/zork1-map.json
+    python tools/build_map.py game/source/1dungeon.zil > game/zork1-map.json
 
-Get the source from https://github.com/historicalsource/zork1 (MIT license).
+The source is in game/source/ (from https://github.com/historicalsource/zork1, MIT license).
 The output lists every room with its name (what the status line shows), Zork's own
 description, flags, and every exit with its condition.
 """
@@ -86,6 +86,8 @@ def rooms_from(src: str) -> dict:
                 room["ldesc"] = text(rest[0][1])
             elif key == "FLAGS":
                 room["flags"] = [a[1] for a in rest if a[0] == "atom"]
+            elif key == "ACTION" and rest and rest[0][0] == "atom":
+                room["action"] = rest[0][1]   # routine in 1actions.zil (some descriptions live there)
             elif key in DIRS:
                 if key == "IN" and rest == [("atom", "ROOMS")]:
                     continue   # (IN ROOMS) means "this object is a room", not an exit

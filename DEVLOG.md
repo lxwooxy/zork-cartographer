@@ -115,6 +115,15 @@ Bugs found and fixed:
 
 - Deployed to Fly.io. The live game in progress (by then in the Cellar, with the river and reservoir found) picked up the new layout on restart: room positions are refreshed from the layout when a save loads. Still zero anomalies.
 
+### Room details, written once
+
+- **Ask:** use the API key to add detail once, and show it when a room is revealed.
+- `tools/describe_rooms.py` describes all 110 canonical rooms ahead of time; the server applies each room's details on discovery. There are no per-turn calls and no key on the server.
+- 40 rooms keep their description in code (`ACTION` routines) rather than `LDESC`. The map now records each routine's name, and the prompt includes that routine's text from `game/source/1actions.zil`, so descriptions stay faithful to the game. (The Zork source files now live in `game/source/`, so the map can be rebuilt without downloading anything.)
+- Impossible exits (`FALSE-FLAG`, e.g. Santa's chimney) are given to Claude as messages, not exits.
+- UI: the description appears in italics in the room panel (web and Unity), and the header badge reads "Room details ✓".
+- Tested with a temporary two-room file: details appear on discovery and nowhere else.
+
 ### Open items
 
 - Claude parsing hasn't been run against the live API yet (no key configured during development).
