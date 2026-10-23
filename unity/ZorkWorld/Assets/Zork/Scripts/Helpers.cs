@@ -68,7 +68,7 @@ namespace Zork
             tm.text = text;
             tm.font = _font;
             tm.fontSize = 64;
-            tm.characterSize = size * 0.15f;
+            tm.characterSize = size * 0.45f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.color = color;

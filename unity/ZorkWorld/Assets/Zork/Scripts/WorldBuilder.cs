@@ -153,7 +153,7 @@ namespace Zork
             light.color = Color.Lerp(Color.white, accentC, 0.35f);
 
             // Label
-            Label.Create(root.transform, r.name, new Vector3(0, wallHeight + 1.6f, 0), 0.32f, Color.white);
+            Label.Create(root.transform, r.name, new Vector3(0, wallHeight + 2.2f, 0), 0.32f, Color.white);
 
             // Items: small glowing cubes along the front of the room
             if (r.items != null)
@@ -165,7 +165,7 @@ namespace Zork
                     it.transform.localScale = Vector3.one * 0.45f;
                     it.transform.localPosition = new Vector3(x, 0.35f, -roomSize * 0.3f);
                     it.AddComponent<Spin>();
-                    Label.Create(root.transform, r.items[i], it.transform.localPosition + new Vector3(0, 0.7f, 0), 0.16f, new Color(1f, 0.9f, 0.6f));
+                    Label.Create(root.transform, r.items[i], it.transform.localPosition + new Vector3(0, 0.9f, 0), 0.26f, new Color(1f, 0.9f, 0.6f));
                 }
 
             // Unexplored and blocked exits: short stubs out of the room

@@ -299,6 +299,13 @@ function renderPanel() {
 
 function renderInventory() {
   fillList("inventory", world.inventory, "Empty-handed", (it) => `examine ${lastWord(it)}`);
+  if (world.inventory_stale) {
+    const li = document.createElement("li");
+    li.className = "click stale";
+    li.textContent = "Something may have been taken. Type i to refresh.";
+    li.onclick = () => send("i");
+    $("inventory").appendChild(li);
+  }
 }
 
 function fillList(id, items, emptyText, clickCmd) {

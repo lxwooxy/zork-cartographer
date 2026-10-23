@@ -53,8 +53,8 @@ namespace Zork
                 "Right-drag orbit · Scroll zoom · WASD/QE pan · F follow · Tab overview · H hide HUD", _small);
 
             // Left: log + input
-            float lw = Mathf.Min(460, Screen.width * 0.38f);
-            var logRect = new Rect(10, 54, lw, Screen.height - 110);
+            float lw = Mathf.Min(440, Screen.width * 0.3f);
+            var logRect = new Rect(10, 54, lw, Mathf.Min(Screen.height - 110, Screen.height * 0.55f));
             GUI.Box(logRect, GUIContent.none, _box);
             var sb = new StringBuilder();
             if (w != null && w.log != null)
@@ -75,7 +75,7 @@ namespace Zork
             GUI.EndScrollView();
 
             GUI.SetNextControlName("cmd");
-            var inputRect = new Rect(10, Screen.height - 48, lw, 30);
+            var inputRect = new Rect(10, logRect.yMax + 8, lw, 30);
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && GUI.GetNameOfFocusedControl() == "cmd")
             {
                 _client.SendCommand(_input);
@@ -92,7 +92,7 @@ namespace Zork
             }
 
             // Right: room + inventory
-            float rw = 280;
+            float rw = Mathf.Min(260, Screen.width * 0.24f);
             var right = new Rect(Screen.width - rw - 10, 54, rw, Screen.height - 64);
             GUI.Box(right, GUIContent.none, _box);
             GUILayout.BeginArea(new Rect(right.x + 10, right.y + 8, right.width - 20, right.height - 16));

@@ -47,6 +47,7 @@ class World:
         self.rooms: dict[str, Room] = {}
         self.current: str | None = None
         self.inventory: list[str] = []
+        self.inventory_stale = False   # something happened we can't track (e.g. the thief)
         self.score = 0
         self.moves = 0
         self.turn = 0
@@ -71,6 +72,7 @@ class World:
             w.rooms[r["id"]] = Room(**r, exits=exits)
         w.current = d.get("current")
         w.inventory = d.get("inventory", [])
+        w.inventory_stale = d.get("inventory_stale", False)
         w.score, w.moves, w.turn = d.get("score", 0), d.get("moves", 0), d.get("turn", 0)
         w.version = d.get("version", 0)
         w.log = d.get("log", [])
@@ -81,6 +83,7 @@ class World:
             "version": self.version,
             "current": self.current,
             "inventory": self.inventory,
+            "inventory_stale": self.inventory_stale,
             "score": self.score,
             "moves": self.moves,
             "turn": self.turn,
@@ -128,7 +131,8 @@ class World:
             moved = False
 
         if moved and not (prev and t.room_name == prev.name and not has_heading):
-            room = self._resolve_room(prev, direction, t.room_name, desc, dark)
+            room = self._resolve_room(prev, direction, t.room_name, desc, dark,
+                                      zp.items_mentioned(other) if has_heading else None)
             changes["new_room"] = room.visits == 0
             room.visits += 1
             if desc and not room.description:
@@ -154,6 +158,9 @@ class World:
         listing = zp.inventory_listing(t.text)
         if listing is not None:
             self.inventory = listing
+            self.inventory_stale = False
+        elif zp.inventory_changed_unexpectedly(t.text):
+            self.inventory_stale = True
         taken, dropped = zp.take_drop(t.command, t.text)
         for it in taken:
             if not any(_same(it, x) for x in self.inventory):
@@ -171,7 +178,8 @@ class World:
         changes["has_heading"] = has_heading
         return changes
 
-    def _resolve_room(self, prev: Room | None, direction: str | None, name: str, desc: str, dark: bool) -> Room:
+    def _resolve_room(self, prev: Room | None, direction: str | None, name: str, desc: str, dark: bool,
+                      items: list[str] | None = None) -> Room:
         # 1. A known exit from the previous room leads to a room with this name.
         if prev and direction and direction in prev.exits:
             to = prev.exits[direction].to
@@ -183,7 +191,18 @@ class World:
             same_desc = [r for r in same if r.description == desc or not r.description]
         else:
             same_desc = same
-        if len(same_desc) == 1 and len(same) == 1:
+        # Items lying around are the best way to tell identical rooms apart
+        # (drop something in each maze room, as Zork players always have).
+        if items and same_desc:
+            seen = {_norm(i) for i in items}
+            match = [r for r in same_desc if r.items and {_norm(i) for i in r.items} == seen]
+            if len(match) == 1:
+                return match[0]
+        # Walking from "Maze" into "Maze" means a different room with the same name.
+        within = bool(prev and direction and prev.name == name)
+        if within:
+            same_desc = [r for r in same_desc if r.id != prev.id]
+        if len(same_desc) == 1 and len(same) == 1 and not within:
             return same_desc[0]
         if same_desc and prev and direction:
             # Several rooms share a name (forests, mazes). Reuse one only if it sits
@@ -324,6 +343,7 @@ class World:
             r.items = _dedupe([i for i in room["items_present"] if i])
         if info.get("inventory") is not None and info.get("inventory_known"):
             self.inventory = info["inventory"]
+            self.inventory_stale = False
         r.enriched = True
         self.version += 1
 

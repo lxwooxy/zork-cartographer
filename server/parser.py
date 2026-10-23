@@ -24,6 +24,7 @@ ALIASES = {
 FAILED_MOVE = (
     "you can't go that way", "the door is closed", "is closed", "you can't", "there is a wall",
     "too narrow", "it is too dark", "you are not able", "the window is closed",
+    "solid rock", "wall is solid", "there is no way", "you would need", "impassable",
 )
 
 
@@ -156,7 +157,7 @@ def exits_in_description(desc: str) -> list[str]:
         w = m.group(1).lower()
         # "north side of the house" describes the house, not an exit
         after = desc[m.end():m.end() + 6].lower()
-        if after.startswith(" side") or after.startswith(" wall"):
+        if after.startswith((" side", " wall", " of ", " end")):  # "west of a white house"
             continue
         w = {"upward": "up", "upwards": "up", "downward": "down", "downwards": "down"}.get(w, w)
         if w in ("up", "down"):
@@ -167,3 +168,12 @@ def exits_in_description(desc: str) -> list[str]:
         if w not in out:
             out.append(w)
     return out
+
+
+_LOST = re.compile(r"(abstracted|stolen|steals?|snatche[sd]|took .* from you|from your possession|"
+                   r"slips? from your|you drop|falls? from your|is knocked out of your|disappears)", re.I)
+
+
+def inventory_changed_unexpectedly(text: str) -> bool:
+    """True when the game text hints that items left your hands (thief, combat, magic)."""
+    return bool(_LOST.search(text))

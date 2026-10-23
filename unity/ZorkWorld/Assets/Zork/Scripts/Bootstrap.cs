@@ -15,6 +15,7 @@ namespace Zork
             root.AddComponent<ZorkClient>();
             var builder = root.AddComponent<WorldBuilder>();
             root.AddComponent<GameHUD>();
+            AutoTestRunner.AttachIfRequested(root);
 
             var cam = Camera.main;
             if (cam == null)
