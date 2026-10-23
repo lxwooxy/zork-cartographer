@@ -36,13 +36,28 @@ namespace Zork
             yield return new WaitForSecondsRealtime(3f);
             yield return Shot("wide");
 
-            // Play a move from inside Unity and check the player follows.
+            var frogInfo = FindAnyObjectByType<FrogPlayer>();
+            Log("frog: " + (frogInfo != null ? frogInfo.Info : "none") + (frogInfo != null ? $" pos={frogInfo.transform.position} modelScale={(frogInfo.transform.childCount > 0 ? frogInfo.transform.GetChild(0).lossyScale.ToString() : "-")}" : ""));
+            // Close-up of the frog.
+            if (rig != null) { rig.distance = 16f; rig.pitch = 35f; }
+            yield return new WaitForSecondsRealtime(3f);
+            yield return Shot("frog");
+
+            // Send the autopilot to a reachable room and check the frog gets there.
             if (rig != null) { rig.distance = 34f; rig.pitch = 50f; }
             var before = client.World?.current;
-            client.SendCommand("nw");
-            yield return new WaitForSecondsRealtime(4f);
-            Log($"sent 'nw': {before} -> {client.World?.current}");
-            yield return Shot("moved");
+            string target = null;
+            foreach (var r in client.World.rooms) if (r.reach >= 2) { target = r.id; break; }
+            if (target != null)
+            {
+                client.Travel(target);
+                var t1 = Time.realtimeSinceStartup;
+                while (Time.realtimeSinceStartup - t1 < 20f && client.World?.current != target) yield return null;
+                yield return new WaitForSecondsRealtime(2f);
+                Log($"travel {before} -> {target}: now at {client.World?.current}, status={client.World?.travelStatus} msg={client.World?.travelMessage}");
+            }
+            else Log("no reachable room to travel to");
+            yield return Shot("travelled");
 
             Log($"builder children={builder.transform.childCount}");
 #if UNITY_EDITOR

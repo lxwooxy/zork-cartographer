@@ -14,6 +14,9 @@ namespace Zork
         public string[] inventory;
         public RoomData[] rooms;
         public LogEntry[] log;
+        public string travelStatus;    // "", moving, arrived, stopped, stuck, failed
+        public string travelMessage;
+        public string travelTo;
     }
 
     [Serializable]
@@ -35,6 +38,7 @@ namespace Zork
         public string[] items;
         public string[] features;
         public ExitData[] exits;
+        public int reach;              // 0 none, 1 maybe, 2 reachable, 3 one move away, 4 on the route
 
         // Used to decide whether a room's geometry needs rebuilding.
         public string Signature()
@@ -66,5 +70,11 @@ namespace Zork
     public class CommandRequest
     {
         public string command;
+    }
+
+    [Serializable]
+    public class TravelRequest
+    {
+        public string to;
     }
 }

@@ -20,8 +20,11 @@ class Turn:
 
 
 class Game:
-    def __init__(self, story: Path, seed: int = 42, width: int = 250):
-        self.story = story
+    def __init__(self, story: Path, seed: int = 42, width: int = 250, saves: Path | None = None):
+        self.story = Path(story).resolve()
+        # dfrotz truncates long save paths, so it runs inside the saves folder and
+        # save files get short names like "c3.qzl".
+        self.saves = Path(saves).resolve() if saves else None
         self.seed = seed
         self.width = width
         self.proc: asyncio.subprocess.Process | None = None
@@ -32,12 +35,15 @@ class Game:
         dfrotz = shutil.which("dfrotz")
         if not dfrotz:
             raise RuntimeError("dfrotz not found. Install it with: brew install frotz")
+        if self.saves:
+            self.saves.mkdir(parents=True, exist_ok=True)
         # -m: no MORE prompts, -s: fixed random seed so replays are deterministic
         self.proc = await asyncio.create_subprocess_exec(
             dfrotz, "-m", "-Z", "0", "-w", str(self.width), "-s", str(self.seed), str(self.story),
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
+            cwd=str(self.saves) if self.saves else None,
         )
         raw = await self._read_until_prompt()
         self.last = self._parse("", raw)
@@ -59,6 +65,30 @@ class Game:
             raw = await self._read_until_prompt(idle=0.01 if fast else 0.15, strict=fast)
             self.last = self._parse(command.strip(), raw)
             return self.last
+
+    async def save(self, filename: str) -> tuple[bool, str]:
+        """Save the game with Zork's own SAVE command. Returns (ok, game text)."""
+        return await self._file_command("save", filename)
+
+    async def restore(self, filename: str) -> tuple[bool, str]:
+        """Load a save made with save(). The interpreter's random numbers keep going,
+        so retrying after a restore can play out differently."""
+        return await self._file_command("restore", filename)
+
+    async def _file_command(self, verb: str, filename: str) -> tuple[bool, str]:
+        async with self.lock:
+            out = ""
+            for line in (verb, filename):
+                self.proc.stdin.write((line + "\n").encode())
+                await self.proc.stdin.drain()
+                out += await self._read_until_prompt()
+            if "overwrite" in out.lower():
+                self.proc.stdin.write(b"y\n")
+                await self.proc.stdin.drain()
+                out += await self._read_until_prompt()
+            text = re.sub(r"\n?>\s*$", "", out).strip()
+            ok = "Ok." in out
+            return ok, text
 
     async def drain(self):
         """Throw away any output still in the pipe (used after a replay)."""

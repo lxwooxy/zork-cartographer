@@ -9,6 +9,8 @@ const DIR_VEC = {
 };
 
 let world = null;
+let travel = null;          // autopilot trip state from the server
+let preview = null;         // {to, reachable, steps, suggest} for the selected room
 let level = 0;
 let selected = null;        // room id shown in the side panel (null = current room)
 let view = { x: 0, y: 0, k: 1 };   // pan offset (px) and zoom
@@ -21,7 +23,7 @@ function connect() {
   const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
   ws.onmessage = (ev) => {
     const msg = JSON.parse(ev.data);
-    if (msg.type === "world") update(msg.world, msg.llm);
+    if (msg.type === "world") update(msg.world, msg.llm, msg.travel);
   };
   ws.onclose = () => setTimeout(connect, 1000);
 }
@@ -96,9 +98,10 @@ $("cmd").addEventListener("keydown", (e) => {
 });
 
 // ---------- state ----------
-function update(w, llm) {
+function update(w, llm, tr) {
   const prevCurrent = world && world.current;
   world = w;
+  travel = tr || null;
   const cur = currentRoom();
   $("score").textContent = w.score;
   $("moves").textContent = w.moves;
@@ -118,10 +121,25 @@ function update(w, llm) {
     selected = null;
   }
   renderLog(w.log);
-  if (window.world3d) window.world3d.update(w);
+  if (prevCurrent && prevCurrent !== w.current && selected) refreshPreview();
+  if (window.world3d) window.world3d.update(w, overlay());
   renderMap();
   renderPanel();
   renderInventory();
+  renderTravel();
+  renderCheckpoints();
+}
+
+// What the map should highlight: the trip in progress, or the previewed route.
+function overlay() {
+  const moving = travel && travel.status === "moving";
+  const steps = moving ? travel.steps : (preview && preview.reachable ? preview.steps : []);
+  return {
+    route: steps,
+    target: moving ? travel.to : (preview ? preview.to : null),
+    reachable: world.reachable || {},
+    confirmed: world.confirmed || {},
+  };
 }
 
 function currentRoom() {
@@ -153,8 +171,12 @@ function renderMap() {
   $("level").textContent = level;
   svg.innerHTML = "";
   const byId = Object.fromEntries(world.rooms.map((r) => [r.id, r]));
+  const defs = el("defs", {}, svg);
+  const f = el("filter", { id: "glow", x: "-50%", y: "-50%", width: "200%", height: "200%" }, defs);
+  el("feGaussianBlur", { stdDeviation: 5 }, f);
   const g = el("g", {}, svg);
   const k = view.k;
+  const ov = overlay();
 
   // Rooms on other levels: faint outlines, for context.
   for (const r of world.rooms) {
@@ -194,11 +216,38 @@ function renderMap() {
     }
   }
 
+  // The route being previewed or travelled: a glowing line, room to room.
+  for (const st of ov.route) {
+    const a = byId[st.from], b = byId[st.to];
+    if (!a || !b) continue;
+    if (a.z !== level && b.z !== level) continue;
+    const [ax, ay] = toScreen(a.x, a.y);
+    const [bx, by] = a.z === b.z ? toScreen(b.x, b.y) : [ax, ay - 26 * k * (b.z > a.z ? 1 : -1)];
+    el("line", { x1: ax, y1: ay, x2: bx, y2: by, class: "route-glow" }, g);
+    el("line", { x1: ax, y1: ay, x2: bx, y2: by, class: "route" }, g);
+  }
+
   // Rooms on this level.
+  const routeRooms = new Set(ov.route.map((st) => st.to));
   for (const r of world.rooms) {
     if (r.z !== level) continue;
     const [sx, sy] = toScreen(r.x, r.y);
+    // Glowing tiles: where you can walk from here.
+    const glow = r.id === world.current ? null
+      : r.id in ov.confirmed ? (ov.confirmed[r.id] === 1 ? "near" : "reach")
+      : r.id in ov.reachable ? "maybe" : null;
+    const pad = 7 * k;
+    if (glow || routeRooms.has(r.id)) {
+      el("rect", { x: sx - ROOM_W * k / 2 - pad / 2, y: sy - ROOM_H * k / 2 - pad / 2,
+        width: ROOM_W * k + pad, height: ROOM_H * k + pad, rx: 10,
+        class: "tileglow " + (routeRooms.has(r.id) ? "onroute" : glow) }, g);
+    }
+    if (r.id === world.current) {
+      el("circle", { cx: sx, cy: sy, r: ROOM_W * k * 0.62, class: "here-pulse" }, g);
+    }
     const cls = ["room"];
+    if (r.id === ov.target) cls.push("target");
+    if (r.id === selected) cls.push("selected");
     if (r.id === world.current) cls.push("current");
     if (r.dark || r.lighting === "dark") cls.push("dark");
     const gr = el("g", { class: cls.join(" "), "data-id": r.id }, g);
@@ -218,9 +267,106 @@ function renderMap() {
     if (r.items.length) {
       el("circle", { cx: sx - ROOM_W * k / 2 + 7, cy: sy - ROOM_H * k / 2 + 7, r: 3.5, class: "itemdot" }, gr);
     }
-    gr.addEventListener("click", (ev) => { ev.stopPropagation(); selected = r.id; renderPanel(); });
+    if (r.id === world.current) {
+      const you = el("text", { x: sx, y: sy - ROOM_H * k / 2 - 8, class: "you" }, gr);
+      you.textContent = "YOU ARE HERE";
+    }
+    gr.addEventListener("click", (ev) => { ev.stopPropagation(); selectRoom(r.id); });
+    gr.addEventListener("dblclick", (ev) => { ev.stopPropagation(); goTo(r.id); });
   }
 }
+
+// ---------- click-to-travel ----------
+async function selectRoom(id) {
+  selected = id === world.current ? null : id;
+  preview = null;
+  await refreshPreview();
+}
+
+async function refreshPreview() {
+  if (!selected || selected === world.current) { preview = null; refreshViews(); return; }
+  const r = await fetch(`/api/route?to=${encodeURIComponent(selected)}`);
+  preview = r.ok ? await r.json() : null;
+  refreshViews();
+}
+
+function refreshViews() {
+  renderMap();
+  renderPanel();
+  if (window.world3d && world) window.world3d.update(world, overlay());
+}
+
+async function goTo(id, fromCheckpoint) {
+  if (!id || id === world.current) return;
+  selected = id;
+  const body = { to: id };
+  if (fromCheckpoint) body.from_checkpoint = fromCheckpoint;
+  const r = await fetch("/api/travel", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    if (d.error) appendLog(null, "[Autopilot] " + d.error);
+  }
+}
+
+async function stopTravel() { await fetch("/api/travel/stop", { method: "POST" }); }
+
+function renderTravel() {
+  const box = $("travel");
+  const t = travel;
+  if (!t || (t.status !== "moving" && !t.events.length && t.status !== "stuck")) { box.hidden = true; return; }
+  box.hidden = false;
+  box.className = "travel " + t.status;
+  const labels = { moving: "Travelling", arrived: "Arrived", stopped: "Stopped", stuck: "Stuck", failed: "Couldn't get there" };
+  const total = t.done + (t.steps ? t.steps.length : 0);
+  let html = `<div class="travel-head"><b>${labels[t.status] || t.status}</b> → ${esc(t.to_name)}`;
+  if (t.status === "moving") html += ` <span class="muted">(${t.done}/${total}${t.attempt > 1 ? `, attempt ${t.attempt}` : ""})</span>`;
+  html += `<span class="spacer"></span>`;
+  if (t.status === "moving") html += `<button id="tstop">Stop</button>`;
+  else html += `<button id="tclose" title="Hide">✕</button>`;
+  html += `</div><div class="travel-msg">${esc(t.message || "")}</div>`;
+  // The latest event is the message above; list the few before it.
+  const earlier = t.events.slice(-4, -1);
+  if (earlier.length) html += `<ul class="travel-events">${earlier.map((e) => `<li class="${e.kind}">${esc(e.text)}</li>`).join("")}</ul>`;
+  if (t.suggest && t.status !== "moving") {
+    const m = t.suggest.moves;
+    const how = m === 0 ? "it starts there" : `then ${m} move${m === 1 ? "" : "s"}`;
+    html += `<button id="tsuggest" class="primary">Load “${esc(t.suggest.name)}” (${how})</button>`;
+  }
+  box.innerHTML = html;
+  if ($("tstop")) $("tstop").onclick = stopTravel;
+  if ($("tclose")) $("tclose").onclick = () => { travel = null; box.hidden = true; };
+  if ($("tsuggest")) $("tsuggest").onclick = () => {
+    if (confirm(`Load the checkpoint “${t.suggest.name}” (turn ${t.suggest.turn})? Progress since then is undone, but the map keeps everything you've explored.`)) goTo(t.to, t.suggest.id);
+  };
+}
+
+// ---------- checkpoints ----------
+function renderCheckpoints() {
+  const ul = $("checkpoints");
+  ul.innerHTML = "";
+  const cps = (world.checkpoints || []).slice().reverse();
+  if (!cps.length) { ul.innerHTML = `<li class="empty">No saves yet</li>`; return; }
+  for (const c of cps) {
+    const li = document.createElement("li");
+    li.className = "cp" + (c.auto ? " auto" : "");
+    li.innerHTML = `<span class="cpname">${esc(c.name)}</span><span class="muted">turn ${c.turn} · ${esc(c.room_name)}</span>`;
+    const b = document.createElement("button");
+    b.textContent = "Load";
+    b.onclick = async () => {
+      if (!confirm(`Load “${c.name}”? Progress since turn ${c.turn} is undone, but the map keeps everything you've explored.`)) return;
+      await fetch(`/api/checkpoints/${c.id}/load`, { method: "POST" });
+    };
+    li.appendChild(b);
+    ul.appendChild(li);
+  }
+}
+
+$("savebtn").onclick = async () => {
+  const cur = currentRoom();
+  const name = prompt("Name this save:", cur ? `${cur.name}, turn ${world.turn}` : "");
+  if (name === null) return;
+  await fetch("/api/checkpoints", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
+};
 
 function shorten(s, n) { return s.length > n ? s.slice(0, Math.max(3, n - 1)) + "…" : s; }
 
@@ -242,7 +388,12 @@ window.addEventListener("mousemove", (e) => {
   drag.moved = true;
   renderMap();
 });
-window.addEventListener("mouseup", () => { if (drag && drag.moved) $("follow").checked = false; drag = null; });
+let justDragged = false;
+window.addEventListener("mouseup", () => {
+  justDragged = !!(drag && drag.moved);
+  if (justDragged) $("follow").checked = false;
+  drag = null;
+});
 svg.addEventListener("wheel", (e) => {
   e.preventDefault();
   const rect = svg.getBoundingClientRect();
@@ -254,7 +405,7 @@ svg.addEventListener("wheel", (e) => {
   view.k = nk;
   renderMap();
 }, { passive: false });
-svg.addEventListener("click", () => { selected = null; renderPanel(); });
+svg.addEventListener("click", () => { if (justDragged) return; selected = null; preview = null; refreshViews(); });
 
 $("lvlup").onclick = () => { level++; $("follow").checked = false; renderMap(); };
 $("lvldown").onclick = () => { level--; $("follow").checked = false; renderMap(); };
@@ -278,7 +429,7 @@ function setMode(is3d) {
   $("view3d").hidden = !is3d;
   if (window.world3d) {
     window.world3d.setVisible(is3d);
-    if (is3d && world) window.world3d.update(world);
+    if (is3d && world) window.world3d.update(world, overlay());
   }
   try { localStorage.setItem("zork-view", is3d ? "3d" : "2d"); } catch {}
   if (!is3d) renderMap();
@@ -287,10 +438,11 @@ $("mode2d").onclick = () => setMode(false);
 $("mode3d").onclick = () => setMode(true);
 $("overview").onclick = () => { if (window.world3d) { window.world3d.overview(); $("follow").checked = false; } };
 window.addEventListener("world3d-ready", () => {
-  if (world) window.world3d.update(world);
+  window.world3d.onRoomClick = (id, dbl) => (dbl ? goTo(id) : selectRoom(id));
+  if (world) window.world3d.update(world, overlay());
   let saved = null;
   try { saved = localStorage.getItem("zork-view"); } catch {}
-  if (saved === "3d" || location.hash === "#3d") setMode(true);
+  if (saved === "3d" || location.hash.startsWith("#3d")) setMode(true);
 });
 window.addEventListener("resize", () => { const c = currentRoom(); if (c && $("follow").checked) centerOn(c); renderMap(); });
 
@@ -319,6 +471,7 @@ function renderPanel() {
     if (ex.note) s += ` — ${ex.note}`;
     return { label: s, dir: d };
   });
+  renderRouteBox(r);
   const ul = $("roomexits");
   ul.innerHTML = "";
   if (!exits.length) ul.innerHTML = `<li class="empty">None known yet</li>`;
@@ -327,6 +480,32 @@ function renderPanel() {
     li.textContent = e.label;
     if (r.id === world.current) { li.className = "click"; li.title = `Go ${e.dir}`; li.onclick = () => send(e.dir); }
     ul.appendChild(li);
+  }
+}
+
+function renderRouteBox(r) {
+  const box = $("routebox");
+  if (r.id === world.current || !preview || preview.to !== r.id) { box.hidden = true; return; }
+  box.hidden = false;
+  if (preview.reachable) {
+    const dirs = preview.steps.map((s) => s.command).join(" → ");
+    const n = preview.steps.length;
+    box.innerHTML = `<div><b>Route</b> <span class="muted">${n} move${n === 1 ? "" : "s"}</span></div>
+      <div class="dirs">${esc(dirs)}</div>
+      <button id="gobtn" class="primary">Go there</button>
+      <div class="muted small">Tip: double-click a room to go straight there.</div>`;
+    $("gobtn").onclick = () => goTo(r.id);
+  } else {
+    let html = `<div><b>No known route</b></div><div class="muted small">Explore the way there by hand first, or go back to a save that had a way through.</div>`;
+    if (preview.suggest) {
+      const m = preview.suggest.moves;
+      html += `<button id="sugbtn" class="primary">Load “${esc(preview.suggest.name)}” (${m === 0 ? "it starts there" : `then ${m} move${m === 1 ? "" : "s"}`})</button>`;
+    }
+    box.innerHTML = html;
+    if ($("sugbtn")) $("sugbtn").onclick = () => {
+      const sg = preview.suggest;
+      if (confirm(`Load “${sg.name}” (turn ${sg.turn})? Progress since then is undone, but the map keeps everything you've explored.`)) goTo(r.id, sg.id);
+    };
   }
 }
 
@@ -363,5 +542,10 @@ $("newgame").onclick = async () => {
   await fetch("/api/new-game", { method: "POST" });
 };
 
-fetch("/api/world").then((r) => r.json()).then((d) => { if (!world) update(d.world, d.llm); });
+fetch("/api/world").then((r) => r.json()).then((d) => {
+  if (!world) update(d.world, d.llm, d.travel);
+  // Links like /#3d&to=kitchen open with that room selected and its route previewed.
+  const to = new URLSearchParams(location.hash.slice(1)).get("to");
+  if (to) selectRoom(to);
+});
 connect();

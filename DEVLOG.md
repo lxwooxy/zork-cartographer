@@ -59,9 +59,35 @@ Bugs found and fixed:
 - **Browser 3D:** `web/world3d.js` ports the Unity builder to three.js (bundled in `web/vendor/`, no CDN). Same scale, themes, walls with doorways, ramps, stubs, item markers, labels. One light follows the player instead of a light per room, so shaders stay cheap with 100+ rooms. Toggle 2D/3D on the map; the choice is remembered.
 - **Unity:** a **Server…** panel to set the URL and password, saved in PlayerPrefs. Tested against a password-protected server.
 
+### Click-to-travel, glowing rooms, "you are here"
+
+- **Goal:** click anywhere on the map and have the program work out "north, west, north" and walk it, handling trouble along the way.
+- **Route planning** on the server (Dijkstra), so the browser and Unity agree. Walked exits are preferred over guessed ones. Each exit remembers the command that actually crossed it (`climb tree`, not `up`).
+- **Rulebook** (`server/autopilot.py`): death / darkness / troll / cyclops / combat / questions stop; the thief makes it keep moving (leaving is the tactic, even mid-attack); blocked moves re-plan.
+- **Bug found while testing:** the guessed reverse of a move is often wrong in Zork (North of House → `south` is "The windows are all boarded."). The first version only recognised failures by phrase, missed this one, and re-planned the same route six times. Then adding "boarded" made it think *successful* moves had failed, because room descriptions mention boarded windows. **Fix:** decide success by where we ended up (same room = blocked, mark and re-plan), never by phrases.
+- **Arriving counts:** reaching the Cyclops Room stopped the trip because the cyclops rule fired; arrival now wins over warnings (except death).
+- **UI:** reachable rooms glow (bright green: one move; soft green: reachable; dashed amber: only via guessed exits), the previewed or active route glows blue, and a pulsing ring plus "YOU ARE HERE" marks the player. Click previews, double-click goes. A banner shows progress and why it stopped.
+
+### Save / load and smarter retries
+
+- **Ask:** let the autopilot save and reload, e.g. go back and try again if the thief steals the key.
+- **Why real saves:** rewinding the command log replays the same dice, so the thief would steal the same thing again. Zork's own `SAVE` / `RESTORE` resets the game but not the interpreter's random numbers, so a retry can go differently. Each retry also waits a turn first to shift things further.
+- dfrotz truncates long save paths (only part of the name was kept), so it now runs inside the saves folder with short names (`c1.qzl`). Saves are about 0.5 KB.
+- **Checkpoints** store a snapshot of position, inventory, score and room items; loading rewinds those but keeps the explored map.
+- Saves and loads are entries in the command log, so startup replay reproduces them exactly.
+- **Autopilot:** checkpoint before every trip; on death or theft, load it and retry (3 attempts); when stuck, suggest the newest save from which the destination is reachable. Tested: the trap-door case (cellar → kitchen, stuck → suggested living-room save → arrived) and a simulated theft (save → move → theft → restore → wait → arrive on attempt 2).
+
+### The frog
+
+- Searched for a free rigged frog. Picked **Frog by Quaternius** (CC0, via Poly Pizza): 28 bones; Idle, Jump, Attack, Death. Also considered his upright yellow frog character (14 animations, including Walk, Wave, Punch); it would be easy to swap in.
+- Web: glTF + `AnimationMixer`. Hops between rooms with an arc, turns to face where it's going, attacks on `kill …`, plays Death when you die.
+- Unity: the same model as FBX, imported with Legacy animations by an `AssetPostprocessor`.
+- **Gotcha:** it rendered as an invisible speck in both engines. The rig's armature is scaled 100× (FBX export), so mesh bounds are ~100× too big and auto-fit shrank it to nothing. Fix: size it by bone positions (Unity) or a fixed scale (web), and disable culling. Bone box is 2.64 × 1.78 × 5.44 in both engines.
+- Added a floating marker above the frog so "you are here" is visible when zoomed out.
+
 ### Open items
 
 - Deploy to Fly.io (config is ready; needs `fly auth login`).
-- Player character: replace the capsule with an animated frog.
 - Claude parsing hasn't been run against the live API yet (no key configured during development).
-- Possible: Z-machine save files instead of replay for very long games.
+- Autopilot could explore unknown exits on its own (currently it only uses known ones).
+- Unity: click-to-preview routes (it has double-click travel, glow and the status bar).

@@ -22,6 +22,11 @@ namespace Zork
         readonly Dictionary<string, Vector3> _positions = new Dictionary<string, Vector3>();
         Transform _connections;
         Vector3 _playerTarget;
+        FrogPlayer _frog;
+        GameHUD _hud;
+        string _lastClicked;
+        float _lastClickTime;
+        string _lastLogKey;
 
         static readonly Dictionary<string, Vector3> Dir = new Dictionary<string, Vector3>
         {
@@ -35,25 +40,34 @@ namespace Zork
         void Awake()
         {
             _client = GetComponent<ZorkClient>();
+            _hud = GetComponent<GameHUD>();
             _client.OnWorld += Build;
             _connections = new GameObject("Connections").transform;
             _connections.SetParent(transform, false);
 
-            var p = Mat.Primitive(PrimitiveType.Capsule, "Player", transform, Mat.Color(new Color(0.5f, 1f, 0.65f), emission: 1.5f));
-            p.transform.localScale = new Vector3(0.9f, 0.9f, 0.9f);
-            var light = p.AddComponent<Light>();
-            light.type = LightType.Point;
-            light.range = 14f;
-            light.intensity = 2.2f;
-            light.color = new Color(1f, 0.85f, 0.6f);
+            var p = new GameObject("Player");
+            p.transform.SetParent(transform, false);
+            _frog = p.AddComponent<FrogPlayer>();
             Player = p.transform;
         }
 
         void Update()
         {
-            if (Player == null) return;
-            var bob = Mathf.Sin(Time.time * 2f) * 0.15f;
-            Player.position = Vector3.Lerp(Player.position, _playerTarget + Vector3.up * (1.3f + bob), Time.deltaTime * 4f);
+            // Double-click a room to send the autopilot there.
+            if (Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0 && (_hud == null || !_hud.IsOverHud(Input.mousePosition)))
+            {
+                var cam = Camera.main;
+                if (cam != null && Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out var hit, 2000f))
+                {
+                    var tag = hit.collider.GetComponentInParent<RoomTag>();
+                    if (tag != null)
+                    {
+                        if (tag.id == _lastClicked && Time.time - _lastClickTime < 0.35f) _client.Travel(tag.id);
+                        _lastClicked = tag.id;
+                        _lastClickTime = Time.time;
+                    }
+                }
+            }
         }
 
         public Vector3 ToWorld(RoomData r) => new Vector3(r.x * spacing, r.z * levelHeight, r.y * spacing);
@@ -82,6 +96,7 @@ namespace Zork
                 mover.target = pos;
                 mover.enabled = true;
                 _positions[r.id] = pos;
+                SetGlow(go, r.reach);
             }
 
             // Connections are cheap, so rebuild them every update.
@@ -104,14 +119,50 @@ namespace Zork
                 CurrentRoom = cur;
                 CurrentRoomPosition = ToWorld(cur);
                 _playerTarget = CurrentRoomPosition;
-                if (Player.position == Vector3.zero) Player.position = _playerTarget;
+                _frog.SetTarget(_playerTarget);
             }
+            if (w.log != null && w.log.Length > 0)
+            {
+                var last = w.log[w.log.Length - 1];
+                var key = w.moves + "|" + last.command + "|" + (last.text?.Length ?? 0);
+                if (key != _lastLogKey) { _lastLogKey = key; _frog.OnTurn(last.command, last.text); }
+            }
+        }
+
+        // Glowing floor tile: where you can walk from here (see RoomData.reach).
+        static readonly Color[] GlowColors =
+        {
+            Color.clear,
+            new Color(0.88f, 0.79f, 0.49f),   // 1: maybe (guessed exits)
+            new Color(0.30f, 0.75f, 0.45f),   // 2: reachable
+            new Color(0.50f, 1.00f, 0.65f),   // 3: one move away
+            new Color(0.44f, 0.83f, 1.00f),   // 4: on the autopilot's route
+        };
+
+        void SetGlow(GameObject room, int reach)
+        {
+            var t = room.transform.Find("Glow");
+            if (reach <= 0 || reach >= GlowColors.Length) { if (t != null) t.gameObject.SetActive(false); return; }
+            if (t == null)
+            {
+                var g = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                g.name = "Glow";
+                Destroy(g.GetComponent<Collider>());
+                g.transform.SetParent(room.transform, false);
+                g.transform.localScale = new Vector3(roomSize + 0.8f, 0.02f, roomSize + 0.8f);
+                g.transform.localPosition = new Vector3(0, -0.02f, 0);
+                t = g.transform;
+            }
+            t.gameObject.SetActive(true);
+            var strength = reach == 2 ? 0.4f : reach == 1 ? 0.35f : 1.1f;
+            t.GetComponent<Renderer>().sharedMaterial = Mat.Color(GlowColors[reach], emission: strength);
         }
 
         // ---------- rooms ----------
         GameObject BuildRoom(RoomData r, Dictionary<string, RoomData> byId)
         {
             var root = new GameObject("Room: " + r.name);
+            root.AddComponent<RoomTag>().id = r.id;
             root.transform.SetParent(transform, false);
             var env = (r.environment ?? "").ToLowerInvariant();
             var dark = r.lighting == "dark";
@@ -402,6 +453,12 @@ namespace Zork
             transform.position = Vector3.Lerp(transform.position, target, Time.deltaTime * 3f);
             if ((transform.position - target).sqrMagnitude < 0.0001f) { transform.position = target; enabled = false; }
         }
+    }
+
+    /// Marks a room's root object so clicks can find which room was hit.
+    public class RoomTag : MonoBehaviour
+    {
+        public string id;
     }
 
     public class Spin : MonoBehaviour

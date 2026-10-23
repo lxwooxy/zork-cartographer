@@ -31,9 +31,29 @@ Zork's geography isn't Euclidean (east then west doesn't always return you), so 
 
 `z` is the level, an integer changed by `up`/`down`. Positions are floats; both 3D views animate rooms gliding to new spots.
 
+## Click-to-travel (autopilot)
+
+- **Planning:** `World.route(start, goal)` is Dijkstra over known, unblocked exits. Exits we've walked cost 1; exits only guessed from the reverse direction cost 1.5, so walked paths are preferred. Each step carries the command that actually worked (`Exit.via`, e.g. `climb tree`, `enter window`), not just the compass direction.
+- **Reachability:** `World.reachable()` (all known exits) and `reachable(confirmed_only=True)` (walked exits only) drive the glowing tiles. Both come with `/api/world` as `reachable` / `confirmed` (room id → number of moves).
+- **Walking** (`_travel_loop` in `app.py`): sends one step, then:
+  1. checks the turn's text against `autopilot.RULES` (death, darkness, troll, cyclops, thief, theft, combat, question);
+  2. on death or theft, `_retry()` loads the trip's checkpoint, waits `attempt - 1` turns to change the random outcome, re-plans and goes again (max 3 attempts);
+  3. on a stop rule, stops (but arriving at the destination always counts as arrived);
+  4. **whether a move worked is decided by where we ended up, not by phrases**: same room means the exit is marked blocked and the route re-planned; a different room than expected means the map is already corrected, so re-plan.
+- **Stuck:** with no route, `suggest_checkpoint(goal)` looks for the newest checkpoint whose room has a known route to the goal. The UI offers to load it, then `POST /api/travel {to, from_checkpoint}`.
+- Any manual command cancels a trip in progress.
+
+## Checkpoints (save / load)
+
+- **Saving** uses Zork's own `SAVE` (`Game.save`), writing Quetzal files (`c1.qzl`, `c2.qzl`, …) into `saves/` next to the world file. dfrotz runs with that folder as its working directory, because it truncates long save paths.
+- **Snapshot:** `World.make_checkpoint` records the room id, inventory, score, moves and every room's items, because the map can't learn those from the save file.
+- **Loading** runs `RESTORE`, then `World.restore_checkpoint` rewinds those fields. Rooms and exits learned since then are kept on purpose: you remember the map even if the game rewinds.
+- **Why not just replay fewer commands?** Replay with a fixed seed repeats the same random outcomes, so the thief would steal the same key again. After a `RESTORE` the interpreter's random numbers keep going, so a retry can play out differently.
+- **Log:** saves and loads go into the command log as `{"kind": "save"|"restore", "file": …}` entries. Startup replay performs them in order, so restarts stay exact. Pruned automatic checkpoints leave their files; replay rewrites them anyway.
+
 ## Restoring a game
 
-`data/world.json` keeps every command. On startup, `app.py` starts a fresh dfrotz with the same seed and replays them (`Game.send(fast=True)`, which stops reading as soon as the `>` prompt appears). Then it drains leftover output. The map itself is loaded from the file, not rebuilt.
+`data/world.json` keeps every command, save and load. On startup, `app.py` starts a fresh dfrotz with the same seed and replays them in order (`Game.send(fast=True)` stops reading as soon as the `>` prompt appears; save/load entries call `Game.save` / `Game.restore`). Then it drains leftover output. The map itself is loaded from the file, not rebuilt.
 
 ## HTTP API
 
@@ -44,7 +64,12 @@ Zork's geography isn't Euclidean (east then west doesn't always return you), so 
 | `GET /api/unity?since=N` | `since` = last version seen | flat, array-only state for Unity's `JsonUtility`, or `{unchanged: true}` |
 | `POST /api/new-game` | | backs up the save, restarts |
 | `POST /api/rooms/{id}/rename` | `{"name": "..."}` | rename a room on the map |
-| `WS /ws` | | pushes `{type: "world", world, llm}` after every change |
+| `GET /api/route?to=ID` | | `{reachable, steps: [{dir, command, from, to, inferred}], suggest}` |
+| `POST /api/travel` | `{"to": ID, "from_checkpoint": null, "retry": true}` | starts a trip; `409` with `suggest` if there's no route |
+| `POST /api/travel/stop` | | stops the trip in progress |
+| `POST /api/checkpoints` | `{"name": "..."}` | saves the game now |
+| `POST /api/checkpoints/{id}/load` | | loads a checkpoint |
+| `WS /ws` | | pushes `{type: "world", world, llm, travel}` after every change |
 | `GET/POST /login` | `{"password": "..."}` | login page / sets the session cookie |
 | `GET /healthz` | | `{ok, turn}`, used by Fly health checks; no password needed |
 
@@ -62,14 +87,18 @@ When `ZORK_PASSWORD` is set, every route except `/login`, `/healthz` and `/style
   "rooms": [{
     "id": "west-of-house", "name": "West of House", "description": "...",
     "x": 0.0, "y": 0.0, "z": 0,             // map position (east, north, level)
-    "exits": {"north": {"to": "north-of-house", "blocked": false, "inferred": false, "note": ""}},
+    "exits": {"north": {"to": "north-of-house", "blocked": false, "inferred": false, "note": "", "via": ""}},
     "items": ["small mailbox"], "visits": 2, "first_turn": 0, "dark": false,
     // filled in by the Claude API when it's on:
     "environment": "field", "indoor": false, "lighting": "bright",
     "features": ["white house"], "palette": {"floor": "#...", "wall": "#...", "accent": "#..."},
     "visual": "...", "enriched": true
   }],
-  "log": [{"turn": 1, "command": "north", "text": "...", "room": "north-of-house", "score": 0, "moves": 1}]
+  "checkpoints": [{"id": "c1", "name": "Got the leaflet", "file": "c1.qzl", "auto": false, "turn": 3,
+                   "current": "west-of-house", "room_name": "West of House", "score": 0, "moves": 2,
+                   "inventory": ["leaflet"], "items": {"west-of-house": ["small mailbox"]}, "created": 1761234567.0}],
+  "log": [{"turn": 1, "command": "north", "text": "...", "room": "north-of-house", "score": 0, "moves": 1},
+          {"turn": 3, "command": "", "kind": "save", "file": "c1.qzl", "text": "[Saved checkpoint: ...]"}]
 }
 ```
 
@@ -88,6 +117,12 @@ Both build the same scene from the same data:
 | Exits not taken | grey stubs, red when blocked; discs for up/down | same |
 | Labels | canvas-texture sprites | `TextMesh` billboards |
 | Lighting | hemisphere + sun + a light on the player | adds a point light per room |
+| Player | frog (`web/models/frog.glb`), three.js `AnimationMixer` | frog (`Resources/Frog.fbx`), Legacy `Animation` (`FrogPlayer.cs`) |
+| You are here | ring on the floor + floating marker | same |
+| Reachable rooms | additive glow plane per room (`setGlow`) | emissive tile per room (`SetGlow`, from `RoomData.reach`) |
+| Travel | click = preview, double-click = go | double-click = go; status bar in the HUD |
+
+**Frog model gotcha:** the rig was exported from FBX with the armature scaled 100×, so the skinned mesh's bounding box is about 100× too big. Both viewers size the frog from its **bone positions** (or a fixed scale) instead of mesh bounds, and turn off culling for it.
 
 When adding a new environment type, update `THEMES` and `decorate()` in `world3d.js`, `Theme.For` and `Decorate()` in `WorldBuilder.cs`, the keyword guesses in `guess_environment`, and the list in the `SYSTEM` prompt in `llm.py`.
 

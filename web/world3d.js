@@ -2,6 +2,7 @@
 // (unity/ZorkWorld/Assets/Zork/Scripts/WorldBuilder.cs).
 import * as THREE from "three";
 import { OrbitControls } from "./vendor/OrbitControls.js";
+import { GLTFLoader } from "./vendor/loaders/GLTFLoader.js";
 
 const SPACING = 14;       // world units per map unit
 const LEVEL_H = 9;        // world units per up/down level
@@ -132,7 +133,7 @@ function buildRoom(r, byId) {
 
   decorate(g, r, env, accentC, wallC);
 
-  const name = label(r.name, "#ffffff", 1.3);
+  const name = label(r.name, "#ffffff", 1.0);
   name.position.set(0, WALL_H + 2.4, 0);
   g.add(name);
 
@@ -268,6 +269,7 @@ export function createWorld3D(container) {
   sun.position.set(-40, 80, 30);
   scene.add(sun);
 
+  const clock = new THREE.Clock();
   const camera = new THREE.PerspectiveCamera(50, 1, 0.5, 3000);
   camera.position.set(25, 30, 30);
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -276,25 +278,101 @@ export function createWorld3D(container) {
   controls.minDistance = 6;
   controls.maxDistance = 900;
 
-  const rooms = new Map();          // id -> { group, sig, target }
+  const rooms = new Map();          // id -> { group, sig, target, glow }
   const links = new THREE.Group();
   scene.add(links);
+  const routeGroup = new THREE.Group();   // glowing route segments
+  scene.add(routeGroup);
 
-  const player = new THREE.Mesh(new THREE.CapsuleGeometry(0.45, 0.8, 6, 12), mat("#80ffa6", 1.2));
-  const glow = new THREE.PointLight(0xffd9a0, 60, 22, 1.6);
-  player.add(glow);
+  // ---------- the player: a frog ----------
+  // Red-eyed tree frog by Quaternius (CC0), web/models/frog.glb.
+  // Animations: Frog_Idle, Frog_Jump, Frog_Attack, Frog_Death.
+  const player = new THREE.Group();
   scene.add(player);
+  const lamp = new THREE.PointLight(0xffe6c0, 35, 22, 1.6);
+  lamp.position.set(0, 4.5, 0);
+  player.add(lamp);
+  const placeholder = new THREE.Mesh(new THREE.CapsuleGeometry(0.45, 0.8, 6, 12), mat("#80ffa6", 1.2));
+  placeholder.position.y = 0.9;
+  player.add(placeholder);
+  let mixer = null;
+  const actions = {};
+  let activeAction = null;
+
+  function play(name, { once = false, fade = 0.2 } = {}) {
+    const next = actions[name];
+    if (!next || next === activeAction && !once) return;
+    next.reset();
+    next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity);
+    next.clampWhenFinished = once;
+    next.play();
+    if (activeAction && activeAction !== next) activeAction.crossFadeTo(next, fade, false);
+    activeAction = next;
+  }
+
+  new GLTFLoader().load("models/frog.glb", (gltf) => {
+    const frog = gltf.scene;
+    // The rig has a 100x scaled armature (FBX export), so bounding boxes of the unposed
+    // mesh are misleading. At scale 1 the posed frog is ~3 units long with its feet at y=0;
+    // 1.0 reads well next to an 8-unit room. It faces +Z.
+    frog.scale.setScalar(1.0);
+    frog.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = false; } });
+    player.remove(placeholder);
+    player.add(frog);
+    mixer = new THREE.AnimationMixer(frog);
+    for (const clip of gltf.animations) {
+      const short = clip.name.split("|").pop().replace("Frog_", "");   // Idle, Jump, Attack, Death
+      actions[short] = mixer.clipAction(clip);
+    }
+    play("Idle");
+  }, undefined, (err) => console.warn("Frog model failed to load; using a capsule.", err));
+
+  // "You are here": a pulsing ring on the floor under the frog.
+  const ring = new THREE.Mesh(new THREE.RingGeometry(1.5, 1.9, 48),
+    new THREE.MeshBasicMaterial({ color: 0x7ee0a1, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false }));
+  ring.rotation.x = -Math.PI / 2;
+  scene.add(ring);
+
+  // ...and a glowing marker floating above, visible when zoomed out.
+  const pin = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.2, 4), mat("#7ee0a1", 1.4));
+  pin.rotation.x = Math.PI;   // point down at the frog
+  scene.add(pin);
+
   let playerTarget = V(0, 0, 0);
+  let hopFrom = null;               // where the current hop started
   let follow = true;
   let visible = false;
   let current = null;
+  let lastTurnSeen = -1;
+  let busyUntil = 0;                // time until a one-shot animation (attack/death) finishes
+
+  // ---------- glowing tiles ----------
+  const GLOW = { near: [0x7ee0a1, 0.55], reach: [0x7ee0a1, 0.22], maybe: [0xe0c97e, 0.2],
+                 onroute: [0x6fd3ff, 0.6], target: [0x6fd3ff, 0.85] };
+  const glowGeo = new THREE.PlaneGeometry(ROOM + 1.2, ROOM + 1.2);
+  function setGlow(entry, kind) {
+    if (!kind) { if (entry.glow) entry.glow.visible = false; return; }
+    if (!entry.glow) {
+      entry.glow = new THREE.Mesh(glowGeo, new THREE.MeshBasicMaterial({
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+      entry.glow.rotation.x = -Math.PI / 2;
+      entry.glow.position.y = 0.06;
+      entry.glow.renderOrder = 5;
+    }
+    if (entry.glow.parent !== entry.group) entry.group.add(entry.glow);
+    const [color, opacity] = GLOW[kind];
+    entry.glow.material.color.setHex(color);
+    entry.glow.userData.base = opacity;
+    entry.glow.userData.kind = kind;
+    entry.glow.visible = true;
+  }
 
   function dispose(group) {
     scene.remove(group);
     group.traverse((o) => { if (o.isSprite) { o.material.map.dispose(); o.material.dispose(); } });
   }
 
-  function update(world) {
+  function update(world, ov = { route: [], target: null, reachable: {}, confirmed: {} }) {
     const byId = Object.fromEntries(world.rooms.map((r) => [r.id, r]));
     for (const r of world.rooms) {
       const sig = signature(r);
@@ -302,9 +380,10 @@ export function createWorld3D(container) {
       if (!entry || entry.sig !== sig) {
         if (entry) dispose(entry.group);
         const group = buildRoom(r, byId);
+        group.userData.roomId = r.id;
         group.position.copy(entry ? entry.group.position : toWorld(r));
         scene.add(group);
-        entry = { group, sig };
+        entry = { group, sig, glow: null };
         rooms.set(r.id, entry);
       }
       entry.target = toWorld(r);
@@ -323,18 +402,80 @@ export function createWorld3D(container) {
       }
     }
 
+    // Glowing tiles: where you can walk, the planned route, the destination.
+    const onRoute = new Set(ov.route.map((st) => st.to));
+    for (const [id, entry] of rooms) {
+      let kind = null;
+      if (id === ov.target) kind = "target";
+      else if (onRoute.has(id)) kind = "onroute";
+      else if (id === world.current) kind = null;
+      else if (id in ov.confirmed) kind = ov.confirmed[id] === 1 ? "near" : "reach";
+      else if (id in ov.reachable) kind = "maybe";
+      setGlow(entry, kind);
+    }
+    routeGroup.clear();
+    const routeMat = mat("#6fd3ff", 1.6, { opacity: 0.85 });
+    for (const st of ov.route) {
+      const a = byId[st.from], b = byId[st.to];
+      if (!a || !b) continue;
+      const pa = toWorld(a).add(V(0, 0.6, 0)), pb = toWorld(b).add(V(0, 0.6, 0));
+      const len = pa.distanceTo(pb);
+      if (len < 0.1) continue;
+      const seg = mesh(GEO.box, routeMat, routeGroup, pa.clone().add(pb).multiplyScalar(0.5), V(0.35, 0.35, len));
+      seg.lookAt(pb);
+    }
+
+    // Frog animations from what just happened in the game.
+    const last = world.log[world.log.length - 1];
+    if (last && last.turn !== lastTurnSeen) {
+      lastTurnSeen = last.turn;
+      const cmd = (last.command || "").toLowerCase();
+      if (/you have died/i.test(last.text)) { play("Death", { once: true }); busyUntil = clock.elapsedTime + 4; }
+      else if (/^(kill|attack|fight|hit|stab|slay)\b/.test(cmd)) { play("Attack", { once: true }); busyUntil = clock.elapsedTime + 1.2; }
+    }
+
     const cur = byId[world.current];
     if (cur) {
       const first = !current;
+      const moved = current && current.id !== cur.id;
       current = cur;
-      playerTarget = toWorld(cur);
+      const target = toWorld(cur);
+      if (moved) hopFrom = player.position.clone();
+      playerTarget = target;
       if (first) {
-        player.position.copy(playerTarget).add(V(0, 1.3, 0));
+        player.position.copy(playerTarget);
         controls.target.copy(playerTarget);
-        camera.position.copy(playerTarget).add(V(22, 26, 28));
+        camera.position.copy(playerTarget).add(V(13, 15, 17));
       }
     }
   }
+
+  // ---------- clicking rooms ----------
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+  let downAt = null;
+  function roomAt(ev) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.set(((ev.clientX - rect.left) / rect.width) * 2 - 1, -((ev.clientY - rect.top) / rect.height) * 2 + 1);
+    raycaster.setFromCamera(pointer, camera);
+    const groups = [...rooms.values()].map((e) => e.group);
+    for (const hit of raycaster.intersectObjects(groups, true)) {
+      let o = hit.object;
+      while (o && !o.userData.roomId) o = o.parent;
+      if (o) return o.userData.roomId;
+    }
+    return null;
+  }
+  renderer.domElement.addEventListener("pointerdown", (ev) => { downAt = [ev.clientX, ev.clientY]; });
+  renderer.domElement.addEventListener("pointerup", (ev) => {
+    if (!downAt || Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) > 5) return;  // that was a drag
+    const id = roomAt(ev);
+    if (id && api.onRoomClick) api.onRoomClick(id, false);
+  });
+  renderer.domElement.addEventListener("dblclick", (ev) => {
+    const id = roomAt(ev);
+    if (id && api.onRoomClick) api.onRoomClick(id, true);
+  });
 
   function resize() {
     const w = container.clientWidth, h = container.clientHeight;
@@ -347,7 +488,6 @@ export function createWorld3D(container) {
   }
   new ResizeObserver(resize).observe(container);
 
-  const clock = new THREE.Clock();
   function frame() {
     requestAnimationFrame(frame);
     if (!visible) return;
@@ -356,8 +496,42 @@ export function createWorld3D(container) {
     for (const entry of rooms.values()) {
       entry.group.position.lerp(entry.target, Math.min(1, dt * 3));
       entry.group.traverse((o) => { if (o.userData.spin) o.rotation.y += dt; });
+      if (entry.glow && entry.glow.visible) {
+        const pulse = ["near", "onroute", "target"].includes(entry.glow.userData.kind) ? 0.75 + 0.25 * Math.sin(t * 3) : 1;
+        entry.glow.material.opacity = entry.glow.userData.base * pulse;
+      }
     }
-    player.position.lerp(playerTarget.clone().add(V(0, 1.3 + Math.sin(t * 2) * 0.15, 0)), Math.min(1, dt * 4));
+
+    // Hop toward the current room: move along the ground with an arc, facing the way we go.
+    const flat = V(playerTarget.x - player.position.x, 0, playerTarget.z - player.position.z);
+    const dist = flat.length();
+    const step = Math.min(dist, dt * 14);
+    const hopping = dist > 0.15 || Math.abs(playerTarget.y - player.position.y) > 0.3;
+    if (hopping) {
+      if (dist > 0.01) {
+        player.position.add(flat.normalize().multiplyScalar(step));
+        const yaw = Math.atan2(playerTarget.x - player.position.x, playerTarget.z - player.position.z);
+        player.rotation.y += Math.atan2(Math.sin(yaw - player.rotation.y), Math.cos(yaw - player.rotation.y)) * Math.min(1, dt * 10);
+      }
+      const total = hopFrom ? Math.max(0.01, V(playerTarget.x - hopFrom.x, 0, playerTarget.z - hopFrom.z).length()) : 1;
+      const progress = hopFrom ? 1 - Math.min(1, dist / total) : 1;
+      const baseY = hopFrom ? THREE.MathUtils.lerp(hopFrom.y, playerTarget.y, progress) : playerTarget.y;
+      player.position.y = baseY + Math.abs(Math.sin(t * 9)) * 0.9;
+      if (t > busyUntil) play("Jump");
+    } else {
+      player.position.copy(playerTarget);
+      hopFrom = null;
+      if (t > busyUntil) play("Idle");
+    }
+    if (mixer) mixer.update(dt);
+
+    ring.position.set(player.position.x, playerTarget.y + 0.08, player.position.z);
+    const s = 1 + 0.12 * Math.sin(t * 3);
+    ring.scale.set(s, s, s);
+    ring.material.opacity = 0.55 + 0.3 * Math.sin(t * 3);
+    pin.position.set(player.position.x, player.position.y + 4.2 + 0.3 * Math.sin(t * 2.5), player.position.z);
+    pin.rotation.y = t * 1.5;
+
     if (follow) {
       // Move the orbit target with the player, keeping the camera's offset.
       const delta = playerTarget.clone().sub(controls.target).multiplyScalar(Math.min(1, dt * 3));
@@ -369,7 +543,12 @@ export function createWorld3D(container) {
   }
   frame();
 
-  return {
+  const api = {
+    onRoomClick: null,
+    // For debugging and tests: where things are.
+    debug: () => ({ player: player.position.toArray(), target: playerTarget.toArray(), ring: ring.position.toArray(),
+      frogLoaded: !!mixer, animations: Object.keys(actions), playing: activeAction && activeAction.getClip().name,
+      frogBox: (() => { const b = new THREE.Box3().setFromObject(player); return [b.min.toArray(), b.max.toArray()]; })() }),
     update,
     setVisible(v) { visible = v; if (v) { resize(); clock.getDelta(); } },
     setFollow(f) { follow = f; },
@@ -391,4 +570,5 @@ export function createWorld3D(container) {
       return false;
     },
   };
+  return api;
 }

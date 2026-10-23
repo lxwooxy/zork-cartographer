@@ -39,6 +39,16 @@ namespace Zork
             _small = new GUIStyle(_log) { fontSize = 12 };
         }
 
+        Rect _leftRect, _rightRect, _travelRect;
+
+        /// True if a screen point (Input.mousePosition, origin bottom-left) is over a HUD panel.
+        public bool IsOverHud(Vector2 mouse)
+        {
+            if (!visible) return false;
+            var p = new Vector2(mouse.x, Screen.height - mouse.y);
+            return _showSettings || _leftRect.Contains(p) || _rightRect.Contains(p) || _travelRect.Contains(p) || p.y < 50;
+        }
+
         void OnGUI()
         {
             Styles();
@@ -55,11 +65,12 @@ namespace Zork
             if (!_client.Connected && _client.LastError != null && !_autoShown && Time.realtimeSinceStartup > 3f) { _autoShown = true; if (!_showSettings) ToggleSettings(); }
             if (_showSettings) { SettingsWindow(); return; }
             GUI.Label(new Rect(12, 28, 900, 20),
-                "Right-drag orbit · Scroll zoom · WASD/QE pan · F follow · Tab overview · H hide HUD", _small);
+                "Double-click a room to travel · Right-drag orbit · Scroll zoom · WASD/QE pan · F follow · Tab overview · H hide HUD", _small);
 
             // Left: log + input
             float lw = Mathf.Min(440, Screen.width * 0.3f);
             var logRect = new Rect(10, 54, lw, Mathf.Min(Screen.height - 110, Screen.height * 0.55f));
+            _leftRect = new Rect(0, 0, lw + 20, logRect.yMax + 50);
             GUI.Box(logRect, GUIContent.none, _box);
             var sb = new StringBuilder();
             if (w != null && w.log != null)
@@ -99,6 +110,8 @@ namespace Zork
             // Right: room + inventory
             float rw = Mathf.Min(260, Screen.width * 0.24f);
             var right = new Rect(Screen.width - rw - 10, 54, rw, Screen.height - 64);
+            _rightRect = right;
+            TravelBar(w, lw, rw);
             GUI.Box(right, GUIContent.none, _box);
             GUILayout.BeginArea(new Rect(right.x + 10, right.y + 8, right.width - 20, right.height - 16));
             var room = _builder.CurrentRoom;
@@ -124,6 +137,21 @@ namespace Zork
             if (w == null || w.inventory == null || w.inventory.Length == 0) GUILayout.Label("<i>empty-handed</i>", _small);
             else foreach (var it in w.inventory) GUILayout.Label("• " + it, _small);
             GUILayout.EndArea();
+        }
+
+        void TravelBar(WorldData w, float lw, float rw)
+        {
+            _travelRect = Rect.zero;
+            if (w == null || string.IsNullOrEmpty(w.travelStatus)) return;
+            var x = lw + 30;
+            var width = Mathf.Max(200, Screen.width - lw - rw - 60);
+            _travelRect = new Rect(x, Screen.height - 64, width, 54);
+            GUI.Box(_travelRect, GUIContent.none, _box);
+            var head = w.travelStatus == "moving" ? "Autopilot: travelling" : "Autopilot: " + w.travelStatus;
+            GUI.Label(new Rect(x + 10, _travelRect.y + 4, width - 90, 22), head, _title);
+            GUI.Label(new Rect(x + 10, _travelRect.y + 26, width - 90, 24), w.travelMessage ?? "", _small);
+            if (w.travelStatus == "moving" && GUI.Button(new Rect(x + width - 74, _travelRect.y + 14, 64, 26), "Stop"))
+                _client.StopTravel();
         }
 
         void ToggleSettings()

@@ -82,13 +82,21 @@ namespace Zork
         public void SendCommand(string command)
         {
             if (string.IsNullOrWhiteSpace(command)) return;
-            StartCoroutine(Post(command.Trim()));
+            StartCoroutine(Post("/api/command", JsonUtility.ToJson(new CommandRequest { command = command.Trim() })));
         }
 
-        IEnumerator Post(string command)
+        /// Ask the autopilot to walk to a room (see server/autopilot.py for its rules).
+        public void Travel(string roomId)
         {
-            var body = JsonUtility.ToJson(new CommandRequest { command = command });
-            using (var req = new UnityWebRequest($"{serverUrl}/api/command", "POST"))
+            if (string.IsNullOrEmpty(roomId)) return;
+            StartCoroutine(Post("/api/travel", JsonUtility.ToJson(new TravelRequest { to = roomId })));
+        }
+
+        public void StopTravel() => StartCoroutine(Post("/api/travel/stop", "{}"));
+
+        IEnumerator Post(string path, string body)
+        {
+            using (var req = new UnityWebRequest($"{serverUrl}{path}", "POST"))
             {
                 req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
                 req.downloadHandler = new DownloadHandlerBuffer();
@@ -96,7 +104,7 @@ namespace Zork
                 Auth(req);
                 req.timeout = 15;
                 yield return req.SendWebRequest();
-                if (req.result != UnityWebRequest.Result.Success)
+                if (req.result != UnityWebRequest.Result.Success && req.responseCode != 409)
                     LastError = req.error;
             }
             _version = -1; // force a refresh right away

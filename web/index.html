@@ -40,7 +40,8 @@
       </div>
       <svg id="map"></svg>
       <div id="view3d" hidden></div>
-      <div id="hint3d" class="only3d">Drag to orbit · right-drag to pan · scroll to zoom</div>
+      <div id="hint3d" class="only3d">Click a room to plan a route · double-click to go · drag to orbit</div>
+      <div id="travel" class="travel" hidden></div>
     </section>
 
     <aside>
@@ -48,6 +49,7 @@
         <h2 id="roomname">—</h2>
         <p id="roomdesc" class="muted"></p>
         <div id="roomtags"></div>
+        <div id="routebox" class="routebox" hidden></div>
         <h3>Here</h3>
         <ul id="roomitems" class="list"></ul>
         <h3>Exits</h3>
@@ -56,6 +58,10 @@
       <div class="panel">
         <h2>Inventory</h2>
         <ul id="inventory" class="list"></ul>
+      </div>
+      <div class="panel">
+        <h2>Saves <button id="savebtn" class="small-btn" title="Save the game right now">Save</button></h2>
+        <ul id="checkpoints" class="list"></ul>
       </div>
     </aside>
   </main>

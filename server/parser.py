@@ -24,7 +24,7 @@ ALIASES = {
 FAILED_MOVE = (
     "you can't go that way", "the door is closed", "is closed", "you can't", "there is a wall",
     "too narrow", "it is too dark", "you are not able", "the window is closed",
-    "solid rock", "wall is solid", "there is no way", "you would need", "impassable",
+    "solid rock", "wall is solid", "boarded", "there is no way", "you would need", "impassable",
 )
 
 

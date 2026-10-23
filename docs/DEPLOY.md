@@ -42,7 +42,7 @@ Then open `https://<app-name>.fly.dev`, enter the password, and play.
 fly deploy --ha=false          # ship code changes
 fly logs                       # server logs (look for "Replayed N commands")
 fly status                     # machine state
-fly ssh console                # shell on the machine; the save is /data/world.json
+fly ssh console                # shell on the machine; the map is /data/world.json, checkpoints in /data/saves/
 fly secrets set ZORK_PASSWORD='new-password'    # change the password (restarts the app)
 ```
 
@@ -52,6 +52,8 @@ Each deploy restarts the machine. On boot the server replays the command log fro
 
 ```bash
 fly ssh sftp get /data/world.json ./world-backup.json
+# checkpoints, if you want them too (they're recreated on replay, so this is optional)
+fly ssh console -C "tar czf /tmp/saves.tgz -C /data saves" && fly ssh sftp get /tmp/saves.tgz ./saves-backup.tgz
 ```
 
 To restore, upload with `fly ssh sftp shell` (`put world-backup.json /data/world.json`), then `fly machine restart`.

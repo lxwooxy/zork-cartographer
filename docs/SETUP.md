@@ -78,17 +78,19 @@ The Unity project is in `unity/ZorkWorld`. It needs no scene setup: a bootstrap 
 
 You can also pass settings as environment variables: `ZORK_SERVER` and `ZORK_PASSWORD`.
 
-**Controls:** right-drag orbit · scroll zoom · WASD/QE pan · **F** follow · **Tab** overview · **H** hide HUD · **Enter** focuses the command box.
+**Controls:** **double-click a room** to send the autopilot there · right-drag orbit · scroll zoom · WASD/QE pan · **F** follow · **Tab** overview · **H** hide HUD · **Enter** focuses the command box.
+
+The player is an animated frog (`Assets/Zork/Resources/Frog.fbx`). `Assets/Zork/Editor/FrogImportSettings.cs` imports it with Legacy animations, so no Animator setup is needed. If the model is missing, a glowing capsule is used instead.
 
 ### Unity smoke test
 
-With the server running, this opens the editor, enters Play mode, saves screenshots, sends one move (`nw`), and quits:
+With the server running, this opens the editor, enters Play mode, saves screenshots (including a close-up of the frog), sends the autopilot to a reachable room, checks that it arrived, and quits:
 
 ```bash
 ZORK_AUTOTEST=/tmp/zorktest \
   "/Applications/Unity/Hub/Editor/6000.0.37f1/Unity.app/Contents/MacOS/Unity" \
   -projectPath unity/ZorkWorld
-cat /tmp/zorktest/autotest.log     # connected=True rooms=… and the move result
+cat /tmp/zorktest/autotest.log     # connected=True rooms=…, the frog's size, and the trip result
 ```
 
 Add `ZORK_PASSWORD=…` if the server has a password. The test code is `Assets/Zork/Editor/ZorkAutoTest.cs` and `Assets/Zork/Scripts/AutoTestRunner.cs`; it does nothing unless `ZORK_AUTOTEST` is set.
@@ -104,3 +106,6 @@ Add `ZORK_PASSWORD=…` if the server has a password. The test code is `Assets/Z
 | Unity: "wrong or missing password" | Click **Server…** and re-enter the password. |
 | Map has a duplicate room | Zork has many rooms with the same name (Forest, Maze). Drop an item in a room you want to recognise later; the mapper uses items lying around to tell identical rooms apart. |
 | Inventory looks wrong | Type `i`. The game's own listing always replaces what the parser tracked. |
+| Autopilot says "No known route" | It only uses exits you've walked or that the map could guess. Walk the missing link by hand once, or use the suggested save. |
+| Autopilot stops in the troll room | On purpose: fights need you. Kill the troll (`kill troll with sword`), then click again. |
+| Saves panel: Load did nothing | Check the server log. Saves live in `saves/` next to `world.json`; deleting that folder breaks loading (replay at startup recreates them). |

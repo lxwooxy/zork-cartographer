@@ -16,6 +16,7 @@ class Exit:
     blocked: bool = False          # tried it and couldn't go
     inferred: bool = False         # guessed from the reverse direction
     note: str = ""                 # e.g. "narrow path", "trap door"
+    via: str = ""                  # the command that actually worked ("climb tree", "enter window")
 
 
 @dataclass
@@ -53,6 +54,7 @@ class World:
         self.turn = 0
         self.version = 0
         self.log: list[dict] = []   # every command + output, for replay and the UI
+        self.checkpoints: list[dict] = []   # saved game states (see make_checkpoint)
 
     # ---------- persistence ----------
     def save(self):
@@ -76,6 +78,7 @@ class World:
         w.score, w.moves, w.turn = d.get("score", 0), d.get("moves", 0), d.get("turn", 0)
         w.version = d.get("version", 0)
         w.log = d.get("log", [])
+        w.checkpoints = d.get("checkpoints", [])
         return w
 
     def to_json(self, full: bool = False) -> dict:
@@ -88,17 +91,117 @@ class World:
             "moves": self.moves,
             "turn": self.turn,
             "rooms": [asdict(r) for r in self.rooms.values()],
+            "checkpoints": self.checkpoints if full else [
+                {k: v for k, v in c.items() if k != "items"} for c in self.checkpoints],
         }
         if not full:
             # Fallback look for rooms Claude hasn't described (used by the 3D views).
             for rd, r in zip(d["rooms"], self.rooms.values()):
                 rd["env3d"] = r.environment or guess_environment(r)
                 rd["indoor3d"] = bool(r.indoor) if r.indoor is not None else guess_indoor(r)
+            d["reachable"] = self.reachable()
+            d["confirmed"] = self.reachable(confirmed_only=True)
         d["log"] = self.log if full else self.log[-200:]
         return d
 
-    def to_unity(self) -> dict:
+    # ---------- checkpoints ----------
+    def next_save_file(self) -> str:
+        # Unique for the whole game, so replaying the log never mixes up two saves.
+        n = 1 + sum(1 for e in self.log if e.get("kind") == "save")
+        return f"c{n}.qzl"
+
+    def make_checkpoint(self, name: str, file: str, auto: bool, text: str = "") -> dict:
+        """Record a checkpoint after the game has been saved to `file`."""
+        import time
+        cp = {
+            "id": file[:-4], "name": name, "file": file, "auto": auto,
+            "turn": self.turn, "current": self.current, "room_name": self.rooms[self.current].name if self.current else "",
+            "score": self.score, "moves": self.moves, "inventory": list(self.inventory),
+            "items": {rid: list(r.items) for rid, r in self.rooms.items()},
+            "created": time.time(),
+        }
+        self.checkpoints.append(cp)
+        self.log.append({"turn": self.turn, "command": "", "kind": "save", "file": file,
+                         "text": text or f"[Saved checkpoint: {name}]", "room": self.current,
+                         "score": self.score, "moves": self.moves})
+        self.version += 1
+        return cp
+
+    def restore_checkpoint(self, cp: dict, text: str = ""):
+        """After the game has restored cp["file"]: put the map's position, inventory and
+        items back as they were. Everything explored since is kept."""
+        self.turn += 1
+        if cp["current"] in self.rooms:
+            self.current = cp["current"]
+            self.rooms[self.current].visits += 1
+        self.inventory = list(cp["inventory"])
+        self.inventory_stale = False
+        self.score, self.moves = cp["score"], cp["moves"]
+        for rid, items in cp.get("items", {}).items():
+            if rid in self.rooms:
+                self.rooms[rid].items = list(items)
+        self.log.append({"turn": self.turn, "command": "", "kind": "restore", "file": cp["file"],
+                         "text": text or f"[Loaded checkpoint: {cp['name']}]", "room": self.current,
+                         "score": self.score, "moves": self.moves})
+        self.version += 1
+
+    # ---------- routes ----------
+    def route(self, start: str, goal: str) -> list[dict] | None:
+        """Cheapest known path from start to goal. Each step: {dir, command, from, to}.
+        Exits we only guessed (the reverse of a move) cost a bit more than ones we walked."""
+        import heapq
+        if start not in self.rooms or goal not in self.rooms:
+            return None
+        dist = {start: 0.0}
+        prev: dict[str, tuple[str, str]] = {}
+        heap = [(0.0, start)]
+        while heap:
+            d, rid = heapq.heappop(heap)
+            if rid == goal:
+                break
+            if d > dist.get(rid, 1e9):
+                continue
+            for direction, ex in self.rooms[rid].exits.items():
+                if not ex.to or ex.blocked or ex.to not in self.rooms:
+                    continue
+                nd = d + (1.5 if ex.inferred else 1.0)
+                if nd < dist.get(ex.to, 1e9):
+                    dist[ex.to] = nd
+                    prev[ex.to] = (rid, direction)
+                    heapq.heappush(heap, (nd, ex.to))
+        if goal not in dist:
+            return None
+        steps = []
+        cur = goal
+        while cur != start:
+            frm, direction = prev[cur]
+            ex = self.rooms[frm].exits[direction]
+            steps.append({"dir": direction, "command": ex.via or direction, "from": frm, "to": cur,
+                          "inferred": ex.inferred})
+            cur = frm
+        return list(reversed(steps))
+
+    def reachable(self, confirmed_only: bool = False) -> dict[str, int]:
+        """Rooms you can walk to from here using known exits, with the number of moves.
+        confirmed_only: only exits you've actually walked (no guessed reverse exits)."""
+        if not self.current:
+            return {}
+        out = {self.current: 0}
+        queue = [self.current]
+        while queue:
+            rid = queue.pop(0)
+            for ex in self.rooms[rid].exits.values():
+                if ex.to and not ex.blocked and ex.to in self.rooms and ex.to not in out:
+                    if confirmed_only and ex.inferred:
+                        continue
+                    out[ex.to] = out[rid] + 1
+                    queue.append(ex.to)
+        return out
+
+    def to_unity(self, travel: dict | None = None) -> dict:
         """Flat, array-only shape that Unity's JsonUtility can read."""
+        reach_all, reach_sure = self.reachable(), self.reachable(confirmed_only=True)
+        route = {st["to"] for st in (travel or {}).get("steps", [])} if travel and travel.get("status") == "moving" else set()
         rooms = []
         for r in self.rooms.values():
             rooms.append({
@@ -113,11 +216,17 @@ class World:
                 "accentColor": r.palette.get("accent", ""),
                 "items": r.items,
                 "features": r.features,
+                # 0 = not reachable, 1 = maybe (guessed exits), 2 = reachable, 3 = one move away,
+                # 4 = on the autopilot's route
+                "reach": 0 if r.id == self.current else 4 if r.id in route else
+                         3 if reach_sure.get(r.id) == 1 else 2 if r.id in reach_sure else 1 if r.id in reach_all else 0,
                 "exits": [{"dir": k, "to": v.to or "", "blocked": v.blocked, "inferred": v.inferred}
                           for k, v in r.exits.items()],
             })
         return {"version": self.version, "current": self.current or "", "score": self.score,
                 "moves": self.moves, "inventory": self.inventory, "rooms": rooms,
+                "travelStatus": (travel or {}).get("status", ""), "travelMessage": (travel or {}).get("message", ""),
+                "travelTo": (travel or {}).get("to", ""),
                 "log": [{"command": e["command"], "text": e["text"]} for e in self.log[-60:]]}
 
     # ---------- turn processing ----------
@@ -146,7 +255,7 @@ class World:
             if prev is not None and room.id != prev.id:
                 changes["moved"] = True
                 if direction:
-                    self._link(prev, direction, room)
+                    self._link(prev, direction, room, t.command)
             if changes["new_room"] or changes["moved"]:
                 self.relax()
             self.current = room.id
@@ -316,9 +425,11 @@ class World:
         for r, p in zip(rooms, pos):
             r.x, r.y = round(p[0], 2), round(p[1], 2)
 
-    def _link(self, a: Room, direction: str, b: Room):
+    def _link(self, a: Room, direction: str, b: Room, command: str = ""):
         ex = a.exits.setdefault(direction, Exit())
         ex.to, ex.blocked, ex.inferred = b.id, False, False
+        if command and zp.ALIASES.get(command.lower().strip(), command.lower().strip()) != direction:
+            ex.via = command.strip()
         back = zp.OPPOSITE.get(direction)
         if back and back not in b.exits:
             b.exits[back] = Exit(to=a.id, inferred=True)
