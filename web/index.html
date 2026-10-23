@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zork Cartographer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Zork Cartographer</h1>
+    <div class="stats">
+      <span>Score <b id="score">0</b></span>
+      <span>Moves <b id="moves">0</b></span>
+      <span>Rooms <b id="roomcount">0</b></span>
+      <span id="llm" class="pill" title="Claude parsing status">Claude: …</span>
+      <button id="newgame" title="Start over (the current map is backed up)">New game</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="terminal">
+      <div id="log"></div>
+      <form id="cmdform" autocomplete="off">
+        <span class="prompt">&gt;</span>
+        <input id="cmd" placeholder="Type a command (n, take lamp, open mailbox…)" autofocus>
+      </form>
+    </section>
+
+    <section id="mapwrap">
+      <div class="maptools">
+        <span>Level</span>
+        <button id="lvldown" title="Go down a level">▼</button>
+        <b id="level">0</b>
+        <button id="lvlup" title="Go up a level">▲</button>
+        <label><input type="checkbox" id="follow" checked> Follow player</label>
+        <button id="center">Center</button>
+      </div>
+      <svg id="map"></svg>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h2 id="roomname">—</h2>
+        <p id="roomdesc" class="muted"></p>
+        <div id="roomtags"></div>
+        <h3>Here</h3>
+        <ul id="roomitems" class="list"></ul>
+        <h3>Exits</h3>
+        <ul id="roomexits" class="list"></ul>
+      </div>
+      <div class="panel">
+        <h2>Inventory</h2>
+        <ul id="inventory" class="list"></ul>
+      </div>
+    </aside>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

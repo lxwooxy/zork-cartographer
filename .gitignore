@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Local state and secrets
+.env
+data/
+
+# Unity
+unity/ZorkWorld/[Ll]ibrary/
+unity/ZorkWorld/[Tt]emp/
+unity/ZorkWorld/[Oo]bj/
+unity/ZorkWorld/[Bb]uild/
+unity/ZorkWorld/[Bb]uilds/
+unity/ZorkWorld/[Ll]ogs/
+unity/ZorkWorld/[Uu]ser[Ss]ettings/
+unity/ZorkWorld/*.csproj
+unity/ZorkWorld/*.sln
+unity/ZorkWorld/.vs/
+unity/ZorkWorld/.idea/
+
+.DS_Store
