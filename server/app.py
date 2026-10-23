@@ -106,6 +106,10 @@ def should_enrich(command: str, text: str, changes: dict) -> bool:
 async def start_game(replay: list[dict]):
     S.game = Game(STORY, seed=SEED, saves=SAVES)
     intro = await S.game.start()
+    if not intro.room_name:
+        # The map depends on dfrotz's status line (room name, score, moves).
+        log.error("dfrotz printed no status line, so rooms can't be tracked. "
+                  "Use Frotz 2.55 or newer (2.54's dumb interface doesn't print it).")
     if not S.world.rooms:
         S.world.apply_turn(intro)
         await S.game.send("verbose")  # always print full room descriptions

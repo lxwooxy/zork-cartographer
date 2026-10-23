@@ -53,7 +53,7 @@ Bugs found and fixed:
 ### Hosting and the browser 3D view
 
 - **Goal:** play from anywhere in a browser, with 3D, no Unity required.
-- **Host: Fly.io.** One always-on machine with a volume. The game is a live process with in-memory state, which suits a small VM better than a stateless platform. Docker image builds `dfrotz` 2.54 from source (Debian's package doesn't reliably include it).
+- **Host: Fly.io.** One always-on machine with a volume. The game is a live process with in-memory state, which suits a small VM better than a stateless platform. Docker image builds `dfrotz` from source (Debian's package doesn't reliably include it). Originally 2.54; see the deploy notes below for why it's 2.55 now.
 - **Access:** one shared game behind `ZORK_PASSWORD`. Browsers use an HMAC cookie; Unity sends an `X-Zork-Password` header. WebSockets check the cookie too. Failed logins are delayed by 1s.
 - **Faster restore:** replay used to wait 150 ms of silence per command (~2.5 min for a 1,000-move game). Replay mode now stops at the `>` prompt and accepts only the real prompt, so a stray `:` or `)` at a chunk boundary can't end a read early. 40 commands: 6s → 1.1s.
 - **Browser 3D:** `web/world3d.js` ports the Unity builder to three.js (bundled in `web/vendor/`, no CDN). Same scale, themes, walls with doorways, ramps, stubs, item markers, labels. One light follows the player instead of a light per room, so shaders stay cheap with 100+ rooms. Toggle 2D/3D on the map; the choice is remembered.
@@ -98,9 +98,14 @@ Bugs found and fixed:
 - **Spoilers:** undiscovered destinations are blanked in `/api/world` unless Reveal is on, and never sent to Unity. Checked by scanning the API output.
 - Old saves keep working in heuristic mode (`mode` is stored in the save).
 
+### Deployed to Fly.io
+
+- App `zork-cartographer-lxwooxy` in `ewr`: one shared-cpu machine (512 MB), a 1 GB volume with daily snapshots, password in a Fly secret.
+- **Bug found on first deploy:** rooms weren't tracked at all (`room: ""`). The Docker image had built **Frotz 2.54**, whose dumb interface **doesn't print the status line**; the Mac had Homebrew's 2.55, which does. Everything depends on that line. Fixes: build 2.55, and the server now logs a clear error at startup if the interpreter prints no status line.
+- Checked live: login redirect and 401s without the password, wrong password rejected, WebSocket refused without the cookie and working with it, three.js and the frog served, canonical tracking with zero anomalies, an autopilot trip arrived. Then reset to a fresh game.
+
 ### Open items
 
-- Deploy to Fly.io (config is ready; needs `fly auth login`).
 - Claude parsing hasn't been run against the live API yet (no key configured during development).
 - Autopilot could explore unknown exits on its own (currently it only uses known ones).
 - Map editor in the browser (drag rooms, change levels) writing `zork1-layout-overrides.json`.

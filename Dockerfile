@@ -3,7 +3,7 @@ FROM python:3.12-slim AS frotz
 RUN apt-get update \
  && apt-get install -y --no-install-recommends build-essential git ca-certificates \
  && rm -rf /var/lib/apt/lists/*
-RUN git clone --depth 1 --branch 2.54 https://gitlab.com/DavidGriffith/frotz.git /src \
+RUN git clone --depth 1 --branch 2.55 https://gitlab.com/DavidGriffith/frotz.git /src \
  && make -C /src dumb \
  && strip /src/dfrotz
 

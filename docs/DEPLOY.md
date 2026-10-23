@@ -8,7 +8,7 @@ The hosted version is one shared game behind a password. It runs on a single alw
 
 ## What's in the repo
 
-- **`Dockerfile`:** builds `dfrotz` 2.54 from source in a build stage, then installs the Python app. The server listens on port 8080.
+- **`Dockerfile`:** builds `dfrotz` 2.55 from source in a build stage, then installs the Python app. The server listens on port 8080.
 - **`fly.toml`:** app name, region, health check (`/healthz`), the `zork_data` volume mounted at `/data`, `auto_stop_machines = "off"`.
 - **`.dockerignore`:** keeps `.venv`, `data`, `unity` and `.env` out of the image.
 
@@ -64,6 +64,7 @@ In the Unity viewer click **Server…**, enter `https://<app-name>.fly.dev` and 
 
 ## Notes
 
+- **Use Frotz 2.55 or newer.** 2.54's dumb interface doesn't print the status line, and without it the server can't tell which room you're in (it logs an error at startup if that happens).
 - `force_https` is on. The login cookie is `Secure` and `HttpOnly` over HTTPS.
 - Failed logins wait one second before replying, to slow down guessing.
 - Anyone with the password plays the same game, including **New game**. Share it only with people you're happy to share a save with.

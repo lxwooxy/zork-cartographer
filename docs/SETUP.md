@@ -7,7 +7,7 @@ How to run Zork Cartographer on your own machine, and how to use the Unity viewe
 | | Version | Notes |
 |---|---|---|
 | Python | 3.10 or newer | Tested on 3.12–3.14 |
-| dfrotz | 2.5x | The text-only build of the Frotz Z-machine interpreter |
+| dfrotz | 2.55 or newer | The text-only build of the Frotz Z-machine interpreter |
 | Browser | any recent | Chrome, Safari, Firefox. The 3D view needs WebGL. |
 | Unity | 6000.0.37f1 | Only for the optional desktop 3D viewer |
 
@@ -24,7 +24,7 @@ dfrotz -v               # check it's on your PATH
 
 ```bash
 sudo apt-get install -y build-essential git
-git clone --depth 1 --branch 2.54 https://gitlab.com/DavidGriffith/frotz.git /tmp/frotz
+git clone --depth 1 --branch 2.55 https://gitlab.com/DavidGriffith/frotz.git /tmp/frotz
 make -C /tmp/frotz dumb
 sudo install /tmp/frotz/dfrotz /usr/local/bin/
 ```
