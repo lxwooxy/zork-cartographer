@@ -37,6 +37,31 @@ namespace Zork
             return m;
         }
 
+        /// A see-through material whose alpha can be changed at runtime (Built-in Standard or URP Lit).
+        public static Material Transparent(Color c)
+        {
+            var m = new Material(Lit) { color = c };
+            if (m.HasProperty("_Surface"))          // URP
+            {
+                m.SetFloat("_Surface", 1f);
+                m.SetOverrideTag("RenderType", "Transparent");
+                m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            }
+            else                                     // Built-in Standard: "Fade" mode
+            {
+                m.SetFloat("_Mode", 2f);
+                m.SetOverrideTag("RenderType", "Transparent");
+                m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                m.SetInt("_ZWrite", 0);
+                m.DisableKeyword("_ALPHATEST_ON");
+                m.EnableKeyword("_ALPHABLEND_ON");
+                m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            }
+            m.renderQueue = 3000;
+            return m;
+        }
+
         public static GameObject Primitive(PrimitiveType type, string name, Transform parent, Material m)
         {
             var go = GameObject.CreatePrimitive(type);

@@ -90,6 +90,11 @@ class World:
         w.version = d.get("version", 0)
         w.log = d.get("log", [])
         w.checkpoints = d.get("checkpoints", [])
+        if w.canon:
+            # The layout is authoritative and may have been tuned since this game began.
+            for r in w.rooms.values():
+                if r.id in w.canon.rooms:
+                    r.x, r.y, r.z = w.canon.position(r.id)
         return w
 
     def to_json(self, full: bool = False) -> dict:
@@ -119,6 +124,10 @@ class World:
                         ex["hidden_to"] = ""      # no spoilers
                     elif not ex["to"] and ex["hidden_to"]:
                         ex["to"] = ex["hidden_to"]
+            if self.canon:
+                d["landmarks"] = self.canon.landmarks_view(set(self.rooms), self.reveal)
+                for rd in d["rooms"]:
+                    rd["roles"] = self.canon.roles.get(rd["id"], {})
             if self.canon and self.reveal:
                 # Fog of war off: add every room not found yet, marked as undiscovered.
                 for cid in self.canon.rooms:
@@ -127,6 +136,7 @@ class World:
                     r = self._canon_room(cid)
                     rd = asdict(r)
                     rd["undiscovered"] = True
+                    rd["roles"] = self.canon.roles.get(cid, {})
                     rd["env3d"], rd["indoor3d"] = guess_environment(r), guess_indoor(r)
                     for ex in rd["exits"].values():
                         ex["to"] = ex["hidden_to"]
@@ -258,8 +268,23 @@ class World:
                          3 if reach_sure.get(r.id) == 1 else 2 if r.id in reach_sure else 1 if r.id in reach_all else 0,
                 "exits": [{"dir": k, "to": v.to or "", "blocked": v.blocked, "inferred": v.inferred}
                           for k, v in r.exits.items()],
+                # "landmark:role" pairs, e.g. "white-house:exterior" (JsonUtility has no dictionaries)
+                "roles": [f"{lid}:{role}" for lid, role in (self.canon.roles.get(r.id, {}) if self.canon else {}).items()],
+            })
+        landmarks = []
+        for lm in (self.canon.landmarks_view(set(self.rooms), self.reveal) if self.canon else []):
+            flat = lambda pt: [float(v) for v in pt] if pt else []
+            landmarks.append({
+                "id": lm["id"], "kind": lm["kind"],
+                "rooms": [{"id": r["id"], "role": r["role"], "x": r["x"], "y": r["y"], "z": r["z"]} for r in lm["rooms"]],
+                "doorSide": (lm.get("door") or {}).get("side", ""), "doorBoarded": bool((lm.get("door") or {}).get("boarded")),
+                "windowSide": (lm.get("window") or {}).get("side", ""), "window": flat((lm.get("window") or {}).get("room")),
+                "chimney": flat(lm.get("chimney")),
+                "treeBase": flat((lm.get("big_tree") or {}).get("base")), "treeTop": flat((lm.get("big_tree") or {}).get("top")),
+                "path": [float(v) for pt in lm.get("path", []) for v in pt],   # x,y,z,x,y,z,...
             })
         return {"version": self.version, "current": self.current or "", "score": self.score,
+                "landmarks": landmarks,
                 "moves": self.moves, "inventory": self.inventory, "rooms": rooms,
                 "travelStatus": (travel or {}).get("status", ""), "travelMessage": (travel or {}).get("message", ""),
                 "travelTo": (travel or {}).get("to", ""),

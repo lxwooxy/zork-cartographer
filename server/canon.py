@@ -46,9 +46,86 @@ class Canon:
         self.layout: dict[str, list] = {}
         if layout_path and Path(layout_path).exists():
             self.layout = {k.lower(): v for k, v in json.loads(Path(layout_path).read_text()).items()}
+        self.landmarks: dict[str, dict] = {}
+        self.roles: dict[str, dict[str, str]] = {}    # room id -> {landmark id: role}
+        lm_path = Path(str(map_path).replace("-map.json", "-landmarks.json"))
+        if lm_path.exists():
+            self._load_landmarks(json.loads(lm_path.read_text()).get("landmarks", {}))
         self.by_name: dict[str, list[str]] = {}
         for rid, r in self.rooms.items():
             self.by_name.setdefault(r["name"], []).append(rid)
+
+    def _load_landmarks(self, data: dict):
+        """Places drawn as one thing across several rooms (game/zork1-landmarks.json)."""
+        for lid, lm in data.items():
+            lm = {k: (v.lower() if isinstance(v, str) and k in ("chimney", "via", "from", "to") else v)
+                  for k, v in lm.items()}
+            roles: dict[str, str] = {}
+            for role in ("interior", "upstairs", "exterior", "members", "path"):
+                for rid in lm.get(role, []):
+                    roles.setdefault(rid.lower(), "member" if role == "members" else role)
+            for role in ("from", "via", "to"):
+                if lm.get(role):
+                    roles.setdefault(lm[role], role)
+            if lm.get("big_tree"):
+                roles[lm["big_tree"]["base"].lower()] = "tree-base"
+                roles[lm["big_tree"]["top"].lower()] = "tree-top"
+                lm["big_tree"] = {k: v.lower() for k, v in lm["big_tree"].items()}
+            if lm.get("window"):
+                lm["window"] = {**lm["window"], "room": lm["window"].get("room", "").lower()}
+            if lm.get("path"):
+                lm["path"] = [r.lower() for r in lm["path"]]
+            lm["roles"] = {rid: role for rid, role in roles.items() if rid in self.rooms}
+            self.landmarks[lid] = lm
+            for rid, role in lm["roles"].items():
+                self.roles.setdefault(rid, {})[lid] = role
+
+    def landmarks_view(self, discovered: set[str], reveal: bool = False) -> list[dict]:
+        """Landmarks as the client should see them: only discovered parts (fog of war),
+        except places you can see whole from outside (always_visible) once any part is found."""
+        out = []
+        for lid, lm in self.landmarks.items():
+            members = list(lm["roles"])
+            found = [r for r in members if r in discovered]
+            if not reveal and not found:
+                continue
+            show_all = reveal or lm.get("always_visible")
+            rooms = []
+            for rid in members:
+                if not show_all and rid not in discovered:
+                    continue
+                x, y, z = self.position(rid)
+                known = reveal or rid in discovered
+                # Undiscovered parts of a visible landmark give their shape, not their name.
+                rooms.append({"id": rid if known else "", "role": lm["roles"][rid], "x": x, "y": y, "z": z,
+                              "discovered": rid in discovered})
+            view = {"id": lid, "kind": lm["kind"], "name": lm.get("name", lid), "rooms": rooms}
+            for k in ("door", "window", "chimney", "big_tree", "path"):
+                if k in lm:
+                    view[k] = lm[k]
+            if not reveal:
+                # Room names inside these hints are spoilers too: replace with positions.
+                for k in ("chimney",):
+                    if view.get(k):
+                        view[k] = list(self.position(view[k]))
+                if view.get("window"):
+                    view["window"] = {**view["window"], "room": list(self.position(view["window"]["room"]))}
+                if view.get("big_tree"):
+                    view["big_tree"] = {k: list(self.position(v)) for k, v in view["big_tree"].items()}
+                if "path" in view:
+                    view["path"] = [list(self.position(r)) for r in view["path"] if r in discovered]
+            else:
+                for k in ("chimney",):
+                    if view.get(k):
+                        view[k] = list(self.position(view[k]))
+                if view.get("window"):
+                    view["window"] = {**view["window"], "room": list(self.position(view["window"]["room"]))}
+                if view.get("big_tree"):
+                    view["big_tree"] = {k: list(self.position(v)) for k, v in view["big_tree"].items()}
+                if "path" in view:
+                    view["path"] = [list(self.position(r)) for r in view["path"]]
+            out.append(view)
+        return out
 
     @classmethod
     def for_story(cls, story: Path) -> "Canon | None":

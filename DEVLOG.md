@@ -104,6 +104,15 @@ Bugs found and fixed:
 - **Bug found on first deploy:** rooms weren't tracked at all (`room: ""`). The Docker image had built **Frotz 2.54**, whose dumb interface **doesn't print the status line**; the Mac had Homebrew's 2.55, which does. Everything depends on that line. Fixes: build 2.55, and the server now logs a clear error at startup if the interpreter prints no status line.
 - Checked live: login redirect and 401s without the password, wrong password rejected, WebSocket refused without the cookie and working with it, three.js and the frog served, canonical tracking with zero anomalies, an autopilot trip arrived. Then reset to a fresh game.
 
+### One house, one forest: landmarks
+
+- **Ask:** North/South/West of House and Behind House are the same house, so draw it once; same for other places.
+- **Layout first:** the automatic layout had put the Living Room west of West of House and the Attic in the yard, so no building could contain them. Hand-placed the house area in `zork1-layout-overrides.json`: four yards around the house, the Living Room and Kitchen side by side inside it, the Attic above the Kitchen, the Cellar below the Living Room, and Up a Tree above the Forest Path. The layout tool now keeps pinned rooms fixed and arranges the rest around them. (Found along the way: its compass-walk seeding never ran, because every room had already been given a random spot.)
+- **Landmarks file:** house, forest (with the big tree), Frigid River, rainbow, reservoir, with a role per room.
+- **3D (web and Unity):** rooms render by role, and each place is built once across its rooms (details in ARCHITECTURE.md). The house goes see-through with the roof off while you're inside, and also when it's between the camera and you. Without that, standing at North of House the camera just saw a wall.
+- **Spoilers:** visible-from-outside places send undiscovered parts as bare positions; the server scrubs room names.
+- **Unity gotcha:** built-in `TextMesh` labels draw on top of everything, so the Kitchen label showed through the roof. Labels of rooms inside the house are now hidden while it's solid.
+
 ### Open items
 
 - Claude parsing hasn't been run against the live API yet (no key configured during development).

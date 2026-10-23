@@ -119,7 +119,8 @@ The canonical map is generated, then you can tune how it looks. Three files, all
 | `zork1-map.json` | Every room and exit, with conditions and Zork's descriptions | `tools/build_map.py` from the game source |
 | `zork1-regions.json` | Which level each room is on (surface, underground, deep…) | **Hand-edited** |
 | `zork1-layout.json` | Final position of every room | `tools/layout_map.py` |
-| `zork1-layout-overrides.json` | Your manual position fixes, `{"ROOM-ID": [x, y, level]}` | **Hand-edited** (optional) |
+| `zork1-layout-overrides.json` | Hand-placed rooms, `{"ROOM-ID": [x, y, level]}`. These stay fixed and everything else is arranged around them (the house and forest are placed this way). | **Hand-edited** |
+| `zork1-landmarks.json` | Places drawn as one thing across rooms: which rooms belong, and each room's role (house interior/yard, forest, river path, rainbow ends) | **Hand-edited** |
 
 ```bash
 # 1. Rebuild the room/exit data (only needed if the parser changes)
@@ -132,6 +133,8 @@ curl -sLO https://raw.githubusercontent.com/historicalsource/zork1/master/1dunge
 # 3. Look at it: one panel per level
 .venv/bin/python tools/render_map.py game/zork1-map.json game/zork1-layout.json > map.svg && open map.svg
 ```
+
+Landmark kinds the 3D views know: `house`, `forest`, `river`, `rainbow`, `lake`. Add a new kind by writing a builder in `web/world3d.js` (`LANDMARK_BUILDERS`) and `LandmarkBuilder.cs`.
 
 Restart the server after changing these. Room positions come straight from the layout, so existing games pick up the new layout on the next move.
 

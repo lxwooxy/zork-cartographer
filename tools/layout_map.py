@@ -87,17 +87,18 @@ def curated_levels(rooms: dict, path: str) -> dict[str, int]:
     return z
 
 
-def layout(rooms: dict, iters: int = 3000, seed: int = 1, regions: str | None = None) -> dict[str, list]:
+def layout(rooms: dict, iters: int = 3000, seed: int = 1, regions: str | None = None,
+           pinned: dict | None = None) -> dict[str, list]:
     rnd = random.Random(seed)
     z = curated_levels(rooms, regions) if regions else levels(rooms)
+    pinned = pinned or {}
+    for rid, p in pinned.items():
+        z[rid] = int(p[2])
     ids = list(rooms)
-    pos: dict[str, list[float]] = {}
-    # Seed positions by walking compass exits outward (BFS), like drawing the map by hand.
-    for seed_room in [START] + ids:
-        if seed_room in pos:
-            continue
-        pos[seed_room] = [rnd.uniform(-6, 6), rnd.uniform(-6, 6)] if seed_room != START else [0.0, 0.0]
-        queue = [seed_room]
+    pos: dict[str, list[float]] = {rid: [float(p[0]), float(p[1])] for rid, p in pinned.items()}
+    # Seed positions by walking compass exits outward (BFS) from the pinned rooms and the
+    # start, like drawing the map by hand. Rooms the walk can't reach get a random spot.
+    def walk(queue):
         while queue:
             cur = queue.pop(0)
             for d, ex in rooms[cur]["exits"].items():
@@ -107,6 +108,13 @@ def layout(rooms: dict, iters: int = 3000, seed: int = 1, regions: str | None = 
                 v = VEC.get(d, (rnd.uniform(-1, 1), rnd.uniform(-1, 1)))
                 pos[to] = [pos[cur][0] + v[0] * 1.6 + rnd.uniform(-.2, .2), pos[cur][1] + v[1] * 1.6 + rnd.uniform(-.2, .2)]
                 queue.append(to)
+
+    pos.setdefault(START, [0.0, 0.0])
+    walk(list(pos))
+    for rid in ids:
+        if rid not in pos:
+            pos[rid] = [rnd.uniform(-6, 6), rnd.uniform(-6, 6)]
+            walk([rid])
     edges = []
     for rid, r in rooms.items():
         for d, ex in r["exits"].items():
@@ -127,8 +135,10 @@ def layout(rooms: dict, iters: int = 3000, seed: int = 1, regions: str | None = 
                 dist = math.hypot(dx, dy) or 1e-6               # up/down/in/out: just stay close
                 ex, ey = dx - dx / dist * 1.2, dy - dy / dist * 1.2
             k = 0.08
-            pa[0] += ex * k; pa[1] += ey * k
-            pb[0] -= ex * k; pb[1] -= ey * k
+            if a not in pinned:
+                pa[0] += ex * k; pa[1] += ey * k
+            if b not in pinned:
+                pb[0] -= ex * k; pb[1] -= ey * k
         for members in by_level.values():
             for i, a in enumerate(members):
                 pa = pos[a]
@@ -139,24 +149,26 @@ def layout(rooms: dict, iters: int = 3000, seed: int = 1, regions: str | None = 
                     if d2 < 2.89:
                         d = math.sqrt(d2) or 1e-3
                         push = (1.7 - d) * 0.5 * (0.5 + cool)
-                        pa[0] -= dx / d * push; pa[1] -= dy / d * push
-                        pb[0] += dx / d * push; pb[1] += dy / d * push
-        ox, oy = pos[START]
-        for p in pos.values():
-            p[0] -= ox; p[1] -= oy
+                        if a not in pinned:
+                            pa[0] -= dx / d * push; pa[1] -= dy / d * push
+                        if b not in pinned:
+                            pb[0] += dx / d * push; pb[1] += dy / d * push
+        if not pinned:
+            ox, oy = pos[START]
+            for p in pos.values():
+                p[0] -= ox; p[1] -= oy
     return {rid: [round(pos[rid][0], 2), round(pos[rid][1], 2), z[rid]] for rid in ids}
 
 
 def main():
     rooms = json.load(open(sys.argv[1]))["rooms"]
     regions = sys.argv[2] if len(sys.argv) > 2 else None
-    out = layout(rooms, regions=regions)
     import os
     overrides = sys.argv[1].replace("-map.json", "-layout-overrides.json")
+    pinned = {}
     if os.path.exists(overrides):
-        for rid, p in json.load(open(overrides)).items():
-            if rid in out:
-                out[rid] = p
+        pinned = {k: v for k, v in json.load(open(overrides)).items() if k in rooms}
+    out = layout(rooms, regions=regions, pinned=pinned)
     json.dump(out, sys.stdout, indent=1, sort_keys=True)
     lv = {}
     for x, y, zz in out.values():

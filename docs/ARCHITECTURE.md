@@ -43,6 +43,15 @@ Zork's geography isn't Euclidean (east then west doesn't always return you), so 
 
 **Heuristic (fallback).** For saves made before the canonical map existed, or with `ZORK_MAP=off`: the map is built from play, as described below. `World.mode` is stored in the save, so a game never switches modes halfway.
 
+## Landmarks (places drawn as one thing)
+
+`game/zork1-landmarks.json` groups rooms into places: `white-house` (house), `forest`, `frigid-river` (river), `rainbow`, `reservoir` (lake). Each room gets a role (`interior`, `upstairs`, `exterior`, `member`, `path`, `tree-base`, `tree-top`, `from`/`via`/`to`).
+
+- **Server:** `Canon.landmarks_view(discovered, reveal)` sends only discovered parts. `always_visible` places (the house, the rainbow) appear whole once any part is found, but their undiscovered rooms are sent as positions without ids, so no names leak. Rooms carry `roles` (`/api/world`: dict; `/api/unity`: `"landmark:role"` strings).
+- **Rooms render by role:** house yards are open grass with no per-room house; interior rooms keep walls; forest rooms are clearings (the trees belong to the forest); river rooms are water; Up a Tree is a platform in the branches.
+- **Landmarks render once, across rooms:** the house shell is fitted around its interior rooms, tall enough for the attic, with a pitched roof, chimney, boarded door and kitchen window. Walls fade and the roof hides while you're inside or when the house blocks the camera's view of you. The forest floor and trees sit on a fixed grid (trees don't move as you explore) and avoid rooms, paths and the house. There's a big trunk from the Forest Path to Up a Tree, a water ribbon along the river path, six arcs for the rainbow, and discs for the lake.
+- Web: `LANDMARK_BUILDERS` in `web/world3d.js`. Unity: `LandmarkBuilder.cs`.
+
 ## Click-to-travel (autopilot)
 
 - **Planning:** `World.route(start, goal)` is Dijkstra over known, unblocked exits. Exits we've walked cost 1; exits only guessed from the reverse direction cost 1.5, so walked paths are preferred. Each step carries the command that actually worked (`Exit.via`, e.g. `climb tree`, `enter window`), not just the compass direction.

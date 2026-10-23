@@ -1,0 +1,41 @@
+{
+ "_about": "Locations that span several rooms and are drawn as one thing in 3D. Roles tell the builders how each room fits in. Room ids are from zork1-map.json.",
+ "landmarks": {
+  "white-house": {
+   "kind": "house",
+   "name": "The white house",
+   "interior": ["LIVING-ROOM", "KITCHEN"],
+   "upstairs": ["ATTIC"],
+   "exterior": ["WEST-OF-HOUSE", "NORTH-OF-HOUSE", "SOUTH-OF-HOUSE", "EAST-OF-HOUSE"],
+   "door": {"side": "west", "boarded": true},
+   "window": {"side": "east", "room": "KITCHEN"},
+   "chimney": "KITCHEN",
+   "always_visible": true
+  },
+  "forest": {
+   "kind": "forest",
+   "name": "The forest",
+   "members": ["FOREST-1", "FOREST-2", "FOREST-3", "MOUNTAINS", "PATH", "CLEARING", "GRATING-CLEARING", "STONE-BARROW",
+               "WEST-OF-HOUSE", "NORTH-OF-HOUSE", "SOUTH-OF-HOUSE", "EAST-OF-HOUSE"],
+   "big_tree": {"base": "PATH", "top": "UP-A-TREE"}
+  },
+  "frigid-river": {
+   "kind": "river",
+   "name": "The Frigid River",
+   "path": ["DAM-BASE", "RIVER-1", "RIVER-2", "RIVER-3", "RIVER-4", "RIVER-5", "ARAGAIN-FALLS"]
+  },
+  "rainbow": {
+   "kind": "rainbow",
+   "name": "The rainbow",
+   "from": "ARAGAIN-FALLS",
+   "via": "ON-RAINBOW",
+   "to": "END-OF-RAINBOW",
+   "always_visible": true
+  },
+  "reservoir": {
+   "kind": "lake",
+   "name": "The reservoir",
+   "members": ["RESERVOIR-SOUTH", "RESERVOIR", "RESERVOIR-NORTH", "STREAM-VIEW", "IN-STREAM"]
+  }
+ }
+}

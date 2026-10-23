@@ -464,6 +464,8 @@ window.addEventListener("world3d-ready", () => {
   let saved = null;
   try { saved = localStorage.getItem("zork-view"); } catch {}
   if (saved === "3d" || location.hash.startsWith("#3d")) setMode(true);
+  // /#3d&overview opens zoomed out over the whole map.
+  if (new URLSearchParams(location.hash.slice(1)).has("overview")) setTimeout(() => window.world3d.overview(), 300);
 });
 window.addEventListener("resize", () => { const c = currentRoom(); if (c && $("follow").checked) centerOn(c); renderMap(); });
 

@@ -101,7 +101,7 @@ function rng(seedStr) {
 
 function signature(r) {
   const ex = Object.entries(r.exits).map(([d, e]) => `${d}:${e.to}:${e.blocked}`).join("|");
-  return [r.undiscovered ? "ghost" : "", r.env3d, r.indoor3d, r.lighting, JSON.stringify(r.palette), r.items.join(","), (r.features || []).join(","), r.name, ex].join("#");
+  return [r.undiscovered ? "ghost" : "", JSON.stringify(r.roles || {}), r.env3d, r.indoor3d, r.lighting, JSON.stringify(r.palette), r.items.join(","), (r.features || []).join(","), r.name, ex].join("#");
 }
 
 // ---------- room building ----------
@@ -116,16 +116,28 @@ function buildGhost(r) {
   return g;
 }
 
+// What part a room plays in a multi-room landmark (see game/zork1-landmarks.json).
+const ROLE_KINDS = { "white-house": "house", forest: "forest", "frigid-river": "river", rainbow: "rainbow", reservoir: "lake" };
+function roleIn(r, landmarkId) { return (r.roles || {})[landmarkId] || null; }
+
 function buildRoom(r, byId) {
   if (r.undiscovered) return buildGhost(r);
+  const houseRole = roleIn(r, "white-house");
+  const forestRole = roleIn(r, "forest");
+  const riverRole = roleIn(r, "frigid-river");
+  if (forestRole === "tree-top") return buildTreePlatform(r);
   const g = new THREE.Group();
   g.name = r.id;
-  const env = (r.env3d || "").toLowerCase();
+  let env = (r.env3d || "").toLowerCase();
+  if (houseRole === "exterior") env = "yard";              // the house itself is a landmark
+  else if (houseRole) env = "house";
+  else if (forestRole) env = "clearing";                   // trees come from the forest landmark
+  if (riverRole === "path") env = "riverbed";
   const theme = THEMES[env] || THEMES.default;
   const pal = r.palette || {};
   const dark = r.lighting === "dark" || r.dark;
   const shade = (c) => (dark ? new THREE.Color(c).multiplyScalar(0.45) : new THREE.Color(c));
-  const floorC = shade(pal.floor || theme[0]);
+  const floorC = shade(env === "yard" ? "#4f6b37" : env === "clearing" ? "#55703f" : env === "riverbed" ? "#2a5d99" : pal.floor || theme[0]);
   const wallC = shade(pal.wall || theme[1]);
   const accentC = new THREE.Color(pal.accent || theme[2]);
 
@@ -141,7 +153,8 @@ function buildRoom(r, byId) {
     if (!v || (Math.abs(v[0]) < 1e-3 && Math.abs(v[1]) < 1e-3)) continue;
     open.add(Math.abs(v[0]) > Math.abs(v[1]) ? (v[0] > 0 ? "east" : "west") : (v[1] > 0 ? "north" : "south"));
   }
-  if (r.indoor3d || env === "maze") buildWalls(g, open, mat(wallC), env === "maze" ? WALL_H * 0.8 : WALL_H);
+  const indoor = houseRole === "interior" || houseRole === "upstairs" || (r.indoor3d && !["yard", "clearing", "riverbed"].includes(env));
+  if (indoor || env === "maze") buildWalls(g, open, mat(wallC), env === "maze" ? WALL_H * 0.8 : WALL_H);
 
   decorate(g, r, env, accentC, wallC);
 
@@ -222,7 +235,7 @@ function decorate(g, r, env, accent, wall) {
       mesh(GEO.cyl, mat(new THREE.Color(wall).lerp(new THREE.Color("#ffffff"), 0.4)), g, V(i * ROOM * 0.3, WALL_H / 2, j * ROOM * 0.3), V(0.6, WALL_H, 0.6));
     }
   }
-  if (!r.indoor3d && r.name.toLowerCase().includes("house")) {
+  if (!r.indoor3d && r.name.toLowerCase().includes("house") && !(r.roles || {})["white-house"]) {
     // The white house, with a little roof
     mesh(GEO.box, mat("#ebebe0"), g, V(ROOM * 0.3, 1.25, -ROOM * 0.3), V(2.5, 2.5, 2.5));
     const roof = mesh(GEO.cone, mat("#6b4b3a"), g, V(ROOM * 0.3, 3.1, -ROOM * 0.3), V(3.6, 1.3, 3.6));
@@ -265,6 +278,186 @@ function buildConnection(parent, a, b, inferred) {
   ramp.lookAt(e);
 }
 
+// "Up a Tree": a wooden platform in the branches of the forest's big tree.
+function buildTreePlatform(r) {
+  const g = new THREE.Group();
+  g.name = r.id;
+  mesh(GEO.cyl, mat("#7a5634"), g, V(0, -0.2, 0), V(ROOM * 0.8, 0.4, ROOM * 0.8));
+  for (let i = 0; i < 6; i++) {          // a ring of leafy clumps around the edge, leaving the middle open
+    const a = (i / 6) * Math.PI * 2;
+    mesh(GEO.sphere, mat("#2f7a3a"), g, V(Math.cos(a) * ROOM * 0.55, 1.2, Math.sin(a) * ROOM * 0.55), V(3.4, 2.6, 3.4));
+  }
+  const name = label(r.name, "#ffffff", 1.0);
+  name.position.set(0, WALL_H + 2.4, 0);
+  g.add(name);
+  return g;
+}
+
+// ---------- landmarks: places drawn as one thing across several rooms ----------
+const P = (pt) => toWorld({ x: pt[0], y: pt[1], z: pt[2] });   // [x, y, z] map point -> world
+const RP = (room) => toWorld(room);
+
+function hash2(i, j, seed) {
+  let h = Math.imul(i * 374761393 + j * 668265263, 1274126177) ^ seed;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+function buildHouse(lm, parent, ctx) {
+  const inside = lm.rooms.filter((r) => r.role === "interior").map(RP);
+  if (!inside.length) return;
+  const up = lm.rooms.filter((r) => r.role === "upstairs");
+  const pad = ROOM / 2 + 1.6;
+  const minX = Math.min(...inside.map((p) => p.x)) - pad, maxX = Math.max(...inside.map((p) => p.x)) + pad;
+  const minZ = Math.min(...inside.map((p) => p.z)) - pad, maxZ = Math.max(...inside.map((p) => p.z)) + pad;
+  const base = inside[0].y - 0.4;
+  const height = (up.length ? LEVEL_H : 0) + WALL_H + 1.2;
+  const cx = (minX + maxX) / 2, cz = (minZ + maxZ) / 2, w = maxX - minX, d = maxZ - minZ, t = 0.5;
+  const g = new THREE.Group();
+  g.userData.house = true;
+  parent.add(g);
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xece9df, roughness: 0.9, transparent: true });
+  const trimMat = new THREE.MeshStandardMaterial({ color: 0x8a7a68, roughness: 0.9, transparent: true });
+  ctx.houseMats = [wallMat, trimMat];
+  const walls = [
+    [V(cx, base + height / 2, minZ), V(w, height, t)], [V(cx, base + height / 2, maxZ), V(w, height, t)],
+    [V(minX, base + height / 2, cz), V(t, height, d)], [V(maxX, base + height / 2, cz), V(t, height, d)],
+  ];
+  for (const [pos, size] of walls) mesh(GEO.box, wallMat, g, pos, size);
+  // Floor between the rooms, and trim along the base
+  mesh(GEO.box, new THREE.MeshStandardMaterial({ color: 0x6b4e32 }), g, V(cx, base - 0.05, cz), V(w, 0.3, d));
+  mesh(GEO.box, trimMat, g, V(cx, base + 0.3, minZ - 0.05), V(w + 0.2, 0.6, t + 0.1));
+  mesh(GEO.box, trimMat, g, V(cx, base + 0.3, maxZ + 0.05), V(w + 0.2, 0.6, t + 0.1));
+
+  // Pitched roof: a triangular prism along the long side
+  const roofH = Math.min(w, d) * 0.45;
+  const shape = new THREE.Shape([new THREE.Vector2(-d / 2 - 1, 0), new THREE.Vector2(d / 2 + 1, 0), new THREE.Vector2(0, roofH)]);
+  const roofGeo = new THREE.ExtrudeGeometry(shape, { depth: w + 2, bevelEnabled: false });
+  const roof = new THREE.Mesh(roofGeo, new THREE.MeshStandardMaterial({ color: 0x5b3b2e, roughness: 0.85 }));
+  roof.rotation.y = Math.PI / 2;
+  roof.position.set(minX - 1, base + height, cz);
+  g.add(roof);
+  ctx.roof = roof;
+
+  if (lm.chimney) {
+    const c = P(lm.chimney);
+    const chim = mesh(GEO.box, new THREE.MeshStandardMaterial({ color: 0x8b4a3a }), g, V(c.x + 2, base + height + roofH * 0.6, cz - d / 4), V(1.4, roofH + 1.5, 1.4));
+    ctx.chimney = chim;
+  }
+  // The boarded front door (west side)
+  if (lm.door) {
+    const x = lm.door.side === "west" ? minX - 0.3 : maxX + 0.3;
+    mesh(GEO.box, new THREE.MeshStandardMaterial({ color: 0x5a3b22 }), g, V(x, base + 1.6, cz), V(0.2, 3.2, 1.9));
+    if (lm.door.boarded) {
+      for (const s of [-1, 1]) {
+        const plank = mesh(GEO.box, new THREE.MeshStandardMaterial({ color: 0x9c7a55 }), g, V(x - 0.15 * Math.sign(cx - x), base + 1.6, cz), V(0.15, 0.35, 2.6));
+        plank.rotation.x = s * 0.7;
+      }
+    }
+  }
+  // The kitchen window (east side), slightly ajar
+  if (lm.window) {
+    const wp = P(lm.window.room);
+    const x = lm.window.side === "east" ? maxX + 0.3 : minX - 0.3;
+    mesh(GEO.box, new THREE.MeshStandardMaterial({ color: 0xd9d2bf }), g, V(x, base + 2.2, wp.z), V(0.2, 1.9, 2.3));
+    mesh(GEO.box, new THREE.MeshStandardMaterial({ color: 0x1d2a33, emissive: 0x16242e, emissiveIntensity: 0.6 }), g, V(x + 0.05 * Math.sign(x - cx), base + 2.2, wp.z), V(0.15, 1.5, 1.9));
+  }
+  ctx.houseBox = { minX, maxX, minZ, maxZ };
+  ctx.houseBox3 = new THREE.Box3(V(minX - 1, base, minZ - 1), V(maxX + 1, base + height + roofH, maxZ + 1));
+}
+
+function buildForest(lm, parent, ctx) {
+  const pts = lm.rooms.map(RP);
+  if (!pts.length) return;
+  const reach = ROOM / 2 + 9;     // how far woodland spreads around each known forest room
+  const g = new THREE.Group();
+  parent.add(g);
+  const y0 = pts[0].y;
+  // Woodland floor: a soft disc under each known forest room, merging into one floor
+  for (const p of pts) mesh(GEO.cyl, mat("#30482a"), g, V(p.x, y0 - 0.55, p.z), V(reach * 2, 0.2, reach * 2));
+  // Trees on a fixed grid (so they don't move as you explore), skipping rooms, paths and the house
+  const minX = Math.min(...pts.map((p) => p.x)) - reach, maxX = Math.max(...pts.map((p) => p.x)) + reach;
+  const minZ = Math.min(...pts.map((p) => p.z)) - reach, maxZ = Math.max(...pts.map((p) => p.z)) + reach;
+  const cell = 4.2;
+  const avoid = ctx.levelRooms(pts[0].y);
+  const hb = ctx.houseBox;
+  const trunkMat = mat("#5a3d26");
+  const leafMats = [mat("#26732f"), mat("#2e6b2a"), mat("#3a7d33"), mat("#1f5e2a")];
+  for (let i = Math.floor(minX / cell); i <= Math.ceil(maxX / cell); i++) {
+    for (let j = Math.floor(minZ / cell); j <= Math.ceil(maxZ / cell); j++) {
+      const r1 = hash2(i, j, 7), r2 = hash2(i, j, 11), r3 = hash2(i, j, 13);
+      if (r3 < 0.25) continue;                                 // natural gaps
+      const x = (i + r1) * cell, z = (j + r2) * cell;
+      if (!pts.some((p) => Math.hypot(p.x - x, p.z - z) < reach)) continue;
+      if (avoid.some((p) => Math.abs(p.x - x) < ROOM / 2 + 1.5 && Math.abs(p.z - z) < ROOM / 2 + 1.5)) continue;
+      if (ctx.onPath(x, z, 2.2)) continue;
+      if (hb && x > hb.minX - 2 && x < hb.maxX + 2 && z > hb.minZ - 2 && z < hb.maxZ + 2) continue;
+      const h = 2.2 + r1 * 2.2, s = 1.8 + r2 * 1.6;
+      mesh(GEO.cyl, trunkMat, g, V(x, y0 + h / 2 - 0.4, z), V(0.4, h, 0.4));
+      mesh(r3 > 0.8 ? GEO.cone : GEO.sphere, leafMats[Math.floor(r3 * 4) % 4], g, V(x, y0 + h + s * 0.35 - 0.4, z), V(s, s * 1.25, s));
+    }
+  }
+  // The big climbable tree: trunk from the forest path up to the "Up a Tree" platform
+  if (lm.big_tree) {
+    const b = P(lm.big_tree.base), t = P(lm.big_tree.top);
+    const tx = b.x + ROOM / 2 + 1.2, tz = b.z - ROOM / 2 - 1.2;
+    const h = t.y - b.y + 2;
+    mesh(GEO.cyl, mat("#4a3220"), g, V(tx, b.y + h / 2, tz), V(1.6, h, 1.6));
+    const branch = mesh(GEO.box, mat("#4a3220"), g, V((tx + t.x) / 2, t.y - 0.6, (tz + t.z) / 2), V(0.8, 0.8, Math.hypot(tx - t.x, tz - t.z)));
+    branch.lookAt(V(t.x, t.y - 0.6, t.z));
+  }
+}
+
+function buildRiver(lm, parent) {
+  const pts = (lm.path || []).map(P);
+  const water = mat("#2a5d99", 0.12, { roughness: 0.15, opacity: 0.9 });
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const a = pts[i], b = pts[i + 1];
+    const len = Math.hypot(b.x - a.x, b.z - a.z);
+    const seg = mesh(GEO.box, water, parent, V((a.x + b.x) / 2, (a.y + b.y) / 2 - 0.35, (a.z + b.z) / 2), V(7, 0.25, len + 7));
+    seg.rotation.y = Math.atan2(b.x - a.x, b.z - a.z);
+    // Banks
+    for (const s of [-1, 1]) {
+      const bank = mesh(GEO.box, mat("#5b5348"), parent, V(0, 0, 0), V(1.2, 1.4, len + 6));
+      bank.position.set((a.x + b.x) / 2 + Math.cos(seg.rotation.y) * 4.2 * s, (a.y + b.y) / 2 - 0.2, (a.z + b.z) / 2 - Math.sin(seg.rotation.y) * 4.2 * s);
+      bank.rotation.y = seg.rotation.y;
+    }
+  }
+}
+
+function buildRainbow(lm, parent) {
+  const from = lm.rooms.find((r) => r.role === "from"), to = lm.rooms.find((r) => r.role === "to");
+  if (!from || !to) return;
+  const a = RP(from), b = RP(to);
+  const span = Math.hypot(b.x - a.x, b.z - a.z);
+  const g = new THREE.Group();
+  g.position.set((a.x + b.x) / 2, a.y, (a.z + b.z) / 2);
+  g.rotation.y = -Math.atan2(b.z - a.z, b.x - a.x);
+  const colors = [0xff4040, 0xff9a30, 0xffe040, 0x50d050, 0x4090ff, 0x7050e0];
+  colors.forEach((c, i) => {
+    const arc = new THREE.Mesh(new THREE.TorusGeometry(span / 2 - i * 0.55, 0.3, 8, 64, Math.PI),
+      new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.75 }));
+    g.add(arc);
+  });
+  parent.add(g);
+}
+
+function buildLake(lm, parent) {
+  const pts = lm.rooms.map(RP);
+  if (!pts.length) return;
+  const water = mat("#2a5d99", 0.1, { roughness: 0.15, opacity: 0.85 });
+  for (const p of pts) mesh(GEO.cyl, water, parent, V(p.x, p.y - 0.3, p.z), V(ROOM * 2.4, 0.2, ROOM * 2.4));
+}
+
+const LANDMARK_BUILDERS = { house: buildHouse, forest: buildForest, river: buildRiver, rainbow: buildRainbow, lake: buildLake };
+
+function distToSeg(x, z, a, b) {
+  const dx = b.x - a.x, dz = b.z - a.z;
+  const len2 = dx * dx + dz * dz || 1e-6;
+  const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / len2));
+  return Math.hypot(x - (a.x + t * dx), z - (a.z + t * dz));
+}
+
 // ---------- the view ----------
 export function createWorld3D(container) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -295,6 +488,10 @@ export function createWorld3D(container) {
   scene.add(links);
   const routeGroup = new THREE.Group();   // glowing route segments
   scene.add(routeGroup);
+  const landmarkGroup = new THREE.Group(); // the house, the forest, the river... (see LANDMARK_BUILDERS)
+  scene.add(landmarkGroup);
+  let landmarkSig = "";
+  let lmCtx = {};
 
   // ---------- the player: a frog ----------
   // Red-eyed tree frog by Quaternius (CC0), web/models/frog.glb.
@@ -411,6 +608,29 @@ export function createWorld3D(container) {
         if (done.has(key)) continue;
         done.add(key);
         buildConnection(links, r, byId[e.to], e.inferred || r.undiscovered || byId[e.to].undiscovered);
+      }
+    }
+
+    // Landmarks: rebuilt when they or the set of known rooms change.
+    const lms = world.landmarks || [];
+    const sig = JSON.stringify(lms) + "|" + world.rooms.map((r) => r.id).join(",");
+    if (sig !== landmarkSig) {
+      landmarkSig = sig;
+      landmarkGroup.traverse((o) => { if (o.geometry && o.geometry.type === "ExtrudeGeometry") o.geometry.dispose(); });
+      landmarkGroup.clear();
+      const segs = [];
+      for (const r of world.rooms) for (const e of Object.values(r.exits)) {
+        const b = e.to && byId[e.to];
+        if (b && b.z === r.z) segs.push([toWorld(r), toWorld(b)]);
+      }
+      lmCtx = {
+        levelRooms: (y) => world.rooms.map(toWorld).filter((p) => Math.abs(p.y - y) < 0.5),
+        onPath: (x, z, w) => segs.some(([a, b]) => distToSeg(x, z, a, b) < w),
+      };
+      // The house first: the forest keeps its trees clear of it.
+      for (const lm of [...lms].sort((a, b) => (a.kind === "house" ? -1 : b.kind === "house" ? 1 : 0))) {
+        const build = LANDMARK_BUILDERS[lm.kind];
+        if (build) build(lm, landmarkGroup, lmCtx);
       }
     }
 
@@ -536,6 +756,26 @@ export function createWorld3D(container) {
       if (t > busyUntil) play("Idle");
     }
     if (mixer) mixer.update(dt);
+
+    // The house: see-through with the roof off while you're inside it.
+    if (lmCtx.houseMats) {
+      const roles = (current && current.roles) || {};
+      let inside = ["interior", "upstairs"].includes(roles["white-house"]);
+      // Also see through it when it stands between the camera and the frog.
+      if (!inside && lmCtx.houseBox3) {
+        const to = player.position.clone().add(V(0, 1, 0));
+        const dir = to.clone().sub(camera.position);
+        const dist = dir.length();
+        const hit = new THREE.Ray(camera.position, dir.normalize()).intersectBox(lmCtx.houseBox3, V(0, 0, 0));
+        if (hit && hit.distanceTo(camera.position) < dist) inside = true;
+      }
+      for (const m of lmCtx.houseMats) {
+        m.opacity += ((inside ? 0.12 : 1) - m.opacity) * Math.min(1, dt * 4);
+        m.depthWrite = m.opacity > 0.95;
+      }
+      if (lmCtx.roof) lmCtx.roof.visible = !inside;
+      if (lmCtx.chimney) lmCtx.chimney.visible = !inside;
+    }
 
     ring.position.set(player.position.x, playerTarget.y + 0.08, player.position.z);
     const s = 1 + 0.12 * Math.sin(t * 3);

@@ -23,6 +23,8 @@ namespace Zork
         Transform _connections;
         Vector3 _playerTarget;
         FrogPlayer _frog;
+        LandmarkBuilder _landmarks;
+        readonly List<GameObject> _insideLabels = new List<GameObject>();   // labels of rooms inside the house
         GameHUD _hud;
         string _lastClicked;
         float _lastClickTime;
@@ -41,6 +43,7 @@ namespace Zork
         {
             _client = GetComponent<ZorkClient>();
             _hud = GetComponent<GameHUD>();
+            _landmarks = gameObject.AddComponent<LandmarkBuilder>();
             _client.OnWorld += Build;
             _connections = new GameObject("Connections").transform;
             _connections.SetParent(transform, false);
@@ -53,6 +56,11 @@ namespace Zork
 
         void Update()
         {
+            // Rooms inside the house: hide their labels while the house is solid.
+            _insideLabels.RemoveAll(l => l == null);
+            var show = _landmarks == null || !_landmarks.HouseSolid;
+            foreach (var l in _insideLabels) if (l.activeSelf != show) l.SetActive(show);
+
             // Double-click a room to send the autopilot there.
             if (Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0 && (_hud == null || !_hud.IsOverHud(Input.mousePosition)))
             {
@@ -121,6 +129,7 @@ namespace Zork
                 _playerTarget = CurrentRoomPosition;
                 _frog.SetTarget(_playerTarget);
             }
+            _landmarks.Build(w);
             if (w.log != null && w.log.Length > 0)
             {
                 var last = w.log[w.log.Length - 1];
@@ -161,13 +170,24 @@ namespace Zork
         // ---------- rooms ----------
         GameObject BuildRoom(RoomData r, Dictionary<string, RoomData> byId)
         {
+            // What part this room plays in a multi-room landmark (see LandmarkBuilder)
+            var houseRole = r.RoleIn("white-house");
+            var forestRole = r.RoleIn("forest");
+            var riverRole = r.RoleIn("frigid-river");
+            if (forestRole == "tree-top") return BuildTreePlatform(r);
+
             var root = new GameObject("Room: " + r.name);
             root.AddComponent<RoomTag>().id = r.id;
             root.transform.SetParent(transform, false);
             var env = (r.environment ?? "").ToLowerInvariant();
+            if (houseRole == "exterior") env = "yard";          // the house itself is a landmark
+            else if (houseRole != null) env = "house";
+            else if (forestRole != null) env = "clearing";      // trees come from the forest landmark
+            if (riverRole == "path") env = "riverbed";
             var dark = r.lighting == "dark";
             var theme = Theme.For(env);
-            var floorC = Mat.Parse(r.floorColor, theme.floor);
+            var floorC = env == "yard" ? new Color(0.31f, 0.42f, 0.22f) : env == "clearing" ? new Color(0.33f, 0.44f, 0.25f)
+                       : env == "riverbed" ? new Color(0.16f, 0.36f, 0.6f) : Mat.Parse(r.floorColor, theme.floor);
             var wallC = Mat.Parse(r.wallColor, theme.wall);
             var accentC = Mat.Parse(r.accentColor, theme.accent);
             if (dark) { floorC *= 0.45f; wallC *= 0.45f; floorC.a = wallC.a = 1f; }
@@ -186,7 +206,9 @@ namespace Zork
                     if (side != null) open.Add(side);
                 }
 
-            if (r.indoor && env != "maze")
+            var indoor = houseRole == "interior" || houseRole == "upstairs" ||
+                         (r.indoor && env != "yard" && env != "clearing" && env != "riverbed");
+            if (indoor && env != "maze")
                 BuildWalls(root.transform, open, Mat.Color(wallC), wallHeight);
             else if (env == "maze")
                 BuildWalls(root.transform, open, Mat.Color(wallC), wallHeight * 0.8f);
@@ -240,6 +262,8 @@ namespace Zork
                     stub.transform.localRotation = Quaternion.LookRotation(d);
                     stub.transform.localPosition = d * (roomSize * 0.5f + 1.25f) + Vector3.up * -0.1f;
                 }
+            if (houseRole == "interior" || houseRole == "upstairs")
+                foreach (var l in root.GetComponentsInChildren<Label>(true)) _insideLabels.Add(l.gameObject);
             return root;
         }
 
@@ -351,7 +375,7 @@ namespace Zork
 
             // A white house sits next to the rooms around it.
             var name = r.name.ToLowerInvariant();
-            if (!r.indoor && name.Contains("house"))
+            if (!r.indoor && name.Contains("house") && r.RoleIn("white-house") == null)
             {
                 var house = Mat.Primitive(PrimitiveType.Cube, "White House", parent, Mat.Color(new Color(0.92f, 0.92f, 0.88f)));
                 house.transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);
@@ -369,6 +393,27 @@ namespace Zork
                     prop.transform.localPosition = p + Vector3.up * h / 2f;
                     Label.Create(parent, r.features[i], prop.transform.localPosition + new Vector3(0, h / 2f + 0.5f, 0), 0.14f, new Color(0.8f, 0.85f, 0.9f));
                 }
+        }
+
+        // "Up a Tree": a wooden platform in the big tree's branches (the trunk is part of the forest)
+        GameObject BuildTreePlatform(RoomData r)
+        {
+            var root = new GameObject("Room: " + r.name);
+            root.AddComponent<RoomTag>().id = r.id;
+            root.transform.SetParent(transform, false);
+            var deck = Mat.Primitive(PrimitiveType.Cylinder, "Platform", root.transform, Mat.Color(new Color(0.48f, 0.34f, 0.2f)));
+            deck.transform.localScale = new Vector3(roomSize * 0.8f, 0.2f, roomSize * 0.8f);
+            deck.transform.localPosition = new Vector3(0, -0.2f, 0);
+            for (int i = 0; i < 6; i++)
+            {
+                var a = i / 6f * Mathf.PI * 2;
+                var leaf = Mat.Primitive(PrimitiveType.Sphere, "Leaves", root.transform, Mat.Color(new Color(0.18f, 0.48f, 0.23f)));
+                leaf.transform.localPosition = new Vector3(Mathf.Cos(a) * roomSize * 0.55f, 1.2f, Mathf.Sin(a) * roomSize * 0.55f);
+                leaf.transform.localScale = new Vector3(3.4f, 2.6f, 3.4f);
+                Destroy(leaf.GetComponent<Collider>());
+            }
+            Label.Create(root.transform, r.name, new Vector3(0, wallHeight + 2.2f, 0), 0.32f, Color.white);
+            return root;
         }
 
         // ---------- connections ----------

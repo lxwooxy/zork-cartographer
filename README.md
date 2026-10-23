@@ -56,6 +56,7 @@ Zork I's source is open, so the full map (110 rooms, 352 exits, with conditions 
 - **Fog of war:** rooms appear only once you've been there. Exits you haven't taken show as stubs, without saying where they lead. The header shows progress (`Rooms 17/110`).
 - **Exact tracking:** your position follows the real exits, so identical rooms (the 15 "Maze" rooms, the 4 "Forest" rooms) are never confused, and the autopilot can route through the maze correctly.
 - **Map ✓** in the header means the game has agreed with the map on every move. If it ever disagrees, the badge turns amber and its tooltip lists where. That's how the map gets checked and perfected.
+- **Places, not just rooms:** locations that span several rooms are drawn as one thing in 3D (`game/zork1-landmarks.json`). The white house is a single building with the Kitchen and Living Room inside and the Attic upstairs; the four "… of House" rooms are its yards, and its walls fade with the roof off when you go in (or when it blocks your view). The forest is one woodland with a big climbable tree, the Frigid River is one river, the rainbow arcs from Aragain Falls, and the reservoir is one lake.
 - **Reveal map** (map toolbar) shows every room, including undiscovered ones as faint outlines. Spoilers, obviously.
 
 To tune the map, see [docs/SETUP.md → Perfecting the map](docs/SETUP.md#7-perfecting-the-map). Saves made before the canonical map existed keep using the older play-built mapper.
@@ -96,6 +97,8 @@ server/autopilot.py            click-to-travel rulebook (stop / flee / retry dec
 server/canon.py                loads the canonical map and layout
 game/zork1-map.json            every room and exit, generated from the game source
 game/zork1-regions.json        hand-curated level for each room (edit to taste)
+game/zork1-landmarks.json      places drawn as one thing (house, forest, river, rainbow, reservoir)
+game/zork1-layout-overrides.json  hand-placed rooms (the house and forest), kept fixed by the layout
 game/zork1-layout.json         room positions (generated)
 tools/                         build_map.py, layout_map.py, render_map.py
 server/app.py                  FastAPI app: API, WebSocket, password login, static files
