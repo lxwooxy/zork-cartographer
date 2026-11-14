@@ -1,4 +1,7 @@
 // Zork Cartographer web UI: terminal, 2D map, room panel and inventory.
+// It talks to a backend set up by the page as window.zorkBackend: the Python server
+// (backend-server.js) or the game running in the browser (engine/local.js).
+const backend = window.zorkBackend;
 const $ = (id) => document.getElementById(id);
 const SVGNS = "http://www.w3.org/2000/svg";
 const SCALE = 110;          // pixels per map unit
@@ -18,24 +21,13 @@ let lastLogLen = 0;
 const history = [];
 let histIdx = 0;
 
-// ---------- server connection ----------
-function connect() {
-  const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
-  ws.onmessage = (ev) => {
-    const msg = JSON.parse(ev.data);
-    if (msg.type === "world") update(msg.world, msg.llm, msg.travel);
-  };
-  ws.onclose = () => setTimeout(connect, 1000);
-}
+// ---------- backend ----------
+backend.subscribe((w, llm, tr) => update(w, llm, tr));
 
 async function send(command) {
   appendLog(command, null);
-  const r = await fetch("/api/command", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ command }),
-  });
-  const data = await r.json();
-  if (data.error) appendLog(null, data.error);
+  const data = await backend.command(command);
+  if (data && data.error) appendLog(null, data.error);
 }
 
 // ---------- terminal ----------
@@ -308,8 +300,7 @@ async function selectRoom(id) {
 
 async function refreshPreview() {
   if (!selected || selected === world.current) { preview = null; refreshViews(); return; }
-  const r = await fetch(`/api/route?to=${encodeURIComponent(selected)}`);
-  preview = r.ok ? await r.json() : null;
+  preview = await backend.route(selected);
   refreshViews();
 }
 
@@ -322,16 +313,11 @@ function refreshViews() {
 async function goTo(id, fromCheckpoint) {
   if (!id || id === world.current) return;
   selected = id;
-  const body = { to: id };
-  if (fromCheckpoint) body.from_checkpoint = fromCheckpoint;
-  const r = await fetch("/api/travel", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (!r.ok) {
-    const d = await r.json().catch(() => ({}));
-    if (d.error) appendLog(null, "[Autopilot] " + d.error);
-  }
+  const d = await backend.travel(id, fromCheckpoint);
+  if (d && d.error) appendLog(null, "[Autopilot] " + d.error);
 }
 
-async function stopTravel() { await fetch("/api/travel/stop", { method: "POST" }); }
+async function stopTravel() { await backend.stopTravel(); }
 
 function renderTravel() {
   const box = $("travel");
@@ -377,7 +363,7 @@ function renderCheckpoints() {
     b.textContent = "Load";
     b.onclick = async () => {
       if (!confirm(`Load “${c.name}”? Progress since turn ${c.turn} is undone, but the map keeps everything you've explored.`)) return;
-      await fetch(`/api/checkpoints/${c.id}/load`, { method: "POST" });
+      await backend.load(c.id);
     };
     li.appendChild(b);
     ul.appendChild(li);
@@ -388,7 +374,8 @@ $("savebtn").onclick = async () => {
   const cur = currentRoom();
   const name = prompt("Name this save:", cur ? `${cur.name}, turn ${world.turn}` : "");
   if (name === null) return;
-  await fetch("/api/checkpoints", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
+  const d = await backend.save(name);
+  if (d && d.error) appendLog(null, d.error);
 };
 
 function shorten(s, n) { return s.length > n ? s.slice(0, Math.max(3, n - 1)) + "…" : s; }
@@ -458,7 +445,7 @@ function setMode(is3d) {
   if (!is3d) renderMap();
 }
 $("reveal").onchange = async () => {
-  await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reveal: $("reveal").checked }) });
+  await backend.setReveal($("reveal").checked);
 };
 $("mode2d").onclick = () => setMode(false);
 $("mode3d").onclick = () => setMode(true);
@@ -572,15 +559,17 @@ function lastWord(s) { return s.trim().split(/\s+/).pop(); }
 function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
 $("newgame").onclick = async () => {
-  if (!confirm("Start a new game? The current map is backed up to data/world.bak.json.")) return;
+  if (!confirm(backend.newGameText)) return;
   lastLogLen = -1;
-  await fetch("/api/new-game", { method: "POST" });
+  await backend.newGame();
 };
 
-fetch("/api/world").then((r) => r.json()).then((d) => {
+backend.init().then((d) => {
   if (!world) update(d.world, d.llm, d.travel);
   // Links like /#3d&to=kitchen open with that room selected and its route previewed.
   const to = new URLSearchParams(location.hash.slice(1)).get("to");
   if (to) selectRoom(to);
+}).catch((e) => {
+  console.error(e);
+  appendLog(null, "Couldn't start the game: " + (e && e.message ? e.message : e));
 });
-connect();

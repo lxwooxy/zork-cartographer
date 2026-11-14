@@ -80,6 +80,23 @@ Zork's geography isn't Euclidean (east then west doesn't always return you), so 
 
 `data/world.json` keeps every command, save and load. On startup, `app.py` starts a fresh dfrotz with the same seed and replays them in order (`Game.send(fast=True)` stops reading as soon as the `>` prompt appears; save/load entries call `Game.save` / `Game.restore`). Then it drains leftover output. The map itself is loaded from the file, not rebuilt.
 
+## Browser version
+
+`tools/build_static.py` builds a serverless copy of the web UI into `dist/browser/`. `web/app.js` talks to a backend object set by the page: `web/backend-server.js` (HTTP + WebSocket, used by `web/index.html`) or `web/engine/local.js` (everything in the page, used by `web/index-static.html`). Both have the same methods: `init`, `subscribe`, `command`, `route`, `travel`, `stopTravel`, `save`, `load`, `setReveal`, `newGame`.
+
+| Server | Browser (`web/engine/`) |
+|---|---|
+| `game.py` (dfrotz) | `zmachine.js` wraps JSZM (`web/vendor/jszm/jszm.js`). Its `updateStatusLine` hook gives room, score and moves, like dfrotz's status line. |
+| `canon.py`, `parser.py`, `autopilot.py` | `canon.js`, `parser.js`, `autopilot.js`: direct ports |
+| `world.py` (canonical mode) | `world.js`: tracking, discovery, hidden/conditional exits, items, inventory, Dijkstra routes, reachable/confirmed, checkpoints. The heuristic mapper and spring layout aren't ported; a room name missing from the canonical map gets a simple placeholder room. |
+| `app.py` | `local.js`: commands, checkpoints, travel loop with retries, new game |
+
+- **Saves:** `SAVE`/`RESTORE` go through JSZM's `save`/`restore` hooks, which hand over the interpreter state as bytes (JSZM's own format, not Quetzal). Checkpoints are stored in localStorage as base64 (`zork-cartographer:v1:cp:<id>`).
+- **Autosave:** after each command that ends at a normal prompt, the page quietly runs `save` and stores that state, the interpreter's random-number state and the map (`...:state`, `...:world`). A reload starts the game, restores that state and puts the random numbers back, so it continues exactly. A quiet save doesn't count as a move or run the game clock. Turns where the game asked a question aren't autosaved (the save would lose the question). `again`/`g` repeats the player's last command, not the quiet save.
+- **Seed:** each new game picks a random seed (`crypto.getRandomValues`).
+- **No storage?** If localStorage is blocked, the game still works; the terminal says progress won't survive a reload.
+- **Typed `save`** makes a checkpoint; typed `restore`, `restart` and `quit` point to the buttons.
+
 ## HTTP API
 
 | Method & path | Body / query | Returns |
