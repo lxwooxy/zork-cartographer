@@ -125,3 +125,12 @@ button.primary:hover { background: #255571; }
 #map .edge.hidden { stroke: #2c3832; stroke-width: 1.5; stroke-dasharray: 3 4; }
 .pill.warn { color: #e0c97e; border-color: #e0c97e; }
 .visual { margin: 8px 0 0; font-style: italic; color: #bfd6c8; border-left: 2px solid var(--accent); padding-left: 8px; }
+
+/* ---- about dialog (static browser build) ---- */
+dialog#about { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 8px; max-width: min(560px, calc(100vw - 32px)); padding: 16px 20px; }
+dialog#about::backdrop { background: rgba(0,0,0,.6); }
+dialog#about h2 { font-size: 16px; margin: 0 0 8px; color: var(--accent); }
+dialog#about h3 { font-size: 12px; margin: 14px 0 4px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+dialog#about p { margin: 0 0 8px; }
+dialog#about a { color: var(--accent); }
+dialog#about form { margin-top: 12px; text-align: right; }
