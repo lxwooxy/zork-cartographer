@@ -32,6 +32,17 @@ cp .env.example .env        # optional settings (API key, password)
 
 Open <http://localhost:8765> and type `look`.
 
+## Browser version (no server)
+
+The whole game can also run as a static site: Zork I runs in the browser with the [JSZM](https://github.com/DLehenbauer/jszm) Z-machine interpreter, and the canonical map, room tracking, inventory, routes, autopilot and checkpoints are ported to JavaScript (`web/engine/`). The game is saved in the browser (localStorage) after every move, so a reload picks up where you left off.
+
+```bash
+python3 tools/build_static.py                      # -> dist/browser/ (about 1.8 MB, relative paths)
+python3 -m http.server -d dist/browser 8000        # open http://localhost:8000
+```
+
+Upload `dist/browser/` to any static host (GitHub Pages works). Not included: the heuristic map mode and live Claude calls (room details are pre-written), the password login and the Unity feed. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#browser-version).
+
 ## Using it
 
 - **Terminal (left):** type Zork commands. ↑/↓ recalls previous commands.

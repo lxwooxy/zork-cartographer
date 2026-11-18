@@ -69,7 +69,11 @@
     </aside>
   </main>
   <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
-  <script src="app.js"></script>
+  <script type="module">
+    import { createServerBackend } from "./backend-server.js";
+    window.zorkBackend = createServerBackend();
+  </script>
+  <script type="module" src="app.js"></script>
   <script type="module">
     import { createWorld3D } from "./world3d.js";
     window.world3d = createWorld3D(document.getElementById("view3d"));

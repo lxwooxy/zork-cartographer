@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zork Cartographer</title>
+  <meta name="description" content="Play Zork I in your browser and watch the map draw itself: 2D map, 3D view, inventory and click-to-travel.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Zork Cartographer</h1>
+    <div class="stats">
+      <span>Score <b id="score">0</b></span>
+      <span>Moves <b id="moves">0</b></span>
+      <span>Rooms <b id="roomcount">0</b></span>
+      <span id="mapmode" class="pill" hidden></span>
+      <span id="llm" class="pill" title="Claude parsing status">Claude: …</span>
+      <button id="newgame" title="Start over (clears this game and its saves from this browser)">New game</button>
+      <button id="aboutbtn" title="About this page and credits">About</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="terminal">
+      <div id="log"></div>
+      <form id="cmdform" autocomplete="off">
+        <span class="prompt">&gt;</span>
+        <input id="cmd" placeholder="Type a command (n, take lamp, open mailbox…)" autofocus>
+      </form>
+    </section>
+
+    <section id="mapwrap">
+      <div class="maptools">
+        <span class="seg"><button id="mode2d" class="on">2D</button><button id="mode3d">3D</button></span>
+        <span class="only2d">Level</span>
+        <button id="lvldown" class="only2d" title="Go down a level">▼</button>
+        <b id="level" class="only2d">0</b>
+        <button id="lvlup" class="only2d" title="Go up a level">▲</button>
+        <label><input type="checkbox" id="follow" checked> Follow</label>
+        <button id="center">Center</button>
+        <button id="overview" class="only3d" title="Show the whole map">Overview</button>
+        <label id="revealwrap" hidden title="Show every room in the game, including ones you haven't found (spoilers)"><input type="checkbox" id="reveal"> Reveal map</label>
+      </div>
+      <svg id="map"></svg>
+      <div id="view3d" hidden></div>
+      <div id="hint3d" class="only3d">Click a room to plan a route · double-click to go · drag to orbit</div>
+      <div id="travel" class="travel" hidden></div>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h2 id="roomname">—</h2>
+        <p id="roomdesc" class="muted"></p>
+        <p id="roomvisual" class="visual" hidden></p>
+        <div id="roomtags"></div>
+        <div id="routebox" class="routebox" hidden></div>
+        <h3>Here</h3>
+        <ul id="roomitems" class="list"></ul>
+        <h3>Exits</h3>
+        <ul id="roomexits" class="list"></ul>
+      </div>
+      <div class="panel">
+        <h2>Inventory</h2>
+        <ul id="inventory" class="list"></ul>
+      </div>
+      <div class="panel">
+        <h2>Saves <button id="savebtn" class="small-btn" title="Save the game right now">Save</button></h2>
+        <ul id="checkpoints" class="list"></ul>
+      </div>
+    </aside>
+  </main>
+  <dialog id="about">
+    <h2>Zork Cartographer</h2>
+    <p>Play Zork I and watch the world map itself as you go. Everything runs in your browser: the game, the map and the autopilot. Your game is saved in this browser after every move, so you can close the tab and come back.</p>
+    <p class="muted">Click a room to plan a route, double-click to walk there. Save makes a checkpoint; Load goes back to one (the map keeps what you've explored). Reveal map shows every room (spoilers).</p>
+    <h3>Credits</h3>
+    <ul class="list credits">
+      <li>Zork I © Infocom, released under the MIT license by Microsoft (2025). <a href="game/LICENSE-zork1.txt">License</a></li>
+      <li>Z-machine interpreter: <a href="https://github.com/DLehenbauer/jszm">JSZM</a> by zzo38 (public domain)</li>
+      <li>3D: <a href="https://threejs.org">three.js</a> (MIT) · frog model by <a href="https://quaternius.com">Quaternius</a> (CC0)</li>
+      <li>Room details written once by Claude. <a href="THIRD_PARTY.txt">Third-party notices</a></li>
+    </ul>
+    <form method="dialog"><button class="primary">Close</button></form>
+  </dialog>
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+  <script src="vendor/jszm/jszm.js"></script>
+  <script type="module">
+    // The game runs in the browser (no server): see engine/local.js.
+    import { createLocalBackend } from "./engine/local.js";
+    window.zorkBackend = createLocalBackend({ base: "game/" });
+    document.getElementById("aboutbtn").onclick = () => document.getElementById("about").showModal();
+  </script>
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { createWorld3D } from "./world3d.js";
+    window.world3d = createWorld3D(document.getElementById("view3d"));
+    window.dispatchEvent(new Event("world3d-ready"));
+  </script>
+</body>
+</html>

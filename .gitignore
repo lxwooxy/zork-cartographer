@@ -22,3 +22,6 @@ unity/ZorkWorld/.idea/
 
 .DS_Store
 unity/ZorkWorld/.vscode/
+
+# Static browser build (tools/build_static.py)
+dist/
