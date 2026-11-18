@@ -2,6 +2,8 @@
 
 Play Zork I in your browser and watch the world map itself as you go: a live 2D map, a 3D view of every room you've visited (with a frog as your player), and your inventory, all updating as you type. Click any room to have the autopilot walk you there, and save and load the game at any point. A Unity viewer renders the same world in 3D on the desktop.
 
+**▶ [Play it in your browser](https://lxwooxy.github.io/zork/)**, no install needed.
+
 ```text
  you type a command (browser or Unity)
         │
@@ -145,3 +147,7 @@ Everything works without an API key. The key is only needed to (re)write the roo
 ## Credits
 
 Zork I © Infocom, released under the MIT license by Microsoft (2025); see `game/LICENSE-zork1`. Interpreter: [Frotz](https://gitlab.com/DavidGriffith/frotz). 3D rendering: [three.js](https://threejs.org) (MIT). Frog model: [Quaternius](https://quaternius.com) (CC0), see `web/models/CREDITS.md`.
+
+## License
+
+MIT for the code in this repository (see [LICENSE](LICENSE)). Zork I itself is MIT-licensed by Microsoft, and other bundled files keep their own licenses; see [THIRD_PARTY.md](THIRD_PARTY.md).
